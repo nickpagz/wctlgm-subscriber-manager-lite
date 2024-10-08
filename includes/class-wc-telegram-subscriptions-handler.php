@@ -1,18 +1,20 @@
 <?php
 
+namespace WC_Telegram_Subscriber_Manager_Lite;
+
 /**
  * WC_Telegram_Subscriptions_Handler
  *
  * The Class for handling Telegram subscriptions.
  *
- * @package WC_Telegram_Subscriber_Manager
+ * @package WC_Telegram_Subscriber_Manager_Lite
  */
 class WC_Telegram_Subscriptions_Handler {
 
 	private $api_handler;
 
 	public function __construct() {
-		$this->api_handler = new WC_Telegram_API_Handler();
+		$this->api_handler = new \WC_Telegram_Subscriber_Manager_Lite\WC_Telegram_API_Handler();
 	}
 
 	public function process_activation_code( $code, $telegram_user_id ) {
@@ -92,14 +94,14 @@ class WC_Telegram_Subscriptions_Handler {
 			return array(
 				'success'  => false,
 				'channels' => array(),
-				'message'  => __( 'No channels found or failed to generate invites for products.', 'wctlgm-subscriber-manager' ),
+				'message'  => __( 'No channels found or failed to generate invites for products.', 'wctlgm-subscriber-manager-lite' ),
 			);
 		}
 
 		return array(
 			'success'  => true,
 			'channels' => $invites,
-			'message'  => __( 'Channel invites generated successfully.', 'wctlgm-subscriber-manager' ),
+			'message'  => __( 'Channel invites generated successfully.', 'wctlgm-subscriber-manager-lite' ),
 		);
 	}
 

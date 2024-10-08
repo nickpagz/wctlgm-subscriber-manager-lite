@@ -1,11 +1,13 @@
 <?php
 
+namespace WC_Telegram_Subscriber_Manager_Lite;
+
 /**
- * Class WC_Telegram_Subscriber_Manager
+ * Class WC_Telegram_Subscriber_Manager_Lite
  *
  * The main plugin class.
  *
- * @package WC_Telegram_Subscriber_Manager
+ * @package WC_Telegram_Subscriber_Manager_Lite
  */
 class WC_Telegram_Subscriber_Manager_Lite {
 
@@ -30,16 +32,11 @@ class WC_Telegram_Subscriber_Manager_Lite {
 		require_once WCTLGM_SML_PLUGIN_DIR . 'includes/class-wc-telegram-endpoint-handler.php';
 	}
 
-	/** */
-	private function maybe_load_extensions() {
-		do_action( 'wctlgm_load_extensions' );
-	}
-
 	/**
 	 * Defines the admin settings page.
 	 */
 	private function define_admin_settings() {
-		new WC_Telegram_Subscriber_Manager_Settings();
+		new \WC_Telegram_Subscriber_Manager_Lite\WC_Telegram_Subscriber_Manager_Settings();
 	}
 
 	/**
@@ -49,19 +46,12 @@ class WC_Telegram_Subscriber_Manager_Lite {
 		add_action(
 			'plugins_loaded',
 			function () {
-				new WC_Telegram_Endpoint_Handler();
+				new \WC_Telegram_Subscriber_Manager_Lite\WC_Telegram_Endpoint_Handler();
 			},
 			10
 		);
 
-		add_action( 'init', array( 'WC_Telegram_Bot_Interaction_Handler', 'init' ) );
-		add_action( 'plugins_loaded', array( 'WC_Telegram_Order_Handler', 'init' ) );
-		add_action(
-			'plugins_loaded',
-			function () {
-				$this->maybe_load_extensions();
-			},
-			10
-		);
+		add_action( 'init', array( '\WC_Telegram_Subscriber_Manager_Lite\WC_Telegram_Bot_Interaction_Handler', 'init' ) );
+		add_action( 'plugins_loaded', array( '\WC_Telegram_Subscriber_Manager_Lite\WC_Telegram_Order_Handler', 'init' ) );
 	}
 }

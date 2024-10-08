@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @package WC_Telegram_Subscriber_Manager_Lite
  * @version 1.0.0
@@ -54,11 +55,30 @@ add_action(
 	}
 );
 
+function check_for_pro_plugin() {
+	// Check if the pro plugin is active
+	if ( is_plugin_active( 'wctlgm-subscriber-manager/wctlgm-subscriber-manager.php' ) ) {
+		// Deactivate the lite plugin
+		deactivate_plugins( plugin_basename( __FILE__ ) );
+
+		// Display an admin notice
+		add_action( 'admin_notices', 'pro_plugin_active_notice' );
+	}
+}
+add_action( 'admin_init', 'check_for_pro_plugin' );
+
+function pro_plugin_active_notice() {
+	?>
+	<div class="notice notice-warning is-dismissible">
+		<p><?php esc_html_e( 'The Pro version of this plugin is active. The Lite version has been deactivated to prevent conflicts.', 'wctlgm-subscriber-manager-lite' ); ?></p>
+	</div>
+	<?php
+}
 
 require WCTLGM_SML_PLUGIN_DIR . 'includes/class-wc-telegram-subscriber-manager-lite.php';
 
 function run_wctlgm_subscriber_manager_lite() {
-	new WC_Telegram_Subscriber_Manager_Lite();
+	new \WC_Telegram_Subscriber_Manager_Lite\WC_Telegram_Subscriber_Manager_Lite();
 }
 
 run_wctlgm_subscriber_manager_lite();

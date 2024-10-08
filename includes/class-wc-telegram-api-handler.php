@@ -1,11 +1,15 @@
 <?php
 
+namespace WC_Telegram_Subscriber_Manager_Lite;
+
+use WP_Error;
+
 /**
  * Class WC_Telegram_API_Handler
  *
- * The main plugin class.
+ * Handles interactions with the Telegram API.
  *
- * @package WC_Telegram_Subscriber_Manager
+ * @package WC_Telegram_Subscriber_Manager_Lite
  */
 class WC_Telegram_API_Handler {
 	private $bot_token;
@@ -32,21 +36,20 @@ class WC_Telegram_API_Handler {
 	public function handle_set_webhook_actions( $url, $secret_token ) {
 		$set_webhook_response = $this->set_webhook( $url, $secret_token );
 		if ( is_wp_error( $set_webhook_response ) ) {
-			wp_send_json_error( array( 'message' => $set_webhook_response->get_error_message() ) );
-			return;
+			return $set_webhook_response;
 		}
 
 		$set_commands_response = $this->set_commands();
 		if ( is_wp_error( $set_commands_response ) ) {
-			wp_send_json_error( array( 'message' => $set_commands_response->get_error_message() ) );
+			return $set_commands_response;
 		} else {
-			wp_send_json_success( array( 'message' => 'Webhook and commands are set successfully.' ) );
+			return 'Webhook and commands are set successfully.';
 		}
 	}
 
 	public function set_webhook( $url, $secret_token ) {
 		if ( empty( $this->bot_token ) ) {
-			return new WP_Error( 'no_bot_token', __( 'No Bot Token found.', 'wctlgm-subscriber-manager-lite' ) );
+			return new \WP_Error( 'no_bot_token', __( 'No Bot Token found.', 'wctlgm-subscriber-manager-lite' ) );
 		}
 
 		$api_url  = "https://api.telegram.org/bot{$this->bot_token}/setWebhook";
@@ -72,6 +75,12 @@ class WC_Telegram_API_Handler {
 
 		$body = wp_remote_retrieve_body( $response );
 		$data = json_decode( $body, true );
+
+		if ( ! isset( $data['ok'] ) || ! $data['ok'] ) {
+			$error_message = isset( $data['description'] ) ? $data['description'] : 'Unknown error';
+			return new \WP_Error( 'telegram_api_error', $error_message );
+		}
+
 		return $data;
 	}
 
@@ -97,6 +106,12 @@ class WC_Telegram_API_Handler {
 
 		$body = wp_remote_retrieve_body( $response );
 		$data = json_decode( $body, true );
+
+		if ( ! isset( $data['ok'] ) || ! $data['ok'] ) {
+			$error_message = isset( $data['description'] ) ? $data['description'] : 'Unknown error';
+			return new \WP_Error( 'telegram_api_error', $error_message );
+		}
+
 		return $data;
 	}
 
@@ -122,7 +137,7 @@ class WC_Telegram_API_Handler {
 
 	public function generate_invite_link( $chat_id ) {
 		if ( empty( $this->bot_token ) ) {
-			return new WP_Error( 'no_bot_token', 'No Bot Token found.' );
+			return new \WP_Error( 'no_bot_token', 'No Bot Token found.' );
 		}
 
 		$url      = "https://api.telegram.org/bot{$this->bot_token}/createChatInviteLink";
@@ -150,7 +165,7 @@ class WC_Telegram_API_Handler {
 			return $data['result']['invite_link'];
 		}
 
-		return new WP_Error( 'api_error', isset( $data['description'] ) ? $data['description'] : 'Failed to create invite link.' );
+		return new \WP_Error( 'api_error', isset( $data['description'] ) ? $data['description'] : 'Failed to create invite link.' );
 	}
 
 	public function approve_join_request( $chat_id, $user_id ) {
@@ -176,6 +191,12 @@ class WC_Telegram_API_Handler {
 
 		$body = wp_remote_retrieve_body( $response );
 		$data = json_decode( $body, true );
+
+		if ( ! isset( $data['ok'] ) || ! $data['ok'] ) {
+			$error_message = isset( $data['description'] ) ? $data['description'] : 'Unknown error';
+			return new \WP_Error( 'telegram_api_error', $error_message );
+		}
+
 		return $data;
 	}
 
@@ -202,6 +223,12 @@ class WC_Telegram_API_Handler {
 
 		$body = wp_remote_retrieve_body( $response );
 		$data = json_decode( $body, true );
+
+		if ( ! isset( $data['ok'] ) || ! $data['ok'] ) {
+			$error_message = isset( $data['description'] ) ? $data['description'] : 'Unknown error';
+			return new \WP_Error( 'telegram_api_error', $error_message );
+		}
+
 		return $data;
 	}
 
@@ -228,6 +255,12 @@ class WC_Telegram_API_Handler {
 
 		$body = wp_remote_retrieve_body( $response );
 		$data = json_decode( $body, true );
+
+		if ( ! isset( $data['ok'] ) || ! $data['ok'] ) {
+			$error_message = isset( $data['description'] ) ? $data['description'] : 'Unknown error';
+			return new \WP_Error( 'telegram_api_error', $error_message );
+		}
+
 		return $data;
 	}
 }

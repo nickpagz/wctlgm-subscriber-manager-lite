@@ -1,11 +1,13 @@
 <?php
 
+namespace WC_Telegram_Subscriber_Manager_Lite;
+
 /**
  * Class WC_Telegram_Subscriber_Manager_Settings
  *
  * The main plugin class.
  *
- * @package WC_Telegram_Subscriber_Manager
+ * @package WC_Telegram_Subscriber_Manager_Lite
  */
 class WC_Telegram_Subscriber_Manager_Settings {
 
@@ -49,9 +51,10 @@ class WC_Telegram_Subscriber_Manager_Settings {
 	 */
 	public function update_settings() {
 		// Check if the nonce is set
-		if ( ! isset( $_POST['wctlgm_settings_nonce'] ) || ! wp_verify_nonce( $_POST['wctlgm_settings_nonce'], 'wctlgm_update_settings' ) ) {
+		if ( ! isset( $_POST['wctlgm_settings_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['wctlgm_settings_nonce'] ) ), 'wctlgm_update_settings' ) ) {
 			return;
 		}
+
 		// Handle the bot token
 		if ( isset( $_POST['wctlgm_bot_token'] ) ) {
 			$bot_token = sanitize_text_field( wp_unslash( $_POST['wctlgm_bot_token'] ) );
@@ -69,8 +72,8 @@ class WC_Telegram_Subscriber_Manager_Settings {
 			$channel = array();
 			if ( ! empty( $_POST['wctlgm_channel']['name'] ) && ! empty( $_POST['wctlgm_channel']['id'] ) ) {
 				$channel = array(
-					'name' => sanitize_text_field( $_POST['wctlgm_channel']['name'] ),
-					'id'   => sanitize_text_field( $_POST['wctlgm_channel']['id'] ),
+					'name' => sanitize_text_field( wp_unslash( $_POST['wctlgm_channel']['name'] ) ),
+					'id'   => sanitize_text_field( wp_unslash( $_POST['wctlgm_channel']['id'] ) ),
 				);
 			}
 			update_option( 'wctlgm_channels', array( $channel ) );
@@ -191,7 +194,6 @@ class WC_Telegram_Subscriber_Manager_Settings {
 		$saved_channels = get_post_meta( $post->ID, '_telegram_channel_ids', true );
 		$saved_channels = ! empty( $saved_channels ) ? $saved_channels : array();
 		$channels       = get_option( 'wctlgm_channels', array() );
-
 		?>
 		<div id='telegram_product_data' class='panel woocommerce_options_panel'>
 			<div class='options_group'>
@@ -211,10 +213,13 @@ class WC_Telegram_Subscriber_Manager_Settings {
 	}
 
 	public function wctlgm_save_telegram_meta_box_data( $post_id ) {
-		if ( isset( $_POST['woocommerce_meta_nonce'], $_POST['telegram_channel_ids'] ) && wp_verify_nonce( $_POST['woocommerce_meta_nonce'], 'woocommerce_save_data' ) ) {
-			$channel_ids = isset( $_POST['telegram_channel_ids'] ) ? $_POST['telegram_channel_ids'] : array();
-			$channel_ids = array_map( 'sanitize_text_field', $channel_ids );
-			update_post_meta( $post_id, '_telegram_channel_ids', $channel_ids );
+		if ( isset( $_POST['woocommerce_meta_nonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['woocommerce_meta_nonce'] ) ), 'woocommerce_save_data' ) ) {
+			if ( isset( $_POST['telegram_channel_ids'] ) ) {
+				$channel_ids = array_map( 'sanitize_text_field', wp_unslash( $_POST['telegram_channel_ids'] ) );
+				update_post_meta( $post_id, '_telegram_channel_ids', $channel_ids );
+			} else {
+				delete_post_meta( $post_id, '_telegram_channel_ids' );
+			}
 		}
 	}
 
@@ -245,10 +250,14 @@ class WC_Telegram_Subscriber_Manager_Settings {
 						action: 'wctlgm_set_webhook',
 					},
 					success: function(response) {
-						alert('Webhook is set successfully.');
+						if (response.success) {
+							alert(response.data.message);
+						} else {
+							alert('Error: ' + response.data.message);
+						}
 					},
 					error: function() {
-						alert('Failed to set the webhook.');
+						alert('Failed to set webhook.');
 					}
 				});
 			});
@@ -266,11 +275,12 @@ class WC_Telegram_Subscriber_Manager_Settings {
 	public function handle_set_webhook() {
 		$secret_token = $this->wctlgm_generate_secret_token();
 		$webhook_url  = rest_url( 'wctlgm/v1/telegram-bot/' );
-		$api_handler  = new WC_Telegram_API_Handler();
+		$api_handler  = new \WC_Telegram_Subscriber_Manager_Lite\WC_Telegram_API_Handler();
 		$result       = $api_handler->handle_set_webhook_actions( $webhook_url, $secret_token );
 
 		if ( is_wp_error( $result ) ) {
-			wp_send_json_error( array( 'message' => $result->get_error_message() ) );
+			$error_message = $result->get_error_message();
+			wp_send_json_error( array( 'message' => $error_message ) );
 		} else {
 			wp_send_json_success( array( 'message' => 'Webhook set successfully.' ) );
 		}

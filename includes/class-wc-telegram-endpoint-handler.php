@@ -1,11 +1,17 @@
 <?php
 
+namespace WC_Telegram_Subscriber_Manager_Lite;
+
+use WP_REST_Request;
+use WP_REST_Response;
+use WP_Error;
+
 /**
  * Class WC_Telegram_Endpoint_Handler
  *
  * The class that sets up the required API endpoint for handling Telegram bot interaction requests.
  *
- * @package WC_Telegram_Subscriber_Manager
+ * @package WC_Telegram_Subscriber_Manager_Lite
  */
 class WC_Telegram_Endpoint_Handler {
 
@@ -33,14 +39,14 @@ class WC_Telegram_Endpoint_Handler {
 
 	public function handle_telegram_requests( WP_REST_Request $request ) {
 		$data        = $request->get_json_params();
-		$bot_handler = new WC_Telegram_Bot_Interaction_Handler();
+		$bot_handler = new \WC_Telegram_Subscriber_Manager_Lite\WC_Telegram_Bot_Interaction_Handler();
 		$response    = $bot_handler->process_telegram_request( $data );
 
 		if ( is_wp_error( $response ) ) {
-			return new WP_REST_Response( $response->get_error_message(), 400 );
+			return new \WP_REST_Response( $response->get_error_message(), 400 );
 		}
 
-		return new WP_REST_Response( $this->prepare_response_payload( $response ), 200 );
+		return new \WP_REST_Response( $this->prepare_response_payload( $response ), 200 );
 	}
 
 	protected function prepare_response_payload( $response ) {

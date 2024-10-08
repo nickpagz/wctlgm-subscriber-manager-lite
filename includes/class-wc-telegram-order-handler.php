@@ -1,5 +1,7 @@
 <?php
 
+namespace WC_Telegram_Subscriber_Manager_Lite;
+
 use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 
 /**
@@ -7,15 +9,15 @@ use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
  *
  * The main plugin class.
  *
- * @package WC_Telegram_Subscriber_Manager
+ * @package WC_Telegram_Subscriber_Manager_Lite
  */
 class WC_Telegram_Order_Handler {
 
 	public static function init() {
-		add_action( 'woocommerce_checkout_update_order_meta', array( 'WC_Telegram_Order_Handler', 'maybe_process_order' ), 11, 1 );
-		add_action( 'woocommerce_store_api_checkout_update_order_meta', array( 'WC_Telegram_Order_Handler', 'maybe_process_order' ), 11, 1 );
-		add_filter( 'woocommerce_thankyou_order_received_text', array( 'WC_Telegram_Order_Handler', 'wctlgm_display_activation_info' ), 10, 2 );
-		add_action( 'woocommerce_email_order_details', array( 'WC_Telegram_Order_Handler', 'wctlgm_email_activation_info' ), 10, 4 );
+		add_action( 'woocommerce_checkout_update_order_meta', array( __CLASS__, 'maybe_process_order' ), 11, 1 );
+		add_action( 'woocommerce_store_api_checkout_update_order_meta', array( __CLASS__, 'maybe_process_order' ), 11, 1 );
+		add_filter( 'woocommerce_thankyou_order_received_text', array( __CLASS__, 'wctlgm_display_activation_info' ), 10, 2 );
+		add_action( 'woocommerce_email_order_details', array( __CLASS__, 'wctlgm_email_activation_info' ), 10, 4 );
 	}
 
 	public static function maybe_process_order( $order ) {
@@ -62,13 +64,13 @@ class WC_Telegram_Order_Handler {
 		$output          = '</div><div class="wctlgm-activation-info alignwide">';
 
 		if ( ! empty( $activation_code ) ) {
-			$output .= '<h2>' . esc_html__( 'Activation Code', 'wctlgm' ) . '</h2>';
-			$output .= '<p>' . esc_html__( 'Here is your activation code:', 'wctlgm' ) . ' <strong>' . esc_html( $activation_code ) . '</strong></p>';
+			$output .= '<h2>' . esc_html__( 'Activation Code', 'wctlgm-subscriber-manager-lite' ) . '</h2>';
+			$output .= '<p>' . esc_html__( 'Here is your activation code:', 'wctlgm-subscriber-manager-lite' ) . ' <strong>' . esc_html( $activation_code ) . '</strong></p>';
 			$output .= sprintf(
 				'<p>%s <a href="%s" target="_blank">%s</a></p>',
-				esc_html( __( 'Please click on the following link and send your activation code to our Telegram bot:', 'wctlgm' ) ),
+				esc_html( __( 'Please click on the following link to open Telegram and enter your activation code in our Telegram bot:', 'wctlgm-subscriber-manager-lite' ) ),
 				esc_url( $bot_url . '?activate=' . $activation_code ),
-				esc_html( __( 'Start Chat', 'wctlgm' ) )
+				esc_html( __( 'Start Chat', 'wctlgm-subscriber-manager-lite' ) )
 			);
 			$output .= '<br>';
 		}
@@ -82,22 +84,21 @@ class WC_Telegram_Order_Handler {
 		}
 	}
 
-
 	private static function email_activation_info( $order, $plain_text = false ) {
 		$bot_url         = get_option( 'wctlgm_bot_url' );
 		$activation_code = $order->get_meta( '_activation_code', true );
 		if ( ! empty( $activation_code ) ) {
 			if ( $plain_text ) {
-				echo "\n" . esc_html__( 'Activation Code:', 'wctlgm' ) . ' ' . esc_html( $activation_code );
-				echo "\n" . esc_html__( 'Please click the following link and send your activation code to our Telegram bot:', 'wctlgm' ) . ' ' . esc_url( $bot_url ) . '?activate=' . esc_html( $activation_code );
+				echo "\n" . esc_html__( 'Activation Code:', 'wctlgm-subscriber-manager-lite' ) . ' ' . esc_html( $activation_code );
+				echo "\n" . esc_html__( 'Please click on the following link to open Telegram and enter your activation code in our Telegram bot:', 'wctlgm-subscriber-manager-lite' ) . ' ' . esc_url( $bot_url ) . '?activate=' . esc_html( $activation_code );
 			} else {
-				echo '<h2>' . esc_html__( ' Activation Code', 'wctlgm' ) . '</h2>';
-				echo '<p>' . esc_html__( 'Here is your activation code:', 'wctlgm' ) . ' <strong>' . esc_html( $activation_code ) . '</strong></p>';
+				echo '<h2>' . esc_html__( ' Activation Code', 'wctlgm-subscriber-manager-lite' ) . '</h2>';
+				echo '<p>' . esc_html__( 'Here is your activation code:', 'wctlgm-subscriber-manager-lite' ) . ' <strong>' . esc_html( $activation_code ) . '</strong></p>';
 				printf(
 					'<p>%s <a href="%s" target="_blank">%s</a></p>',
-					esc_html( __( 'Please click on the following link and send your activation code to our Telegram bot:', 'wctlgm' ) ),
+					esc_html( __( 'Please click on the following link to open Telegram and enter your activation code in our Telegram bot:', 'wctlgm-subscriber-manager-lite' ) ),
 					esc_url( $bot_url . '?activate=' . $activation_code ),
-					esc_html( __( 'Start Chat', 'wctlgm' ) )
+					esc_html( __( 'Start Chat', 'wctlgm-subscriber-manager-lite' ) )
 				);
 			}
 		}
