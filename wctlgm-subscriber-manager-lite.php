@@ -9,6 +9,8 @@
  * Version: 1.0.0
  * Author: Nick Pagazani
  * Author URI: https://github.com/nickpagz
+ * License: GPL-2.0-or-later
+ * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain: wctlgm-subscriber-manager-lite
  */
 

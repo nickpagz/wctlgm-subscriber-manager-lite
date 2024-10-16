@@ -1,7 +1,7 @@
 <?php
-// Assuming $invites is passed to this template containing the channel information
+
 if ( ! isset( $invites ) ) {
-	$invites = array();  // Ensure variable is set if not passed in context
+	$invites = array();
 }
 ?>
 
