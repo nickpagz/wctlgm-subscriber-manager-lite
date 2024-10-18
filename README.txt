@@ -1,7 +1,7 @@
 === WC Telegram Subscriber Manager Lite ===
-Contributors:      npagazani
+Contributors:      rektification, npagazani
 Tags:              woocommerce, telegram, subscriptions
-Tested up to:      6.6
+Tested up to:      6.6.2
 Stable tag:        1.0.0
 License:           GPL-2.0-or-later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
@@ -19,10 +19,10 @@ This automatically generates an invite link for the user to click on. The invite
 == Features ==
 * Grant access to a single private Telegram channel after successful WooCommerce checkout.
 * You only need to enter your bot token and URL to get started.
-* Automatticaly retrieve channel ID.
+* Automaticaly retrieve channel ID.
 * Telegram user ID's automatically retrieved and validated during activation.
 * Set channel access to any Simple product in WooCommerce.
-* Secure webhook checks.
+* Secure webhook validation.
 
 Note, in the Lite version channel members are not automatically removed. They can be removed manually from within Telegram.
 
