@@ -1,15 +1,15 @@
 <?php
 
-namespace WC_Telegram_Subscriber_Manager_Lite;
+namespace Subscriber_Manager_Lite_for_WooCommerce_and_Telegram;
 
 /**
- * Class WC_Telegram_Bot_Interaction_Handler
+ * Class Subscriber_Manager_Lite_WCTLGM_Bot_Interaction_Handler
  *
  * The class that sets up the required API endpoint for handling Telegram bot interaction requests.
  *
- * @package WC_Telegram_Subscriber_Manager_Lite
+ * @package Subscriber_Manager_Lite_for_WooCommerce_and_Telegram
  */
-class WC_Telegram_Bot_Interaction_Handler {
+class Subscriber_Manager_Lite_WCTLGM_Bot_Interaction_Handler {
 
 	private $api_handler;
 	private $text;
@@ -17,7 +17,7 @@ class WC_Telegram_Bot_Interaction_Handler {
 	private $user_id;
 
 	public function __construct() {
-		$this->api_handler = new \WC_Telegram_Subscriber_Manager_Lite\WC_Telegram_API_Handler();
+		$this->api_handler = new \Subscriber_Manager_Lite_for_WooCommerce_and_Telegram\Subscriber_Manager_Lite_WCTLGM_API_Handler();
 	}
 
 	public static function init() {
@@ -73,7 +73,7 @@ class WC_Telegram_Bot_Interaction_Handler {
 		$user_id     = $data['chat_join_request']['from']['id'];
 		$invite_link = $data['chat_join_request']['invite_link']['invite_link'];
 
-		$subscriptions_handler = new \WC_Telegram_Subscriber_Manager_Lite\WC_Telegram_Subscriptions_Handler();
+		$subscriptions_handler = new \Subscriber_Manager_Lite_for_WooCommerce_and_Telegram\Subscriber_Manager_Lite_WCTLGM_Subscriptions_Handler();
 
 		if ( $subscriptions_handler->is_join_request_valid( $user_id, $invite_link ) ) {
 			$response_approval = $this->api_handler->approve_join_request( $chat_id, $user_id );
@@ -111,7 +111,7 @@ class WC_Telegram_Bot_Interaction_Handler {
 
 		$code = $parts[1];
 
-		$subscriptions_handler = new \WC_Telegram_Subscriber_Manager_Lite\WC_Telegram_Subscriptions_Handler();
+		$subscriptions_handler = new \Subscriber_Manager_Lite_for_WooCommerce_and_Telegram\Subscriber_Manager_Lite_WCTLGM_Subscriptions_Handler();
 		$results               = $subscriptions_handler->process_activation_code( $code, $this->user_id );
 
 		if ( ! $results ) {

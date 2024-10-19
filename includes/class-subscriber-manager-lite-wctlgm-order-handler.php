@@ -1,17 +1,17 @@
 <?php
 
-namespace WC_Telegram_Subscriber_Manager_Lite;
+namespace Subscriber_Manager_Lite_for_WooCommerce_and_Telegram;
 
 use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 
 /**
- * Class WC_Telegram_Order_Handler
+ * Class Subscriber_Manager_Lite_WCTLGM_Order_Handler
  *
  * The main plugin class.
  *
- * @package WC_Telegram_Subscriber_Manager_Lite
+ * @package Subscriber_Manager_Lite_for_WooCommerce_and_Telegram
  */
-class WC_Telegram_Order_Handler {
+class Subscriber_Manager_Lite_WCTLGM_Order_Handler {
 
 	public static function init() {
 		add_action( 'woocommerce_checkout_update_order_meta', array( __CLASS__, 'maybe_process_order' ), 11, 1 );

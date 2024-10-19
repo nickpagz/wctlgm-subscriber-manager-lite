@@ -1,4 +1,4 @@
-=== WC Telegram Subscriber Manager Lite ===
+=== Subscriber Manager Lite for WooCommerce and Telegram ===
 Contributors:      rektification, npagazani
 Tags:              woocommerce, telegram, subscriptions
 Tested up to:      6.6.2
@@ -12,7 +12,7 @@ Automatically manage Telegram private channel subscribers via WooCommerce.
 
 Automatically manage Telegram private channel subscribers via WooCommerce.
 
-With WC Telegram Subscriber Manager Lite you can sell access to your private Telegram channels via a simple 
+With Subscriber Manager Lite for WooCommerce and Telegram you can sell access to your private Telegram channels via a simple 
 WooCommerce product. Following a successful checkout, users will be able to link to and submit an activation code in your chat bot.
 This automatically generates an invite link for the user to click on. The invite link is validated in the back-end, and the user is automatically granted access.
 

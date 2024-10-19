@@ -1,17 +1,17 @@
 <?php
 
-namespace WC_Telegram_Subscriber_Manager_Lite;
+namespace Subscriber_Manager_Lite_for_WooCommerce_and_Telegram;
 
 use WP_Error;
 
 /**
- * Class WC_Telegram_API_Handler
+ * Subscriber_Manager_Lite_WCTLGM_API_Handler
  *
  * Handles interactions with the Telegram API.
  *
- * @package WC_Telegram_Subscriber_Manager_Lite
+ * @package Subscriber_Manager_Lite_for_WooCommerce_and_Telegram
  */
-class WC_Telegram_API_Handler {
+class Subscriber_Manager_Lite_WCTLGM_API_Handler {
 	private $bot_token;
 
 	private $commands = array(

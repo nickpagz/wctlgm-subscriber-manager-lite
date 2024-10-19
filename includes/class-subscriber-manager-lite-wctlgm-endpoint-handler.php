@@ -1,19 +1,19 @@
 <?php
 
-namespace WC_Telegram_Subscriber_Manager_Lite;
+namespace Subscriber_Manager_Lite_for_WooCommerce_and_Telegram;
 
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_Error;
 
 /**
- * Class WC_Telegram_Endpoint_Handler
+ * Class Subscriber_Manager_Lite_WCTLGM_Endpoint_Handler
  *
  * The class that sets up the required API endpoint for handling Telegram bot interaction requests.
  *
- * @package WC_Telegram_Subscriber_Manager_Lite
+ * @package Subscriber_Manager_Lite_for_WooCommerce_and_Telegram
  */
-class WC_Telegram_Endpoint_Handler {
+class Subscriber_Manager_Lite_WCTLGM_Endpoint_Handler {
 
 	public function __construct() {
 		add_action( 'rest_api_init', array( $this, 'register_telegram_webhook_endpoint' ) );
@@ -39,7 +39,7 @@ class WC_Telegram_Endpoint_Handler {
 
 	public function handle_telegram_requests( WP_REST_Request $request ) {
 		$data        = $request->get_json_params();
-		$bot_handler = new \WC_Telegram_Subscriber_Manager_Lite\WC_Telegram_Bot_Interaction_Handler();
+		$bot_handler = new \Subscriber_Manager_Lite_for_WooCommerce_and_Telegram\Subscriber_Manager_Lite_WCTLGM_Bot_Interaction_Handler();
 		$response    = $bot_handler->process_telegram_request( $data );
 
 		if ( is_wp_error( $response ) ) {

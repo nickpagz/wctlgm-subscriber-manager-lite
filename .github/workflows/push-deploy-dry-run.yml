@@ -15,5 +15,5 @@ jobs:
         env:
           SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
           SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
-          SLUG: wc-telegram-subscriber-manager-lite
+          SLUG: wctlgm-subscriber-manager-lite
           INPUT_DRY_RUN: true
