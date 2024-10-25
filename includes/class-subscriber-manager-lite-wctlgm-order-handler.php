@@ -1,6 +1,6 @@
 <?php
 
-namespace Subscriber_Manager_Lite_for_WooCommerce_and_Telegram;
+namespace Subscriber_Manager_Lite_for_Telegram;
 
 use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 
@@ -9,7 +9,7 @@ use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
  *
  * The main plugin class.
  *
- * @package Subscriber_Manager_Lite_for_WooCommerce_and_Telegram
+ * @package Subscriber_Manager_Lite_for_Telegram
  */
 class Subscriber_Manager_Lite_WCTLGM_Order_Handler {
 

@@ -1,13 +1,13 @@
 <?php
 
-namespace Subscriber_Manager_Lite_for_WooCommerce_and_Telegram;
+namespace Subscriber_Manager_Lite_for_Telegram;
 
 /**
  * Class Subscriber_Manager_Lite_WCTLGM
  *
  * The main plugin class.
  *
- * @package Subscriber_Manager_Lite_for_WooCommerce_and_Telegram
+ * @package Subscriber_Manager_Lite_for_Telegram
  */
 class Subscriber_Manager_Lite_WCTLGM {
 
@@ -36,7 +36,7 @@ class Subscriber_Manager_Lite_WCTLGM {
 	 * Defines the admin settings page.
 	 */
 	private function define_admin_settings() {
-		new \Subscriber_Manager_Lite_for_WooCommerce_and_Telegram\Subscriber_Manager_Lite_WCTLGM_Settings();
+		new \Subscriber_Manager_Lite_for_Telegram\Subscriber_Manager_Lite_WCTLGM_Settings();
 	}
 
 	/**
@@ -46,12 +46,12 @@ class Subscriber_Manager_Lite_WCTLGM {
 		add_action(
 			'plugins_loaded',
 			function () {
-				new \Subscriber_Manager_Lite_for_WooCommerce_and_Telegram\Subscriber_Manager_Lite_WCTLGM_Endpoint_Handler();
+				new \Subscriber_Manager_Lite_for_Telegram\Subscriber_Manager_Lite_WCTLGM_Endpoint_Handler();
 			},
 			10
 		);
 
-		add_action( 'init', array( '\Subscriber_Manager_Lite_for_WooCommerce_and_Telegram\Subscriber_Manager_Lite_WCTLGM_Bot_Interaction_Handler', 'init' ) );
-		add_action( 'plugins_loaded', array( '\Subscriber_Manager_Lite_for_WooCommerce_and_Telegram\Subscriber_Manager_Lite_WCTLGM_Order_Handler', 'init' ) );
+		add_action( 'init', array( '\Subscriber_Manager_Lite_for_Telegram\Subscriber_Manager_Lite_WCTLGM_Bot_Interaction_Handler', 'init' ) );
+		add_action( 'plugins_loaded', array( '\Subscriber_Manager_Lite_for_Telegram\Subscriber_Manager_Lite_WCTLGM_Order_Handler', 'init' ) );
 	}
 }

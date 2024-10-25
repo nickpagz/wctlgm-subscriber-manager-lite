@@ -1,13 +1,13 @@
 <?php
 
-namespace Subscriber_Manager_Lite_for_WooCommerce_and_Telegram;
+namespace Subscriber_Manager_Lite_for_Telegram;
 
 /**
  * Class Subscriber_Manager_Lite_WCTLGM_Settings
  *
  * The main plugin class.
  *
- * @package Subscriber_Manager_Lite_for_WooCommerce_and_Telegram
+ * @package Subscriber_Manager_Lite_for_Telegram
  */
 class Subscriber_Manager_Lite_WCTLGM_Settings {
 
@@ -275,7 +275,7 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 	public function handle_set_webhook() {
 		$secret_token = $this->wctlgm_generate_secret_token();
 		$webhook_url  = rest_url( 'wctlgm/v1/telegram-bot/' );
-		$api_handler  = new \Subscriber_Manager_Lite_for_WooCommerce_and_Telegram\Subscriber_Manager_Lite_WCTLGM_API_Handler();
+		$api_handler  = new \Subscriber_Manager_Lite_for_Telegram\Subscriber_Manager_Lite_WCTLGM_API_Handler();
 		$result       = $api_handler->handle_set_webhook_actions( $webhook_url, $secret_token );
 
 		if ( is_wp_error( $result ) ) {

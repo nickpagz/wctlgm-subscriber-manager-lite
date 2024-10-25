@@ -1,20 +1,20 @@
 <?php
 
-namespace Subscriber_Manager_Lite_for_WooCommerce_and_Telegram;
+namespace Subscriber_Manager_Lite_for_Telegram;
 
 /**
  * Class Subscriber_Manager_Lite_WCTLGM_Subscriptions_Handler
  *
  * The Class for handling Telegram subscriptions.
  *
- * @package Subscriber_Manager_Lite_for_WooCommerce_and_Telegram
+ * @package Subscriber_Manager_Lite_for_Telegram
  */
 class Subscriber_Manager_Lite_WCTLGM_Subscriptions_Handler {
 
 	private $api_handler;
 
 	public function __construct() {
-		$this->api_handler = new \Subscriber_Manager_Lite_for_WooCommerce_and_Telegram\Subscriber_Manager_Lite_WCTLGM_API_Handler();
+		$this->api_handler = new \Subscriber_Manager_Lite_for_Telegram\Subscriber_Manager_Lite_WCTLGM_API_Handler();
 	}
 
 	public function process_activation_code( $code, $telegram_user_id ) {
