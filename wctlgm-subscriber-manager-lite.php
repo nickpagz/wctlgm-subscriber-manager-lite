@@ -15,6 +15,55 @@
  * Requires Plugins: woocommerce
  */
 
+if ( ! function_exists( 'wctlgm_fs' ) ) {
+	// Create a helper function for easy SDK access.
+	function wctlgm_fs() {
+		global $wctlgm_fs;
+
+		if ( ! isset( $wctlgm_fs ) ) {
+			// Include Freemius SDK.
+			require_once dirname( __FILE__ ) . '/freemius/start.php';
+
+			$wctlgm_fs = fs_dynamic_init( array(
+				'id'              => '16907',
+				'slug'            => 'wctlgm-subscriber-manager',
+				'premium_slug'    => 'wctlgm-subscriber-manager',
+				'type'            => 'plugin',
+				'public_key'      => 'pk_f64df69d37ee38537f9f2a1abbb61',
+				'is_premium'      => false,
+				'is_premium_only' => false,
+				'has_addons'      => false,
+				'has_paid_plans'  => true,
+				'menu'            => array(
+					'slug'           => 'wc-settings',
+					'override_exact' => true,
+					'parent'         => array(
+						'slug' => 'woocommerce',
+					),
+				),
+			) );
+		}
+
+		return $wctlgm_fs;
+	}
+
+	// Init Freemius.
+	wctlgm_fs();
+	// Signal that SDK was initiated.
+	do_action( 'wctlgm_fs_loaded' );
+
+	function wctlgm_fs_settings_url() {
+		return admin_url( 'admin.php?page=wc-settings&tab=telegram_subscriber_manager' );
+	}
+
+	wctlgm_fs()->add_filter( 'connect_url', 'wctlgm_fs_settings_url' );
+	wctlgm_fs()->add_filter( 'after_skip_url', 'wctlgm_fs_settings_url' );
+	wctlgm_fs()->add_filter( 'after_connect_url', 'wctlgm_fs_settings_url' );
+	wctlgm_fs()->add_filter( 'after_pending_connect_url', 'wctlgm_fs_settings_url' );
+}
+
+
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
