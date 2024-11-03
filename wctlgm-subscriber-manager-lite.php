@@ -34,6 +34,7 @@ if ( ! function_exists( 'wctlgm_fs' ) ) {
 				'is_premium_only' => false,
 				'has_addons'      => false,
 				'has_paid_plans'  => true,
+				'navigation'      => 'tabs',
 				'menu'            => array(
 					'slug'           => 'wc-settings',
 					'override_exact' => true,
