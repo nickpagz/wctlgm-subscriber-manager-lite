@@ -109,7 +109,7 @@ class Subscriber_Manager_Lite_WCTLGM_Bot_Interaction_Handler {
 			return $this->build_response( $message );
 		}
 
-		$code = $parts[1];
+		$code = sanitize_text_field( $parts[1] );
 
 		$subscriptions_handler = new \Subscriber_Manager_Lite_for_Telegram\Subscriber_Manager_Lite_WCTLGM_Subscriptions_Handler();
 		$results               = $subscriptions_handler->process_activation_code( $code, $this->user_id );
