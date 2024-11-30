@@ -1,7 +1,7 @@
 === Subscriber Manager Lite for Telegram ===
 Contributors:      rektification, npagazani
 Tags:              woocommerce, telegram, subscriptions
-Tested up to:      6.6.2
+Tested up to:      6.7.1
 Stable tag:        1.0.0
 License:           GPL-2.0-or-later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
@@ -43,6 +43,12 @@ Use the standard WordPress plugins installation page and install or upload the p
 
 After plugin activation plugin settings are in **WooCommerce > Settings** in the **Telegram Subscriber Manager** tab.
 Individual product settings are in the **Product data** settings in the **Telegram Channels** tab (available for Simple products only).
+
+
+== External services ==
+
+This plugin connects to the Telegram API to manage access to private Telegram channels. It is used to grant or revoke access to these channels based on WooCommerce transactions. The plugin retrieves the user's Telegram ID and validates it during the activation process.
+It also sets a webhook to handle communication between your WooCommerce store and Telegram. This service is provided by Telegram: [terms of use](https://telegram.org/tos), [privacy policy](https://telegram.org/privacy).
 
 
 == Screenshots ==

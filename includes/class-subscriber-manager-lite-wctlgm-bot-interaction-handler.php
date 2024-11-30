@@ -59,12 +59,12 @@ class Subscriber_Manager_Lite_WCTLGM_Bot_Interaction_Handler {
 	}
 
 	private function is_action_initiated_from_settings() {
-		return get_transient( 'telegram_fetch_channel_id_active' ) === true;
+		return get_transient( 'wctlgm_telegram_fetch_channel_id_active' ) === true;
 	}
 
 	private function save_channel_id( $chat_id ) {
-		set_transient( 'channel_id_temp_store', $chat_id, HOUR_IN_SECONDS );
-		delete_transient( 'telegram_fetch_channel_id_active' );
+		set_transient( 'wctlgm_channel_id_temp_store', $chat_id, HOUR_IN_SECONDS );
+		delete_transient( 'wctlgm_telegram_fetch_channel_id_active' );
 		return array( 'action' => 'none' );
 	}
 

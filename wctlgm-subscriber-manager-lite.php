@@ -30,24 +30,22 @@ if ( ! defined( 'WCTLGM_SML_PLUGIN_DIR' ) ) {
 /**
  * Plugin activation.
  */
-function activate_wctlgm_subscriber_manager_lite() {
-	// Check for custom post type.
+function wctlgm_subscriber_manager_lite_activation() {
 	if ( ! class_exists( 'WooCommerce' ) ) {
-		deactivate_plugins( WCTLGM_SML_PLUGIN_BASE );
 		wp_die( esc_html__( 'Plugin not activated. WooCommerce not found.', 'wctlgm-subscriber-manager-lite' ) );
 	}
 }
 
-register_activation_hook( __FILE__, 'activate_wctlgm_subscriber_manager_lite' );
+register_activation_hook( __FILE__, 'wctlgm_subscriber_manager_lite_activation' );
 
 /**
  * Plugin deactivation.
  */
-function deactivate_wctlgm_subscriber_manager_lite() {
+function wctlgm_subscriber_manager_lite_deactivation() {
 	// Nothing to do here, yet.
 }
 
-register_deactivation_hook( __FILE__, 'deactivate_wctlgm_subscriber_manager_lite' );
+register_deactivation_hook( __FILE__, 'wctlgm_subscriber_manager_lite_deactivation' );
 
 add_action(
 	'before_woocommerce_init',
@@ -58,19 +56,19 @@ add_action(
 	}
 );
 
-function check_for_pro_plugin() {
+function wctlgm_subscriber_manager_lite_check_for_pro_plugin() {
 	// Check if the pro plugin is active
 	if ( is_plugin_active( 'wctlgm-subscriber-manager/wctlgm-subscriber-manager.php' ) ) {
 		// Deactivate the lite plugin
 		deactivate_plugins( plugin_basename( __FILE__ ) );
 
 		// Display an admin notice
-		add_action( 'admin_notices', 'pro_plugin_active_notice' );
+		add_action( 'admin_notices', 'wctlgm_subscriber_manager_lite_pro_plugin_active_notice' );
 	}
 }
-add_action( 'admin_init', 'check_for_pro_plugin' );
+add_action( 'admin_init', 'wctlgm_subscriber_manager_lite_check_for_pro_plugin' );
 
-function pro_plugin_active_notice() {
+function wctlgm_subscriber_manager_lite_pro_plugin_active_notice() {
 	?>
 	<div class="notice notice-warning is-dismissible">
 		<p><?php esc_html_e( 'The Pro version of this plugin is active. The Lite version has been deactivated to prevent conflicts.', 'wctlgm-subscriber-manager-lite' ); ?></p>
@@ -80,8 +78,8 @@ function pro_plugin_active_notice() {
 
 require WCTLGM_SML_PLUGIN_DIR . 'includes/class-subscriber-manager-lite-wctlgm.php';
 
-function run_wctlgm_subscriber_manager_lite() {
+function wctlgm_subscriber_manager_lite_start() {
 	new \Subscriber_Manager_Lite_for_Telegram\Subscriber_Manager_Lite_WCTLGM();
 }
 
-run_wctlgm_subscriber_manager_lite();
+wctlgm_subscriber_manager_lite_start();
