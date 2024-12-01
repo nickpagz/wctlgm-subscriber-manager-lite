@@ -21,8 +21,8 @@ class Subscriber_Manager_Lite_WCTLGM_Subscriptions_Handler {
 		$order = $this->find_order_by( '_activation_code', sanitize_text_field( $code ) );
 		if ( $order ) {
 			$order_id = $order->get_id();
-			$order->update_meta_data( '_telegram_user_id', $telegram_user_id );
-			$order->delete_meta_data( '_activation_code', $code );
+			$order->update_meta_data( '_telegram_user_id', sanitize_text_field( $telegram_user_id ) );
+			$order->delete_meta_data( '_activation_code', sanitize_text_field( $code ) );
 			$response        = $this->get_channel_invites( $order );
 			$channel_invites = $response['channels'];
 			foreach ( $channel_invites as $invite ) {

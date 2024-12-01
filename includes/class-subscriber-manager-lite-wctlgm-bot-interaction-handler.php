@@ -30,7 +30,7 @@ class Subscriber_Manager_Lite_WCTLGM_Bot_Interaction_Handler {
 		}
 
 		if ( isset( $data['edited_channel_post'] ) ) {
-			$chat_id = $data['edited_channel_post']['chat']['id'];
+			$chat_id = sanitize_text_field( $data['edited_channel_post']['chat']['id'] );
 
 			if ( $this->is_action_initiated_from_settings() ) {
 				// Optionally check if the chat ID matches expected channels
@@ -43,9 +43,9 @@ class Subscriber_Manager_Lite_WCTLGM_Bot_Interaction_Handler {
 			return array( 'action' => 'none' );
 		}
 
-		$this->text    = $data['message']['text'];
-		$this->chat_id = $data['message']['chat']['id'];
-		$this->user_id = $data['message']['from']['id'];
+		$this->text    = sanitize_text_field( $data['message']['text'] );
+		$this->chat_id = sanitize_text_field( $data['message']['chat']['id'] );
+		$this->user_id = sanitize_text_field( $data['message']['from']['id'] );
 
 		if ( strpos( $this->text, '/start' ) === 0 ) {
 			return $this->handle_start_command();
@@ -69,9 +69,9 @@ class Subscriber_Manager_Lite_WCTLGM_Bot_Interaction_Handler {
 	}
 
 	protected function process_join_request( $data ) {
-		$chat_id     = $data['chat_join_request']['chat']['id'];
-		$user_id     = $data['chat_join_request']['from']['id'];
-		$invite_link = $data['chat_join_request']['invite_link']['invite_link'];
+		$chat_id     = sanitize_text_field( $data['chat_join_request']['chat']['id'] );
+		$user_id     = sanitize_text_field( $data['chat_join_request']['from']['id'] );
+		$invite_link = esc_url_raw( $data['chat_join_request']['invite_link']['invite_link'] );
 
 		$subscriptions_handler = new \Subscriber_Manager_Lite_for_Telegram\Subscriber_Manager_Lite_WCTLGM_Subscriptions_Handler();
 
