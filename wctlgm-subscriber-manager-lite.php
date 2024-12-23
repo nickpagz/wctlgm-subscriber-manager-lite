@@ -22,8 +22,7 @@ if ( ! function_exists( 'wctlgm_fs' ) ) {
 
 		if ( ! isset( $wctlgm_fs ) ) {
 			// Include Freemius SDK.
-			require_once dirname( __FILE__ ) . '/freemius/start.php';  // phpcs:ignore Modernize.FunctionCalls.Dirname.FileConstant
-
+			require_once __DIR__ . '/vendor/autoload.php';
 			$wctlgm_fs = fs_dynamic_init(
 				array(
 					'id'                  => '16907',
