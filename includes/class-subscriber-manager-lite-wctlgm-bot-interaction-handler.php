@@ -30,7 +30,7 @@ class Subscriber_Manager_Lite_WCTLGM_Bot_Interaction_Handler {
 		}
 
 		if ( isset( $data['edited_channel_post'] ) ) {
-			$chat_id = $data['edited_channel_post']['chat']['id'];
+			$chat_id = sanitize_text_field( $data['edited_channel_post']['chat']['id'] );
 
 			if ( $this->is_action_initiated_from_settings() ) {
 				// Optionally check if the chat ID matches expected channels
@@ -43,9 +43,9 @@ class Subscriber_Manager_Lite_WCTLGM_Bot_Interaction_Handler {
 			return array( 'action' => 'none' );
 		}
 
-		$this->text    = $data['message']['text'];
-		$this->chat_id = $data['message']['chat']['id'];
-		$this->user_id = $data['message']['from']['id'];
+		$this->text    = sanitize_text_field( $data['message']['text'] );
+		$this->chat_id = sanitize_text_field( $data['message']['chat']['id'] );
+		$this->user_id = sanitize_text_field( $data['message']['from']['id'] );
 
 		if ( strpos( $this->text, '/start' ) === 0 ) {
 			return $this->handle_start_command();
@@ -59,19 +59,19 @@ class Subscriber_Manager_Lite_WCTLGM_Bot_Interaction_Handler {
 	}
 
 	private function is_action_initiated_from_settings() {
-		return get_transient( 'telegram_fetch_channel_id_active' ) === true;
+		return get_transient( 'wctlgm_telegram_fetch_channel_id_active' ) === true;
 	}
 
 	private function save_channel_id( $chat_id ) {
-		set_transient( 'channel_id_temp_store', $chat_id, HOUR_IN_SECONDS );
-		delete_transient( 'telegram_fetch_channel_id_active' );
+		set_transient( 'wctlgm_channel_id_temp_store', $chat_id, HOUR_IN_SECONDS );
+		delete_transient( 'wctlgm_telegram_fetch_channel_id_active' );
 		return array( 'action' => 'none' );
 	}
 
 	protected function process_join_request( $data ) {
-		$chat_id     = $data['chat_join_request']['chat']['id'];
-		$user_id     = $data['chat_join_request']['from']['id'];
-		$invite_link = $data['chat_join_request']['invite_link']['invite_link'];
+		$chat_id     = sanitize_text_field( $data['chat_join_request']['chat']['id'] );
+		$user_id     = sanitize_text_field( $data['chat_join_request']['from']['id'] );
+		$invite_link = esc_url_raw( $data['chat_join_request']['invite_link']['invite_link'] );
 
 		$subscriptions_handler = new \Subscriber_Manager_Lite_for_Telegram\Subscriber_Manager_Lite_WCTLGM_Subscriptions_Handler();
 
@@ -109,7 +109,7 @@ class Subscriber_Manager_Lite_WCTLGM_Bot_Interaction_Handler {
 			return $this->build_response( $message );
 		}
 
-		$code = $parts[1];
+		$code = sanitize_text_field( $parts[1] );
 
 		$subscriptions_handler = new \Subscriber_Manager_Lite_for_Telegram\Subscriber_Manager_Lite_WCTLGM_Subscriptions_Handler();
 		$results               = $subscriptions_handler->process_activation_code( $code, $this->user_id );

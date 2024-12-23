@@ -22,6 +22,30 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 		add_action( 'wp_ajax_check_and_set_channel_id', array( $this, 'check_and_set_channel_id' ) );
 		add_action( 'admin_menu', array( $this, 'add_settings_page' ) );
 		add_action( 'admin_init', array( $this, 'register_settings' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_subscriber_manager_scripts' ) );
+	}
+
+	/**
+	 * Enqueue the JavaScript for the settings page.
+	 *
+	 * @return void
+	 */
+	public function enqueue_subscriber_manager_scripts() {
+		wp_enqueue_script(
+			'subscriber-manager-lite-js',
+			plugin_dir_url( __FILE__ ) . '../assets/js/wctlgm-subscriber-manager-lite.js',
+			array( 'jquery' ),
+			filemtime( plugin_dir_path( __FILE__ ) . '../assets/js/wctlgm-subscriber-manager-lite.js' ),
+			true
+		);
+
+		wp_localize_script(
+			'subscriber-manager-lite-js',
+			'wctlgm_vars',
+			array(
+				'nonce' => wp_create_nonce( 'check_set_channel_id_nonce' ),
+			)
+		);
 	}
 
 	public function custom_channels_input() {
@@ -60,29 +84,6 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 				?>
 			</td>
 		</tr>
-		
-		<script type="text/javascript">
-			jQuery(document).ready(function($) {
-				$('.wctlgm_fetch_channel_id').on('click', function() {
-					$.ajax({
-						url: ajaxurl,
-						method: 'POST',
-						data: {
-							action: 'check_and_set_channel_id',
-							nonce: '<?php echo esc_attr( wp_create_nonce( 'check_set_channel_id_nonce' ) ); ?>'
-						},
-						success: function(response) {
-							if (response.success) {
-								$('input[name="wctlgm_channels[0][id]"]').val(response.data.channel_id);
-								alert('Channel ID fetched successfully.');
-							} else {
-								alert(response.data.message);
-							}
-						}
-					});
-				});
-			});
-		</script>
 		<?php
 	}
 
@@ -152,34 +153,6 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 			esc_html__( 'Set Webhook', 'wctlgm-subscriber-manager-lite' ),
 			empty( $bot_token ) ? esc_html__( 'Enter a bot token and Save settings to activate button.', 'wctlgm-subscriber-manager-lite' ) : ''
 		);
-		?>
-		<script type="text/javascript">
-			jQuery('#wctlgm_set_webhook_button').on('click', function() {
-				if (jQuery(this).is(':disabled')) {
-					alert('Please save a valid bot token first.');
-					return;
-				}
-				// AJAX call to set webhook
-				jQuery.ajax({
-					url: ajaxurl,
-					method: 'POST',
-					data: {
-						action: 'wctlgm_set_webhook',
-					},
-					success: function(response) {
-						if (response.success) {
-							alert(response.data.message);
-						} else {
-							alert('Error: ' + response.data.message);
-						}
-					},
-					error: function() {
-						alert('Failed to set webhook.');
-					}
-				});
-			});
-		</script>
-		<?php
 	}
 
 	public function wctlgm_generate_secret_token() {
@@ -209,12 +182,12 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 			return;
 		}
 
-		$channel_id = get_transient( 'channel_id_temp_store' );
+		$channel_id = get_transient( 'wctlgm_channel_id_temp_store' );
 		if ( $channel_id ) {
-			delete_transient( 'channel_id_temp_store' );
+			delete_transient( 'wctlgm_channel_id_temp_store' );
 			wp_send_json_success( array( 'channel_id' => $channel_id ) );
 		} else {
-			set_transient( 'telegram_fetch_channel_id_active', true, HOUR_IN_SECONDS );
+			set_transient( 'wctlgm_telegram_fetch_channel_id_active', true, HOUR_IN_SECONDS );
 			wp_send_json_error( array( 'message' => 'Please post a message in your Telegram channel and then edit it. Then click "Get Channel ID" again.' ) );
 		}
 	}
