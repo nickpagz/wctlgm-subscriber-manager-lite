@@ -1,5 +1,8 @@
 {
+    "name": "nickpagz/wctlgm-subscriber-manager-lite",
+    "description": "Manage Telegram subscribers via WooCommerce.",
     "require": {
         "freemius/wordpress-sdk": "^2.10"
-    }
+    },
+    "license": "GPL-3.0-only"
 }
