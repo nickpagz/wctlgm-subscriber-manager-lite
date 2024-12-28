@@ -15,17 +15,13 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 	 * Constructor for the settings class.
 	 */
 	public function __construct() {
-		add_filter( 'woocommerce_settings_tabs_array', array( $this, 'add_settings_tab' ), 50 );
-		add_action( 'woocommerce_settings_tabs_telegram_subscriber_manager', array( $this, 'settings_tab' ) );
-		add_filter( 'woocommerce_admin_settings_sanitize_option_wctlgm_bot_url', array( $this, 'sanitize_url' ), 10, 3 );
-		add_action( 'woocommerce_update_options_telegram_subscriber_manager', array( $this, 'update_settings' ) );
-		add_action( 'woocommerce_admin_field_custom_button', array( $this, 'wctlgm_custom_button_html' ) );
 		add_action( 'wp_ajax_wctlgm_set_webhook', array( $this, 'handle_set_webhook' ) );
-		add_action( 'woocommerce_admin_field_custom_channels', array( $this, 'custom_channels_input' ) );
 		add_filter( 'woocommerce_product_data_tabs', array( $this, 'wctlgm_add_product_data_tab' ) );
 		add_action( 'woocommerce_product_data_panels', array( $this, 'wctlgm_telegram_product_data_fields' ) );
 		add_action( 'woocommerce_process_product_meta', array( $this, 'wctlgm_save_telegram_meta_box_data' ) );
 		add_action( 'wp_ajax_check_and_set_channel_id', array( $this, 'check_and_set_channel_id' ) );
+		add_action( 'admin_menu', array( $this, 'add_settings_page' ) );
+		add_action( 'admin_init', array( $this, 'register_settings' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_subscriber_manager_scripts' ) );
 	}
 
@@ -52,128 +48,40 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 		);
 	}
 
-	/**
-	 * Add a new settings tab to the WooCommerce settings tabs.
-	 *
-	 * @param array $settings_tabs Array of WooCommerce setting tabs & their labels, excluding the Subscription tab.
-	 * @return array
-	 */
-	public function add_settings_tab( $settings_tabs ) {
-		$settings_tabs['telegram_subscriber_manager'] = __( 'Telegram Subscriber Manager', 'wctlgm-subscriber-manager-lite' );
-		return $settings_tabs;
-	}
-
-	/**
-	 * Uses the WooCommerce admin fields API to output settings via the @woocommerce_admin_fields() function.
-	 */
-	public function settings_tab() {
-		woocommerce_admin_fields( $this->get_settings() );
-	}
-
-	/**
-	 * Use the WooCommerce options API to save settings via the @woocommerce_update_options() function.
-	 */
-	public function update_settings() {
-		// Check if the nonce is set
-		if ( ! isset( $_POST['wctlgm_settings_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['wctlgm_settings_nonce'] ) ), 'wctlgm_update_settings' ) ) {
-			return;
-		}
-
-		// Handle the bot token
-		if ( isset( $_POST['wctlgm_bot_token'] ) ) {
-			$bot_token = sanitize_text_field( wp_unslash( $_POST['wctlgm_bot_token'] ) );
-			update_option( 'wctlgm_bot_token', $bot_token );
-		}
-
-		// Handle the bot url
-		if ( isset( $_POST['wctlgm_bot_url'] ) ) {
-			$bot_url = esc_url_raw( wp_unslash( $_POST['wctlgm_bot_url'] ) );
-			update_option( 'wctlgm_bot_url', $bot_url );
-		}
-
-		// Handle the custom channels data
-		if ( isset( $_POST['wctlgm_channel'] ) ) {
-			$channel = array();
-			if ( ! empty( $_POST['wctlgm_channel']['name'] ) && ! empty( $_POST['wctlgm_channel']['id'] ) ) {
-				$channel = array(
-					'name' => sanitize_text_field( wp_unslash( $_POST['wctlgm_channel']['name'] ) ),
-					'id'   => sanitize_text_field( wp_unslash( $_POST['wctlgm_channel']['id'] ) ),
-				);
-			}
-			update_option( 'wctlgm_channels', array( $channel ) );
-		}
-	}
-
-	/**
-	 * Get all the settings for this plugin for @woocommerce_admin_fields() function.
-	 *
-	 * @return array Array of settings for @woocommerce_admin_fields() function.
-	 */
-	public function get_settings() {
-		$settings = array(
-			'section_title' => array(
-				'name' => __( 'Telegram Integration Settings', 'wctlgm-subscriber-manager-lite' ),
-				'type' => 'title',
-				'desc' => '',
-				'id'   => 'wctlgm_settings_section_title',
-			),
-			'bot_token'     => array(
-				'name' => __( 'Telegram Bot Token', 'wctlgm-subscriber-manager-lite' ),
-				'type' => 'password',
-				'desc' => __( 'Enter your Telegram bot token here.', 'wctlgm-subscriber-manager-lite' ),
-				'id'   => 'wctlgm_bot_token',
-			),
-			array(
-				'type' => 'custom_button',
-				'id'   => 'wctlgm_set_webhook_button',
-				'desc' => 'Set Webhook',
-			),
-			'bot_url'       => array(
-				'name' => __( 'Telegram Bot URL', 'wctlgm-subscriber-manager-lite' ),
-				'type' => 'text',
-				'desc' => __( 'Enter your Telegram bot URL here.', 'wctlgm-subscriber-manager-lite' ),
-				'id'   => 'wctlgm_bot_url',
-			),
-			'channels'      => array(
-				'name' => __( 'Telegram Channel ID\'s', 'wctlgm-subscriber-manager-lite' ),
-				'type' => 'custom_channels',
-				'desc' => __( 'Enter the Telegram channel names and ID\'s for the plugin to manage.', 'wctlgm-subscriber-manager-lite' ),
-				'id'   => 'wctlgm_channels',
-			),
-			'section_end'   => array(
-				'type' => 'sectionend',
-				'id'   => 'wctlgm_settings_section_end',
-			),
-		);
-
-		return apply_filters( 'wctlgm_settings', $settings );
-	}
-
 	public function custom_channels_input() {
-		// Get the saved value from the database
 		$channels = get_option( 'wctlgm_channels', array() );
-		$channel  = ! empty( $channels ) ? $channels[0] : array(
-			'name' => '',
-			'id'   => '',
+
+		$channel = array(
+			'name' => isset( $channels[0]['name'] ) ? $channels[0]['name'] : '',
+			'id'   => isset( $channels[0]['id'] ) ? $channels[0]['id'] : '',
 		);
 		?>
 		<tr valign="top">
-			<th scope="row" class="titledesc">
-				<label for="wctlgm_channel"><?php esc_html_e( 'Channel Name and ID', 'wctlgm-subscriber-manager-lite' ); ?></label>
-			</th>
-			<td class="forminp">
-			<?php wp_nonce_field( 'wctlgm_update_settings', 'wctlgm_settings_nonce' ); ?>
+			<td class="forminp" colspan="2" style="padding-top: 0;">
+				<?php wp_nonce_field( 'wctlgm_update_settings', 'wctlgm_settings_nonce' ); ?>
 				<table id="wctlgm_channel_table">
 					<tbody>
 						<tr>
-							<td><input type="text" name="wctlgm_channel[name]" value="<?php echo esc_attr( $channel['name'] ); ?>" /></td>
-							<td><input type="text" name="wctlgm_channel[id]" value="<?php echo esc_attr( $channel['id'] ); ?>" /></td>
-							<td>
+							<td style="padding-top: 0;">
+								<input type="text" name="wctlgm_channels[0][name]" value="<?php echo esc_attr( $channel['name'] ); ?>" />
+								<p class="description"><?php esc_html_e( 'Channel Name', 'wctlgm-subscriber-manager-lite' ); ?></p>
+							</td>
+							<td style="padding-top: 0;">
+								<input type="text" name="wctlgm_channels[0][id]" value="<?php echo esc_attr( $channel['id'] ); ?>" />
+								<p class="description"><?php esc_html_e( 'Channel ID', 'wctlgm-subscriber-manager-lite' ); ?></p>
+							</td>
+							<td style="vertical-align: top; padding-top: 0;">
 								<button type="button" class="button wctlgm_fetch_channel_id"><?php esc_html_e( 'Get Channel ID', 'wctlgm-subscriber-manager-lite' ); ?></button>
 							</td>
 						</tr>
 					</tbody>
 				</table>
+				<?php
+				if ( wctlgm_fs()->is_not_paying() ) {
+					echo wp_kses_post( sprintf( '<em>Need to add multiple channels? <a href="%s">Upgrade to Pro Now!</a></em>', wctlgm_fs()->get_upgrade_url() ) );
+					echo '</section>';
+				}
+				?>
 			</td>
 		</tr>
 		<?php
@@ -209,7 +117,13 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 						<?php endforeach; ?>
 					</select>
 				</p>
+				<?php
+				if ( wctlgm_fs()->is_not_paying() ) {
+					echo wp_kses_post( sprintf( '<p><em>Need to set access expiry? Automatic user removal? Works with subscriptions? <a href="%s">Upgrade to Pro Now!</a></em></p>', wctlgm_fs()->get_upgrade_url() ) );
+				}
+				?>
 			</div>
+			
 		</div>
 		<?php
 	}
@@ -225,20 +139,20 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 		}
 	}
 
-	public function wctlgm_custom_button_html( $value ) {
+	/**
+	 * Display the custom button for setting the webhook.
+	 */
+	public function wctlgm_custom_button_html() {
 		$bot_token = get_option( 'wctlgm_bot_token' );
 		$disabled  = empty( $bot_token ) ? 'disabled' : '';
 
 		printf(
-			'<tr valign="top"><th scope="row" class="titledesc"><label>%s</label></th><td class="forminp"><button type="button" class="button-primary" id="%s" %s>%s</button><p class="description">%s</p></td></tr>',
-			esc_html( $value['desc'] ),
-			esc_attr( $value['id'] ),
+			'<tr valign="top"><th scope="row" class="titledesc"><label>%s</label></th><td class="forminp"><button type="button" class="button-primary" id="wctlgm_set_webhook_button" %s>%s</button><p class="description">%s</p></td></tr>',
+			esc_html__( 'Set Webhook', 'wctlgm-subscriber-manager-lite' ),
 			esc_attr( $disabled ),
 			esc_html__( 'Set Webhook', 'wctlgm-subscriber-manager-lite' ),
 			empty( $bot_token ) ? esc_html__( 'Enter a bot token and Save settings to activate button.', 'wctlgm-subscriber-manager-lite' ) : ''
 		);
-		?>
-		<?php
 	}
 
 	public function wctlgm_generate_secret_token() {
@@ -276,5 +190,134 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 			set_transient( 'wctlgm_telegram_fetch_channel_id_active', true, HOUR_IN_SECONDS );
 			wp_send_json_error( array( 'message' => 'Please post a message in your Telegram channel and then edit it. Then click "Get Channel ID" again.' ) );
 		}
+	}
+
+	/**
+	 * Add a new settings page under the Settings menu.
+	 */
+	public function add_settings_page() {
+		add_options_page(
+			__( 'Telegram Subscriber Manager', 'wctlgm-subscriber-manager-lite' ),
+			__( 'Telegram Subscriber Manager', 'wctlgm-subscriber-manager-lite' ),
+			'manage_options',
+			'wctlgm-settings',
+			array( $this, 'settings_page' )
+		);
+	}
+
+	/**
+	 * Display the settings page.
+	 */
+	public function settings_page() {
+		?>
+		<div class="wrap fs-section">
+			<h1><?php esc_html_e( 'Telegram Subscriber Manager Settings', 'wctlgm-subscriber-manager-lite' ); ?></h1>
+			<h2 class="nav-tab-wrapper">
+				<a href="#" class="nav-tab fs-tab nav-tab-active home">Settings</a>
+			</h2>
+			<form method="post" action="options.php">
+				<?php
+				settings_fields( 'wctlgm_settings_group' );
+
+				do_settings_sections( 'wctlgm-settings' );
+
+				submit_button();
+				?>
+			</form>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Register settings and add settings sections and fields.
+	 */
+	public function register_settings() {
+		register_setting( 'wctlgm_settings_group', 'wctlgm_bot_token', array( $this, 'sanitize_text_field' ) );
+		register_setting( 'wctlgm_settings_group', 'wctlgm_bot_url', array( $this, 'sanitize_url' ) );
+		register_setting( 'wctlgm_settings_group', 'wctlgm_channels', array( $this, 'sanitize_channels' ) );
+
+		add_settings_section(
+			'wctlgm_settings_section',
+			__( 'Telegram Integration Settings', 'wctlgm-subscriber-manager-lite' ),
+			null,
+			'wctlgm-settings'
+		);
+
+		add_settings_field(
+			'wctlgm_bot_token',
+			__( 'Telegram Bot Token', 'wctlgm-subscriber-manager-lite' ),
+			array( $this, 'bot_token_field' ),
+			'wctlgm-settings',
+			'wctlgm_settings_section'
+		);
+
+		add_settings_field(
+			'wctlgm_bot_url',
+			__( 'Telegram Bot URL', 'wctlgm-subscriber-manager-lite' ),
+			array( $this, 'bot_url_field' ),
+			'wctlgm-settings',
+			'wctlgm_settings_section'
+		);
+
+		add_settings_field(
+			'wctlgm_channels',
+			__( 'Telegram Channels:', 'wctlgm-subscriber-manager-lite' ),
+			array( $this, 'channels_field' ),
+			'wctlgm-settings',
+			'wctlgm_settings_section'
+		);
+	}
+
+	/**
+	 * Sanitize text fields.
+	 */
+	public function sanitize_text_field( $input ) {
+		return sanitize_text_field( $input );
+	}
+
+	/**
+	 * Sanitize URL fields.
+	 */
+	public function sanitize_url( $input ) {
+		return esc_url_raw( $input );
+	}
+
+	/**
+	 * Sanitize channels.
+	 */
+	public function sanitize_channels( $input ) {
+		$channel = array();
+		if ( ! empty( $input[0]['name'] ) && ! empty( $input[0]['id'] ) ) {
+			$channel = array(
+				'name' => sanitize_text_field( $input[0]['name'] ),
+				'id'   => sanitize_text_field( $input[0]['id'] ),
+			);
+		}
+		return array( $channel );
+	}
+
+	/**
+	 * Display the bot token field with a description.
+	 */
+	public function bot_token_field() {
+		$bot_token = get_option( 'wctlgm_bot_token' );
+		echo '<input type="password" id="wctlgm_bot_token" name="wctlgm_bot_token" value="' . esc_attr( $bot_token ) . '" />';
+		echo '<p class="description">' . esc_html__( 'Enter your Telegram bot token here.', 'wctlgm-subscriber-manager-lite' ) . '</p>';
+		$this->wctlgm_custom_button_html();
+	}
+
+	/**
+	 * Display the bot URL field.
+	 */
+	public function bot_url_field() {
+		$bot_url = get_option( 'wctlgm_bot_url' );
+		echo '<input type="text" name="wctlgm_bot_url" value="' . esc_attr( $bot_url ) . '" />';
+	}
+
+	/**
+	 * Display the channels field.
+	 */
+	public function channels_field() {
+		$this->custom_channels_input();
 	}
 }

@@ -15,6 +15,49 @@
  * Requires Plugins: woocommerce
  */
 
+if ( ! function_exists( 'wctlgm_fs' ) ) {
+	// Create a helper function for easy SDK access.
+	function wctlgm_fs() {
+		global $wctlgm_fs;
+
+		if ( ! isset( $wctlgm_fs ) ) {
+			// Include Freemius SDK.
+			require_once __DIR__ . '/vendor/autoload.php';
+			$wctlgm_fs = fs_dynamic_init(
+				array(
+					'id'                  => '16907',
+					'slug'                => 'wctlgm-subscriber-manager',
+					'premium_slug'        => 'wctlgm-subscriber-manager',
+					'type'                => 'plugin',
+					'public_key'          => 'pk_f64df69d37ee38537f9f2a1abbb61',
+					'is_premium'          => false,
+					'premium_suffix'      => '',
+					'has_premium_version' => true,
+					'is_premium_only'     => false,
+					'has_addons'          => false,
+					'has_paid_plans'      => true,
+					'navigation'          => 'tabs',
+					'menu'                => array(
+						'slug'   => 'wctlgm-settings',
+						'parent' => array(
+							'slug' => 'options-general.php',
+						),
+					),
+				)
+			);
+		}
+
+		return $wctlgm_fs;
+	}
+
+	// Init Freemius.
+	wctlgm_fs();
+	// Signal that SDK was initiated.
+	do_action( 'wctlgm_fs_loaded' );
+}
+
+
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
@@ -59,10 +102,8 @@ add_action(
 function wctlgm_subscriber_manager_lite_check_for_pro_plugin() {
 	// Check if the pro plugin is active
 	if ( is_plugin_active( 'wctlgm-subscriber-manager/wctlgm-subscriber-manager.php' ) ) {
-		// Deactivate the lite plugin
 		deactivate_plugins( plugin_basename( __FILE__ ) );
 
-		// Display an admin notice
 		add_action( 'admin_notices', 'wctlgm_subscriber_manager_lite_pro_plugin_active_notice' );
 	}
 }
@@ -71,7 +112,7 @@ add_action( 'admin_init', 'wctlgm_subscriber_manager_lite_check_for_pro_plugin' 
 function wctlgm_subscriber_manager_lite_pro_plugin_active_notice() {
 	?>
 	<div class="notice notice-warning is-dismissible">
-		<p><?php esc_html_e( 'The Pro version of this plugin is active. The Lite version has been deactivated to prevent conflicts.', 'wctlgm-subscriber-manager-lite' ); ?></p>
+		<p><?php esc_html_e( 'The Pro version of Subscriber Manager for Telegram is active. The Lite version has been deactivated to prevent conflicts.', 'wctlgm-subscriber-manager-lite' ); ?></p>
 	</div>
 	<?php
 }

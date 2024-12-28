@@ -6,7 +6,6 @@
 /bin
 /tests
 /node_modules
-/vendor
 
 # Files
 .*
