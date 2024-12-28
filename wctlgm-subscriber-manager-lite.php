@@ -74,7 +74,6 @@ if ( ! defined( 'WCTLGM_SML_PLUGIN_DIR' ) ) {
  * Plugin activation.
  */
 function wctlgm_subscriber_manager_lite_activation() {
-	// Check for custom post type.
 	if ( ! class_exists( 'WooCommerce' ) ) {
 		wp_die( esc_html__( 'Plugin not activated. WooCommerce not found.', 'wctlgm-subscriber-manager-lite' ) );
 	}

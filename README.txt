@@ -51,6 +51,12 @@ This plugin connects to the Telegram API to manage access to private Telegram ch
 It also sets a webhook to handle communication between your WooCommerce store and Telegram. This service is provided by Telegram: [terms of use](https://telegram.org/tos), [privacy policy](https://telegram.org/privacy).
 
 
+== External services ==
+
+This plugin connects to the Telegram API to manage access to private Telegram channels. It is used to grant or revoke access to these channels based on WooCommerce transactions. The plugin retrieves the user's Telegram ID and validates it during the activation process.
+It also sets a webhook to handle communication between your WooCommerce store and Telegram. This service is provided by Telegram: [terms of use](https://telegram.org/tos), [privacy policy](https://telegram.org/privacy).
+
+
 == Screenshots ==
 
 1. Coming soon
