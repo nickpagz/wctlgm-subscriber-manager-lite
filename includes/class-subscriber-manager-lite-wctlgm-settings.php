@@ -197,11 +197,11 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 	 */
 	public function add_settings_page() {
 		add_options_page(
-			__( 'Telegram Subscriber Manager', 'wctlgm-subscriber-manager-lite' ), // Page title
-			__( 'Telegram Subscriber Manager', 'wctlgm-subscriber-manager-lite' ), // Menu title
-			'manage_options', // Capability
-			'wctlgm-settings', // Menu slug
-			array( $this, 'settings_page' ) // Callback function
+			__( 'Telegram Subscriber Manager', 'wctlgm-subscriber-manager-lite' ),
+			__( 'Telegram Subscriber Manager', 'wctlgm-subscriber-manager-lite' ),
+			'manage_options',
+			'wctlgm-settings',
+			array( $this, 'settings_page' )
 		);
 	}
 
@@ -217,13 +217,10 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 			</h2>
 			<form method="post" action="options.php">
 				<?php
-				// Output security fields for the registered setting
 				settings_fields( 'wctlgm_settings_group' );
 
-				// Output setting sections and their fields
 				do_settings_sections( 'wctlgm-settings' );
 
-				// Output save settings button
 				submit_button();
 				?>
 			</form>

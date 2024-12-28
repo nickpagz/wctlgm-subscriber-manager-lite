@@ -102,10 +102,8 @@ add_action(
 function wctlgm_subscriber_manager_lite_check_for_pro_plugin() {
 	// Check if the pro plugin is active
 	if ( is_plugin_active( 'wctlgm-subscriber-manager/wctlgm-subscriber-manager.php' ) ) {
-		// Deactivate the lite plugin
 		deactivate_plugins( plugin_basename( __FILE__ ) );
 
-		// Display an admin notice
 		add_action( 'admin_notices', 'wctlgm_subscriber_manager_lite_pro_plugin_active_notice' );
 	}
 }
