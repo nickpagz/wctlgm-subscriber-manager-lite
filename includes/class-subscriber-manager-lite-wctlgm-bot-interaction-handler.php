@@ -125,7 +125,7 @@ class Subscriber_Manager_Lite_WCTLGM_Bot_Interaction_Handler {
 		if ( $result['success'] ) {
 			$message = __( 'Activation successful!', 'wctlgm-subscriber-manager-lite' );
 			if ( ! empty( $result['channels'] ) ) {
-				$message .= "\n" . __( 'Use the following links to access the private channels:', 'wctlgm-subscriber-manager-lite' );
+				$message .= "\n" . __( 'Use the following link to access the private channel:', 'wctlgm-subscriber-manager-lite' );
 				foreach ( $result['channels'] as $channel ) {
 					// translators: %1$s is the channel name, %2$s is the invite link
 					$message .= "\n" . sprintf( __( 'Channel: %1$s - %2$s', 'wctlgm-subscriber-manager-lite' ), $channel['name'], $channel['invite_link'] );
@@ -158,7 +158,7 @@ class Subscriber_Manager_Lite_WCTLGM_Bot_Interaction_Handler {
 		$user_email = $order->get_billing_email();
 
 		ob_start();
-		include WCTLGM_SM_PLUGIN_DIR . 'assets/email-templates/email-invites.php';
+		include WCTLGM_SML_PLUGIN_DIR . 'assets/email-templates/email-invites.php';
 		$message_body = ob_get_clean();
 
 		wp_mail( $user_email, 'Your Subscription Activation Details', $message_body, array( 'Content-Type: text/html; charset=UTF-8' ) );
