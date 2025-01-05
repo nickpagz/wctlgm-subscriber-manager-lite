@@ -26,7 +26,7 @@ if ( ! function_exists( 'wctlgm_fs' ) ) {
 			$wctlgm_fs = fs_dynamic_init(
 				array(
 					'id'                  => '16907',
-					'slug'                => 'wctlgm-subscriber-manager',
+					'slug'                => 'wctlgm-subscriber-manager-lite',
 					'premium_slug'        => 'wctlgm-subscriber-manager',
 					'type'                => 'plugin',
 					'public_key'          => 'pk_f64df69d37ee38537f9f2a1abbb61',
