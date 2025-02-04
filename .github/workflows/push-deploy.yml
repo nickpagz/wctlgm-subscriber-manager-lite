@@ -1,4 +1,4 @@
-name: Dry-run deploy to WordPress.org
+name: Deploy to WordPress.org
 
 on:
   workflow_dispatch:
