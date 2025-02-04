@@ -25,7 +25,8 @@ jobs:
           zip -r ${{ github.event.repository.name }}.zip . \
           -x ".*" ".*/**" ".git/**" ".github/**" "node_modules/**" \
           ".gitignore" ".editorconfig" ".distignore" ".phpcs.xml" \
-          "composer.json" "composer.lock" "package.json" "package-lock.json"
+          "composer.json" "composer.lock" "package.json" "package-lock.json" \
+          "resources/**" \
           ls -la ${{ github.event.repository.name }}.zip
 
       - name: Release

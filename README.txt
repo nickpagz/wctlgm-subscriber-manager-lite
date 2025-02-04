@@ -69,6 +69,7 @@ It also sets a webhook to handle communication between your WooCommerce store an
 
 = 1.1.0 =
 * Fixed an issue where activation codes may be displayed before payment is received.
+* Update to the latest Freemius SDK
 
 = 1.0.2 =
 * .org Initial Release

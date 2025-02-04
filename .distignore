@@ -6,6 +6,7 @@
 /bin
 /tests
 /node_modules
+/resources
 
 # Files
 .*
