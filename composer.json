@@ -13,14 +13,14 @@
                 "version": "2.11.0",
                 "dist": {
                     "type": "zip",
-                    "url": "resources/wordpress-sdk-2.11.0.zip"
+                    "url": "resources/wordpress-sdk.zip"
                 }
             }
         }
     ],
     "extra": {
         "installer-paths": {
-            "path/to/desired/location/": ["freemius/wordpress-sdk"]
+            "vendor/freemius/wordpress-sdk/": ["freemius/wordpress-sdk"]
         }
     }
 }
