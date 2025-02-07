@@ -3,7 +3,7 @@ Contributors:      rektification, npagazani
 Tags:              woocommerce, telegram, subscriptions
 Requires at least: 6.0
 Tested up to:      6.7.1
-Stable tag:        1.0.2
+Stable tag:        1.1.0
 License:           GPL-2.0-or-later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -66,6 +66,10 @@ It also sets a webhook to handle communication between your WooCommerce store an
 
 
 == Changelog ==
+
+= 1.1.0 =
+* Fixed an issue where activation codes may be displayed before payment is received.
+* Update to the latest Freemius SDK
 
 = 1.0.2 =
 * .org Initial Release
