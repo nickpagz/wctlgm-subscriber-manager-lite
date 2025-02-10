@@ -4,23 +4,5 @@
     "require": {
         "freemius/wordpress-sdk": "^2.11"
     },
-    "license": "GPL-3.0-only",
-    "repositories": [
-        {
-            "type": "package",
-            "package": {
-                "name": "freemius/wordpress-sdk",
-                "version": "2.11.0",
-                "dist": {
-                    "type": "zip",
-                    "url": "resources/wordpress-sdk.zip"
-                }
-            }
-        }
-    ],
-    "extra": {
-        "installer-paths": {
-            "vendor/freemius/wordpress-sdk/": ["freemius/wordpress-sdk"]
-        }
-    }
+    "license": "GPL-3.0-only"
 }
