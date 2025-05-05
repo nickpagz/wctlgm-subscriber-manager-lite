@@ -4,5 +4,13 @@
     "require": {
         "freemius/wordpress-sdk": "^2.11"
     },
-    "license": "GPL-3.0-only"
+    "license": "GPL-3.0-only",
+    "scripts": {
+        "make-pot": "./vendor/bin/wp i18n make-pot . languages/wctlgm-subscriber-manager-lite.pot",
+        "make-mo": "./vendor/bin/wp i18n make-mo languages/"
+    },
+    "require-dev": {
+        "wp-cli/wp-cli": "^2.11",
+        "wp-cli/i18n-command": "^2.6"
+    }
 }

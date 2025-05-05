@@ -1,0 +1,218 @@
+# Copyright (C) 2025 Rektification
+# This file is distributed under the GPL-2.0-or-later.
+msgid ""
+msgstr ""
+"Project-Id-Version: Subscriber Manager Lite for Telegram 1.1.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/wctlgm-subscriber-"
+"manager-lite\n"
+"POT-Creation-Date: 2025-02-19T10:31:39+00:00\n"
+"PO-Revision-Date: 2025-02-19 14:04+0100\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 3.5\n"
+"X-Domain: wctlgm-subscriber-manager-lite\n"
+
+#. Plugin Name of the plugin
+#: wctlgm-subscriber-manager-lite.php
+msgid "Subscriber Manager Lite for Telegram"
+msgstr "Subscriber Manager Lite for Telegram"
+
+#. Plugin URI of the plugin
+#: wctlgm-subscriber-manager-lite.php
+msgid "https://github.com/nickpagz/wctlgm-subscriber-manager-lite"
+msgstr "https://github.com/nickpagz/wctlgm-subscriber-manager-lite"
+
+#. Description of the plugin
+#: wctlgm-subscriber-manager-lite.php
+msgid ""
+"A plugin to automatically manage Telegram private channel subscribers via "
+"WooCommerce."
+msgstr ""
+
+#. Author of the plugin
+#: wctlgm-subscriber-manager-lite.php
+msgid "Rektification"
+msgstr "Rektification"
+
+#. Author URI of the plugin
+#: wctlgm-subscriber-manager-lite.php
+msgid "https://turtlesignals.com"
+msgstr "https://turtlesignals.com"
+
+#: includes/class-subscriber-manager-lite-wctlgm-api-handler.php:52
+msgid "No Bot Token found."
+msgstr "No se encontró ningún token de bot."
+
+#: includes/class-subscriber-manager-lite-wctlgm-bot-interaction-handler.php:89
+msgid ""
+"Welcome! Please use the /activate <code> command to start the activation "
+"process for your subscription."
+msgstr ""
+"¡Bienvenido! Utilice el comando /activate <code> para iniciar el proceso de "
+"activación de su suscripción."
+
+#. translators: %s is the site name
+#: includes/class-subscriber-manager-lite-wctlgm-bot-interaction-handler.php:97
+msgid ""
+"Welcome! This bot is used to help verify your Telegram User ID and link it "
+"to your subscription with %s."
+msgstr ""
+"¡Bienvenido! Este bot se utiliza para verificar tu ID de usuario de Telegram "
+"y vincularlo a tu suscripción con %s."
+
+#: includes/class-subscriber-manager-lite-wctlgm-bot-interaction-handler.php:100
+msgid ""
+"Please use the /activate <code> command to start the activation process for "
+"your subscription."
+msgstr ""
+"Utilice el comando /activate <code> para iniciar el proceso de activación de "
+"su suscripción."
+
+#: includes/class-subscriber-manager-lite-wctlgm-bot-interaction-handler.php:101
+msgid "For example, /activate Aq371Do4, and hit enter."
+msgstr "Por ejemplo, /activate Aq371Do4 y presiona Enter."
+
+#: includes/class-subscriber-manager-lite-wctlgm-bot-interaction-handler.php:108
+msgid ""
+"Please include your activation code. Try the /help command for more "
+"information."
+msgstr ""
+"Incluya su código de activación. Pruebe el comando /help para obtener más "
+"información."
+
+#: includes/class-subscriber-manager-lite-wctlgm-bot-interaction-handler.php:118
+#: includes/class-subscriber-manager-lite-wctlgm-bot-interaction-handler.php:140
+msgid "Activation failed. Please check your code and try again."
+msgstr "Error en la activación. Verifique su código y vuelva a intentarlo."
+
+#: includes/class-subscriber-manager-lite-wctlgm-bot-interaction-handler.php:126
+msgid "Activation successful!"
+msgstr "¡Activación exitosa!"
+
+#: includes/class-subscriber-manager-lite-wctlgm-bot-interaction-handler.php:128
+msgid "Use the following link to access the private channel:"
+msgstr ""
+
+#. translators: %1$s is the channel name, %2$s is the invite link
+#: includes/class-subscriber-manager-lite-wctlgm-bot-interaction-handler.php:131
+msgid "Channel: %1$s - %2$s"
+msgstr ""
+
+#: includes/class-subscriber-manager-lite-wctlgm-order-handler.php:64
+#: includes/class-subscriber-manager-lite-wctlgm-order-handler.php:89
+#: includes/class-subscriber-manager-lite-wctlgm-order-handler.php:112
+#: includes/class-subscriber-manager-lite-wctlgm-order-handler.php:123
+msgid "Telegram Activation Code"
+msgstr ""
+
+#: includes/class-subscriber-manager-lite-wctlgm-order-handler.php:65
+#: includes/class-subscriber-manager-lite-wctlgm-order-handler.php:90
+msgid "Here is your activation code:"
+msgstr ""
+
+#: includes/class-subscriber-manager-lite-wctlgm-order-handler.php:68
+#: includes/class-subscriber-manager-lite-wctlgm-order-handler.php:87
+#: includes/class-subscriber-manager-lite-wctlgm-order-handler.php:93
+msgid ""
+"Please click on the following link to open Telegram and enter your "
+"activation code in our Telegram bot:"
+msgstr ""
+
+#: includes/class-subscriber-manager-lite-wctlgm-order-handler.php:70
+#: includes/class-subscriber-manager-lite-wctlgm-order-handler.php:95
+msgid "Start Chat"
+msgstr ""
+
+#: includes/class-subscriber-manager-lite-wctlgm-order-handler.php:86
+msgid "Telegram Activation Code:"
+msgstr ""
+
+#: includes/class-subscriber-manager-lite-wctlgm-order-handler.php:113
+msgid ""
+"Telegram Channel activation details will be emailed and available in your "
+"dashboard when payment is received."
+msgstr ""
+
+#: includes/class-subscriber-manager-lite-wctlgm-order-handler.php:124
+msgid "Activated"
+msgstr ""
+
+#: includes/class-subscriber-manager-lite-wctlgm-settings.php:67
+msgid "Channel Name"
+msgstr ""
+
+#: includes/class-subscriber-manager-lite-wctlgm-settings.php:71
+msgid "Channel ID"
+msgstr ""
+
+#: includes/class-subscriber-manager-lite-wctlgm-settings.php:74
+msgid "Get Channel ID"
+msgstr ""
+
+#: includes/class-subscriber-manager-lite-wctlgm-settings.php:92
+msgid "Telegram Channels"
+msgstr ""
+
+#: includes/class-subscriber-manager-lite-wctlgm-settings.php:111
+msgid "Select Channels"
+msgstr ""
+
+#: includes/class-subscriber-manager-lite-wctlgm-settings.php:151
+#: includes/class-subscriber-manager-lite-wctlgm-settings.php:153
+msgid "Set Webhook"
+msgstr ""
+
+#: includes/class-subscriber-manager-lite-wctlgm-settings.php:154
+msgid "Enter a bot token and Save settings to activate button."
+msgstr ""
+
+#: includes/class-subscriber-manager-lite-wctlgm-settings.php:200
+#: includes/class-subscriber-manager-lite-wctlgm-settings.php:201
+msgid "Telegram Subscriber Manager"
+msgstr ""
+
+#: includes/class-subscriber-manager-lite-wctlgm-settings.php:214
+msgid "Telegram Subscriber Manager Settings"
+msgstr ""
+
+#: includes/class-subscriber-manager-lite-wctlgm-settings.php:241
+msgid "Telegram Integration Settings"
+msgstr ""
+
+#: includes/class-subscriber-manager-lite-wctlgm-settings.php:248
+msgid "Telegram Bot Token"
+msgstr ""
+
+#: includes/class-subscriber-manager-lite-wctlgm-settings.php:256
+msgid "Telegram Bot URL"
+msgstr ""
+
+#: includes/class-subscriber-manager-lite-wctlgm-settings.php:264
+msgid "Telegram Channels:"
+msgstr ""
+
+#: includes/class-subscriber-manager-lite-wctlgm-settings.php:305
+msgid "Enter your Telegram bot token here."
+msgstr ""
+
+#: includes/class-subscriber-manager-lite-wctlgm-subscriptions-handler.php:97
+msgid "No channels found or failed to generate invites for products."
+msgstr ""
+
+#: includes/class-subscriber-manager-lite-wctlgm-subscriptions-handler.php:104
+msgid "Channel invites generated successfully."
+msgstr ""
+
+#: wctlgm-subscriber-manager-lite.php:78
+msgid "Plugin not activated. WooCommerce not found."
+msgstr ""
+
+#: wctlgm-subscriber-manager-lite.php:115
+msgid ""
+"The Pro version of Subscriber Manager for Telegram is active. The Lite "
+"version has been deactivated to prevent conflicts."
+msgstr ""
