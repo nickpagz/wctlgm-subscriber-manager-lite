@@ -61,7 +61,7 @@ class Subscriber_Manager_Lite_WCTLGM_Order_Handler {
 
 	private static function get_activation_info_text_for_order( $order, $activation_code ) {
 		$bot_url = get_option( 'wctlgm_bot_url' );
-		$output .= '<h2>' . esc_html__( 'Telegram Activation Code', 'wctlgm-subscriber-manager-lite' ) . '</h2>';
+		$output  = '<h2>' . esc_html__( 'Telegram Activation Code', 'wctlgm-subscriber-manager-lite' ) . '</h2>';
 		$output .= '<p>' . esc_html__( 'Here is your activation code:', 'wctlgm-subscriber-manager-lite' ) . ' <strong>' . esc_html( $activation_code ) . '</strong></p>';
 		$output .= sprintf(
 			'<p>%s <a href="%s" target="_blank">%s</a></p>',

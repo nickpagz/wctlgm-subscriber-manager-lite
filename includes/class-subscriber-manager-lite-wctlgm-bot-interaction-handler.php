@@ -26,7 +26,12 @@ class Subscriber_Manager_Lite_WCTLGM_Bot_Interaction_Handler {
 
 	public function process_telegram_request( $data ) {
 		if ( isset( $data['chat_join_request'] ) ) {
+			error_log( print_r( $data, true ) );
 			return $this->process_join_request( $data );
+		}
+
+		if ( isset( $data['chat_member'] ) ) {
+			error_log( print_r( $data, true ) );
 		}
 
 		if ( isset( $data['edited_channel_post'] ) ) {
@@ -77,12 +82,15 @@ class Subscriber_Manager_Lite_WCTLGM_Bot_Interaction_Handler {
 
 		if ( $subscriptions_handler->is_join_request_valid( $user_id, $invite_link ) ) {
 			$response_approval = $this->api_handler->approve_join_request( $chat_id, $user_id );
-			$response_revoke   = $this->api_handler->revoke_invite_link( $chat_id, $invite_link );
+			// $response_revoke   = $this->api_handler->revoke_invite_link( $chat_id, $invite_link );
+			$message = __( 'Channel invite automatically approved.', 'wctlgm-subscriber-manager-lite' );
 		} else {
+			error_log( "denying join request" );
 			$response_deny = $this->api_handler->deny_join_request( $chat_id, $user_id );
+			$message = __( 'Channel invite automatically denied. Contact support.', 'wctlgm-subscriber-manager-lite' );
 		}
 
-		return array( 'action' => 'none' );
+		return $this->build_response( $message );
 	}
 
 	protected function handle_start_command() {

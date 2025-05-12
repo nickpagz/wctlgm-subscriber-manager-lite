@@ -209,22 +209,52 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 	 * Display the settings page.
 	 */
 	public function settings_page() {
+		// Determine active tab
+		$active_tab = isset( $_GET['tab'] ) ? sanitize_key( $_GET['tab'] ) : 'settings';
 		?>
 		<div class="wrap fs-section">
 			<h1><?php esc_html_e( 'Telegram Subscriber Manager Settings', 'wctlgm-subscriber-manager-lite' ); ?></h1>
 			<h2 class="nav-tab-wrapper">
-				<a href="#" class="nav-tab fs-tab nav-tab-active home">Settings</a>
+				<a href="<?php echo esc_url( admin_url( 'options-general.php?page=wctlgm-settings' ) ); ?>" class="nav-tab fs-tab <?php echo ( $active_tab === 'settings' ? 'nav-tab-active' : '' ); ?>">Settings</a>
+				<a href="<?php echo esc_url( admin_url( 'options-general.php?page=wctlgm-settings&tab=subscribers' ) ); ?>" class="nav-tab fs-tab <?php echo ( $active_tab === 'subscribers' ? 'nav-tab-active' : '' ); ?>">Subscribers</a>
 			</h2>
-			<form method="post" action="options.php">
-				<?php
-				settings_fields( 'wctlgm_settings_group' );
-
-				do_settings_sections( 'wctlgm-settings' );
-
-				submit_button();
+			<?php
+			if ( $active_tab === 'subscribers' ) {
+				$this->render_subscribers_tab();
+			} else {
 				?>
-			</form>
+				<form method="post" action="options.php">
+					<?php
+					settings_fields( 'wctlgm_settings_group' );
+					do_settings_sections( 'wctlgm-settings' );
+					submit_button();
+					?>
+				</form>
+				<?php
+			}
+			?>
 		</div>
+		<?php
+	}
+
+	/**
+	 * Render the Subscribers tab content.
+	 */
+	public function render_subscribers_tab() {
+		if ( ! class_exists( 'WP_List_Table' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php';
+		}
+		require_once WCTLGM_SML_PLUGIN_DIR . 'includes/class-wctlgms-subscribers-list-table.php';
+
+		$list_table = new \Subscriber_Manager_Lite_for_Telegram\WCTLGMS_Subscribers_List_Table();
+		$list_table->prepare_items();
+		?>
+		<form method="post">
+			<?php
+			$list_table->search_box( __( 'Search Subscribers', 'wctlgm-subscriber-manager-lite' ), 'subscriber' );
+			$list_table->display();
+			?>
+		</form>
 		<?php
 	}
 

@@ -233,7 +233,7 @@ class Subscriber_Manager_Lite_WCTLGM_API_Handler {
 	}
 
 	public function deny_join_request( $chat_id, $user_id ) {
-		$url      = "https://api.telegram.org/bot{$this->bot_token}/denyJoinChatRequest";
+		$url      = "https://api.telegram.org/bot{$this->bot_token}/declineChatJoinRequest";
 		$response = wp_remote_post(
 			$url,
 			array(
@@ -255,8 +255,13 @@ class Subscriber_Manager_Lite_WCTLGM_API_Handler {
 
 		$body = wp_remote_retrieve_body( $response );
 		$data = json_decode( $body, true );
+		error_log( "deny join request response" );
+		error_log( "Chat ID: " . $chat_id );
+		error_log( "User ID: " . $user_id );
+		error_log( print_r( $data, true ) );
 
 		if ( ! isset( $data['ok'] ) || ! $data['ok'] ) {
+			error_log( "deny join request error, not OK" );
 			$error_message = isset( $data['description'] ) ? $data['description'] : 'Unknown error';
 			return new \WP_Error( 'telegram_api_error', $error_message );
 		}
