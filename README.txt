@@ -2,8 +2,8 @@
 Contributors:      rektification, npagazani
 Tags:              woocommerce, telegram, subscriptions
 Requires at least: 6.0
-Tested up to:      6.7.1
-Stable tag:        1.1.0
+Tested up to:      6.8.1
+Stable tag:        1.1.1
 License:           GPL-2.0-or-later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -66,6 +66,10 @@ It also sets a webhook to handle communication between your WooCommerce store an
 
 
 == Changelog ==
+
+= 1.1.1 =
+* Fixed an issue where non-validated invites may not be declined.
+* Add an option to allow external/manual channel invites (skips validation)
 
 = 1.1.0 =
 * Fixed an issue where activation codes may be displayed before payment is received.

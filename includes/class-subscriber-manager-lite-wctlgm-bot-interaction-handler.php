@@ -73,12 +73,13 @@ class Subscriber_Manager_Lite_WCTLGM_Bot_Interaction_Handler {
 		$user_id     = sanitize_text_field( $data['chat_join_request']['from']['id'] );
 		$invite_link = esc_url_raw( $data['chat_join_request']['invite_link']['invite_link'] );
 
-		$subscriptions_handler = new \Subscriber_Manager_Lite_for_Telegram\Subscriber_Manager_Lite_WCTLGM_Subscriptions_Handler();
+		$subscriptions_handler  = new \Subscriber_Manager_Lite_for_Telegram\Subscriber_Manager_Lite_WCTLGM_Subscriptions_Handler();
+		$allow_external_invites = get_option( 'wctlgm_allow_external_invites', false );
 
 		if ( $subscriptions_handler->is_join_request_valid( $user_id, $invite_link ) ) {
 			$response_approval = $this->api_handler->approve_join_request( $chat_id, $user_id );
 			$response_revoke   = $this->api_handler->revoke_invite_link( $chat_id, $invite_link );
-		} else {
+		} elseif ( ! $allow_external_invites ) {
 			$response_deny = $this->api_handler->deny_join_request( $chat_id, $user_id );
 		}
 
