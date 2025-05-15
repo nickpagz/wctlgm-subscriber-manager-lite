@@ -233,7 +233,7 @@ class Subscriber_Manager_Lite_WCTLGM_API_Handler {
 	}
 
 	public function deny_join_request( $chat_id, $user_id ) {
-		$url      = "https://api.telegram.org/bot{$this->bot_token}/denyJoinChatRequest";
+		$url      = "https://api.telegram.org/bot{$this->bot_token}/declineChatJoinRequest";
 		$response = wp_remote_post(
 			$url,
 			array(

@@ -234,6 +234,7 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 	public function register_settings() {
 		register_setting( 'wctlgm_settings_group', 'wctlgm_bot_token', array( $this, 'sanitize_text_field' ) );
 		register_setting( 'wctlgm_settings_group', 'wctlgm_bot_url', array( $this, 'sanitize_url' ) );
+		register_setting( 'wctlgm_settings_group', 'wctlgm_allow_external_invites', array( $this, 'sanitize_checkbox' ) );
 		register_setting( 'wctlgm_settings_group', 'wctlgm_channels', array( $this, 'sanitize_channels' ) );
 
 		add_settings_section(
@@ -260,6 +261,14 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 		);
 
 		add_settings_field(
+			'wctlgm_allow_external_invites',
+			__( 'Allow External Invites', 'wctlgm-subscriber-manager-lite' ),
+			array( $this, 'allow_external_invites_field' ),
+			'wctlgm-settings',
+			'wctlgm_settings_section'
+		);
+
+		add_settings_field(
 			'wctlgm_channels',
 			__( 'Telegram Channels:', 'wctlgm-subscriber-manager-lite' ),
 			array( $this, 'channels_field' ),
@@ -280,6 +289,13 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 	 */
 	public function sanitize_url( $input ) {
 		return esc_url_raw( $input );
+	}
+
+	/**
+	 * Sanitize checkbox fields.
+	 */
+	public function sanitize_checkbox( $input ) {
+		return isset( $input ) ? true : false;
 	}
 
 	/**
@@ -312,6 +328,15 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 	public function bot_url_field() {
 		$bot_url = get_option( 'wctlgm_bot_url' );
 		echo '<input type="text" name="wctlgm_bot_url" value="' . esc_attr( $bot_url ) . '" />';
+	}
+
+	/**
+	 * Display the Allow External Invites field.
+	 */
+	public function allow_external_invites_field() {
+		$allow_external_invites = get_option( 'wctlgm_allow_external_invites', false );
+		echo '<input type="checkbox" name="wctlgm_allow_external_invites" value="1" ' . checked( $allow_external_invites, true, false ) . ' />';
+		echo '<p class="description">' . esc_html__( 'When enabled, join requests from external or manually created invite links will skip validation checks.', 'wctlgm-subscriber-manager-lite' ) . '</p>';
 	}
 
 	/**
