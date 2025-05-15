@@ -70,6 +70,7 @@ It also sets a webhook to handle communication between your WooCommerce store an
 = 1.1.1 =
 * Fixed an issue where non-validated invites may not be declined.
 * Add an option to allow external/manual channel invites (skips validation)
+* Dependency updates
 
 = 1.1.0 =
 * Fixed an issue where activation codes may be displayed before payment is received.
