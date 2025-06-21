@@ -5,7 +5,9 @@
  * This template can be overridden by copying it to yourtheme/woocommerce/emails/plain/telegram-channel-activation.php.
  *
  * @package WooCommerce\Templates\Emails\Plain
- * @version 1.0.0
+ * @version 1.2.0
+ *
+ * @since 1.2.0
  */
 
 defined( 'ABSPATH' ) || exit;

@@ -12,8 +12,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  * An email sent to the customer when their Telegram channel access is activated.
  *
  * @class       Subscriber_Manager_Lite_WCTLGM_Activation_Email
- * @version     1.0.0
+ * @version     1.2.0
  * @extends     WC_Email
+ * @since       1.2.0
  */
 class Subscriber_Manager_Lite_WCTLGM_Activation_Email extends \WC_Email {
 
