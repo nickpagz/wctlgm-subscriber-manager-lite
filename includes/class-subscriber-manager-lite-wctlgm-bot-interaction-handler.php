@@ -157,12 +157,9 @@ class Subscriber_Manager_Lite_WCTLGM_Bot_Interaction_Handler {
 
 		// Get our custom email class instance
 		$emails = WC()->mailer()->get_emails();
-		foreach ( $emails as $email ) {
-			if ( 'wctlgm_activation' === $email->id ) {
-				// Trigger our custom email
-				$email->trigger( $order_id, $invites );
-				break;
-			}
+		if ( isset( $emails['wctlgm_activation'] ) ) {
+			$email = $emails['wctlgm_activation'];
+			$email->trigger( $order_id, $invites );
 		}
 	}
 }
