@@ -30,6 +30,7 @@ class Subscriber_Manager_Lite_WCTLGM {
 		require_once WCTLGM_SML_PLUGIN_DIR . 'includes/class-subscriber-manager-lite-wctlgm-api-handler.php';
 		require_once WCTLGM_SML_PLUGIN_DIR . 'includes/class-subscriber-manager-lite-wctlgm-bot-interaction-handler.php';
 		require_once WCTLGM_SML_PLUGIN_DIR . 'includes/class-subscriber-manager-lite-wctlgm-endpoint-handler.php';
+		require_once WCTLGM_SML_PLUGIN_DIR . 'includes/class-subscriber-manager-lite-wctlgm-email-handler.php';
 	}
 
 	/**
@@ -53,5 +54,6 @@ class Subscriber_Manager_Lite_WCTLGM {
 
 		add_action( 'init', array( '\Subscriber_Manager_Lite_for_Telegram\Subscriber_Manager_Lite_WCTLGM_Bot_Interaction_Handler', 'init' ) );
 		add_action( 'plugins_loaded', array( '\Subscriber_Manager_Lite_for_Telegram\Subscriber_Manager_Lite_WCTLGM_Order_Handler', 'init' ) );
+		add_action( 'plugins_loaded', array( '\Subscriber_Manager_Lite_for_Telegram\Subscriber_Manager_Lite_WCTLGM_Email_Handler', 'init' ) );
 	}
 }

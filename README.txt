@@ -3,7 +3,7 @@ Contributors:      rektification, npagazani
 Tags:              woocommerce, telegram, subscriptions
 Requires at least: 6.0
 Tested up to:      6.8.1
-Stable tag:        1.1.1
+Stable tag:        1.2.0
 License:           GPL-2.0-or-later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -66,6 +66,9 @@ It also sets a webhook to handle communication between your WooCommerce store an
 
 
 == Changelog ==
+
+= 1.2.0 =
+* Moved email templates to WooCommerce integration, making them customizeable in the WooCommerce settings.
 
 = 1.1.1 =
 * Fixed an issue where non-validated invites may not be declined.

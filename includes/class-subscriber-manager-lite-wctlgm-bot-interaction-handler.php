@@ -155,13 +155,11 @@ class Subscriber_Manager_Lite_WCTLGM_Bot_Interaction_Handler {
 		$order_id = $args[0];
 		$invites  = $args[1];
 
-		$order      = wc_get_order( $order_id );
-		$user_email = $order->get_billing_email();
-
-		ob_start();
-		include WCTLGM_SML_PLUGIN_DIR . 'assets/email-templates/email-invites.php';
-		$message_body = ob_get_clean();
-
-		wp_mail( $user_email, 'Your Subscription Activation Details', $message_body, array( 'Content-Type: text/html; charset=UTF-8' ) );
+		// Get our custom email class instance
+		$emails = WC()->mailer()->get_emails();
+		if ( isset( $emails['wctlgm_activation'] ) ) {
+			$email = $emails['wctlgm_activation'];
+			$email->trigger( $order_id, $invites );
+		}
 	}
 }
