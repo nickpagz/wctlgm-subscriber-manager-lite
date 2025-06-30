@@ -79,13 +79,13 @@ function wctlgm_subscriber_manager_lite_activation() {
 	}
 
 	// Run upgrade routine on activation - Temp
-	wctlgm_setup_activation_default();
+	wctlgm_lite_setup_activation_default();
 }
 
 /**
  * Set up the default activation requirement for new installations - Temp
  */
-function wctlgm_setup_activation_default() {
+function wctlgm_lite_setup_activation_default() {
 	// Only run if the option hasn't been explicitly set
 	if ( false === get_option( 'wctlgm_force_activation_flow', false ) ) {
 		update_option( 'wctlgm_force_activation_flow', true );
@@ -95,7 +95,7 @@ function wctlgm_setup_activation_default() {
 register_activation_hook( __FILE__, 'wctlgm_subscriber_manager_lite_activation' );
 
 // Check for upgrades on every plugin load - TEMP
-add_action( 'plugins_loaded', 'wctlgm_setup_activation_default' );
+add_action( 'plugins_loaded', 'wctlgm_lite_setup_activation_default' );
 
 /**
  * Plugin deactivation.
