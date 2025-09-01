@@ -60,7 +60,7 @@ class Subscriber_Manager_Lite_WCTLGM_API_Handler {
 					array(
 						'url'             => $url,
 						'secret_token'    => $secret_token,
-						'allowed_updates' => array( 'message', 'edited_channel_post', 'chat_member', 'chat_join_request' ),
+						'allowed_updates' => array( 'message', 'edited_message', 'edited_channel_post', 'chat_member', 'chat_join_request' ),
 					)
 				),
 				'headers' => array(
@@ -92,6 +92,7 @@ class Subscriber_Manager_Lite_WCTLGM_API_Handler {
 				'body'    => wp_json_encode(
 					array(
 						'commands' => $this->commands,
+						'scope'    => '{"type": "all_private_chats"}',
 					)
 				),
 				'headers' => array(

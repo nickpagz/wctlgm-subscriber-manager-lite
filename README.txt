@@ -2,8 +2,8 @@
 Contributors:      rektification, npagazani
 Tags:              woocommerce, telegram, subscriptions
 Requires at least: 6.0
-Tested up to:      6.8.1
-Stable tag:        1.2.0
+Tested up to:      6.8.2
+Stable tag:        1.3.0
 License:           GPL-2.0-or-later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -66,6 +66,10 @@ It also sets a webhook to handle communication between your WooCommerce store an
 
 
 == Changelog ==
+
+= 1.3.0 =
+* Improved private group compatibility.
+* Fixed issue where bots respond in groups with invalid command messages.
 
 = 1.2.0 =
 * Moved email templates to WooCommerce integration, making them customizeable in the WooCommerce settings.
