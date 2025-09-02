@@ -66,7 +66,7 @@ class Subscriber_Manager_Lite_WCTLGM_Order_Handler {
 		$output .= sprintf(
 			'<p>%s <a href="%s" target="_blank">%s</a></p>',
 			esc_html( __( 'Please click on the following link to open Telegram and enter your activation code in our Telegram bot:', 'wctlgm-subscriber-manager-lite' ) ),
-			esc_url( $bot_url . '?activate=' . $activation_code ),
+			esc_url( $bot_url . '?start=' . $activation_code ),
 			esc_html( __( 'Start Chat', 'wctlgm-subscriber-manager-lite' ) )
 		);
 		return $output;
@@ -91,7 +91,7 @@ class Subscriber_Manager_Lite_WCTLGM_Order_Handler {
 				printf(
 					'<p>%s <a href="%s" target="_blank">%s</a></p>',
 					esc_html( __( 'Please click on the following link to open Telegram and enter your activation code in our Telegram bot:', 'wctlgm-subscriber-manager-lite' ) ),
-					esc_url( $bot_url . '?activate=' . $activation_code ),
+					esc_url( $bot_url . '?start=' . $activation_code ),
 					esc_html( __( 'Start Chat', 'wctlgm-subscriber-manager-lite' ) )
 				);
 			}

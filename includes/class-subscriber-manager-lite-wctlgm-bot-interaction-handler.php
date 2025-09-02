@@ -53,7 +53,7 @@ class Subscriber_Manager_Lite_WCTLGM_Bot_Interaction_Handler {
 
 		switch ( $command ) {
 			case '/start':
-				return $this->handle_start_command();
+				return $this->handle_start_command( $args );
 			case '/activate':
 				return $this->handle_activation_command( $args );
 			case '/help':
@@ -101,9 +101,12 @@ class Subscriber_Manager_Lite_WCTLGM_Bot_Interaction_Handler {
 
 		foreach ( $entities as $entity ) {
 			if ( 'bot_command' === $entity['type'] ) {
-				$offset  = $entity['offset'];
-				$length  = $entity['length'];
-				$command = substr( $text, $offset, $length ); // e.g. "/activate"
+				$offset  = (int) $entity['offset'];
+				$length  = (int) $entity['length'];
+				$command = substr( $text, $offset, $length ); // e.g. "/start" or "/start@YourBot"
+
+				// Normalize "/start@YourBot" → "/start"
+				$command = strtolower( preg_replace( '/@.+$/', '', $command ) );
 
 				// Arguments are whatever comes after the command
 				$args = trim( substr( $text, $offset + $length ) );
@@ -114,9 +117,23 @@ class Subscriber_Manager_Lite_WCTLGM_Bot_Interaction_Handler {
 		return array( null, null );
 	}
 
-	protected function handle_start_command() {
-		$message = __( 'Welcome! Please use the /activate <code> command to start the activation process for your subscription.', 'wctlgm-subscriber-manager-lite' );
-		return $this->build_response( $message );
+	protected function handle_start_command( $args = '' ) {
+		$args = trim( (string) $args );
+
+		// No payload → normal welcome
+		if ( '' === $args ) {
+			$message = __( 'Welcome! If you already have an activation code, click your activation link or use /activate <code>.', 'wctlgm-subscriber-manager-lite' );
+			return $this->build_response( $message );
+		}
+
+		// Accept either plain token ("ztS63PRL") or namespaced ("activate_ztS63PRL" or "activate.ztS63PRL")
+		if ( preg_match( '/^(?:activate[._])?([A-Za-z0-9_-]{4,64})$/', $args, $m ) ) {
+			$token = $m[1];
+			return $this->handle_activation_command( $token );
+		}
+
+		// Fallback: invalid payload
+		return $this->build_response( __( 'That activation link looks invalid or expired. Please request a new one or use /help.', 'wctlgm-subscriber-manager-lite' ) );
 	}
 
 	protected function handle_help_command() {
@@ -126,8 +143,9 @@ class Subscriber_Manager_Lite_WCTLGM_Bot_Interaction_Handler {
 			__( 'Welcome! This bot is used to help verify your Telegram User ID and link it to your subscription with %s.', 'wctlgm-subscriber-manager-lite' ),
 			$site_name
 		);
-		$message .= "\n" . __( 'Please use the /activate <code> command to start the activation process for your subscription.', 'wctlgm-subscriber-manager-lite' );
+		$message .= "\n" . __( 'If required, use the /activate <code> command to start the activation process for your subscription.', 'wctlgm-subscriber-manager-lite' );
 		$message .= "\n" . __( 'For example, /activate Aq371Do4, and hit enter.', 'wctlgm-subscriber-manager-lite' );
+		$message .= "\n" . __( 'This is only required in some cases. If you see an "Activation successful!" message in this chat, you can skip this command.', 'wctlgm-subscriber-manager-lite' );
 		return $this->build_response( $message );
 	}
 

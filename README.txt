@@ -7,35 +7,35 @@ Stable tag:        1.3.0
 License:           GPL-2.0-or-later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 
-Automatically manage Telegram private channel subscribers via WooCommerce.
+Automatically manage Telegram private channel and group subscribers via WooCommerce.
 
 == Description ==
 
-Automatically manage Telegram private channel subscribers via WooCommerce.
+Automatically manage Telegram private channel and group subscribers via WooCommerce.
 
-With Subscriber Manager Lite for Telegram you can sell access to your private Telegram channels via a Simple product in
+With Subscriber Manager Lite for Telegram you can sell access to your private Telegram channels and groups via a Simple product in
 WooCommerce. Following a successful checkout, users will be able to link to and submit an activation code in your chat bot.
 This automatically generates an invite link for the user to click on. The invite link is validated in the back-end, and the user is automatically granted access.
 
 == Features ==
 
-* Grant access to a single private Telegram channel after successful WooCommerce checkout.
+* Grant access to a single private Telegram channel or group after successful WooCommerce checkout.
 * You only need to enter your bot token and URL to get started.
-* Semi-automatic channel ID retrieval.
+* Semi-automatic channel or group ID retrieval.
 * Telegram user ID's automatically retrieved and validated during activation.
-* Set channel access to any Simple product in WooCommerce.
+* Set channel or group access to any Simple product in WooCommerce.
 * Secure webhook validation.
 * Works with WooCommerce HPOS
 
-Note, in the Lite version channel members are not automatically removed. They can be removed manually from within Telegram.
+Note, in the Lite version members are not automatically removed. They can be removed manually from within Telegram.
 
 == Pro version ==
 
-* Control access to **unlimited** Telegram private channels.
-* Control access to multiple channels per product. 
+* Control access to **unlimited** Telegram private channels or groups.
+* Control access to multiple channels or groups per product. 
 * Use with both Simple and Simple Subscription products in WooCommerce.
-* Automatically removes channel members when their subscriptions expire.
-* Members won't be removed from channels if they have multiple subscriptions and at least one is still active.
+* Automatically removes members when their subscriptions expire.
+* Members won't be removed if they have multiple subscriptions and at least one is still active.
 * Works best with WooCommerce Subscriptions. Other subscription plugins support coming soon.
 * Set access expiry for Simple products (automatically removes members on expiration).
 * Set order cancellation access cut-off to match a refund policy (members can be optionally instantly removed if they cancel their subscription within the cut-off period).
@@ -68,8 +68,9 @@ It also sets a webhook to handle communication between your WooCommerce store an
 == Changelog ==
 
 = 1.3.0 =
-* Improved private group compatibility.
+* Improved private group compatibility. Now supports private groups and supergroups.
 * Fixed issue where bots respond in groups with invalid command messages.
+* Fixed issue with deep link activation not working.
 
 = 1.2.0 =
 * Moved email templates to WooCommerce integration, making them customizeable in the WooCommerce settings.
