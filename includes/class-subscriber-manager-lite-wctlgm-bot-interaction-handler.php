@@ -59,7 +59,7 @@ class Subscriber_Manager_Lite_WCTLGM_Bot_Interaction_Handler {
 			case '/help':
 				return $this->handle_help_command();
 			default:
-				return $this->build_response( 'Invalid. Please use the /help command for more information.' );
+				return $this->build_response( __( 'Invalid. Please use the /help command for more information.', 'wctlgm-subscriber-manager-lite' ) );
 		}
 	}
 

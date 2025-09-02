@@ -13,24 +13,24 @@ use WP_Error;
  */
 class Subscriber_Manager_Lite_WCTLGM_API_Handler {
 	private $bot_token;
-
-	private $commands = array(
-		array(
-			'command'     => 'start',
-			'description' => 'Start the bot',
-		),
-		array(
-			'command'     => 'activate',
-			'description' => 'Activates your subscription',
-		),
-		array(
-			'command'     => 'help',
-			'description' => 'Provides help information',
-		),
-	);
+	private $commands;
 
 	public function __construct() {
 		$this->bot_token = get_option( 'wctlgm_bot_token' );
+		$this->commands  = array(
+			array(
+				'command'     => 'start',
+				'description' => __( 'Start the bot', 'wctlgm-subscriber-manager-lite' ),
+			),
+			array(
+				'command'     => 'activate',
+				'description' => __( 'Activates your subscription', 'wctlgm-subscriber-manager-lite' ),
+			),
+			array(
+				'command'     => 'help',
+				'description' => __( 'Provides help information', 'wctlgm-subscriber-manager-lite' ),
+			),
+		);
 	}
 
 	public function handle_set_webhook_actions( $url, $secret_token ) {

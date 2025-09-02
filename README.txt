@@ -71,6 +71,7 @@ It also sets a webhook to handle communication between your WooCommerce store an
 * Improved private group compatibility. Now supports private groups and supergroups.
 * Fixed issue where bots respond in groups with invalid command messages.
 * Fixed issue with deep link activation not working.
+* Extend translatable text.
 
 = 1.2.0 =
 * Moved email templates to WooCommerce integration, making them customizeable in the WooCommerce settings.
