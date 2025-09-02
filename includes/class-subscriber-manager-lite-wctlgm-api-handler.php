@@ -92,7 +92,7 @@ class Subscriber_Manager_Lite_WCTLGM_API_Handler {
 				'body'    => wp_json_encode(
 					array(
 						'commands' => $this->commands,
-						'scope'    => '{"type": "all_private_chats"}',
+						'scope'    => wp_json_encode( array( 'type' => 'all_private_chats' ) ),
 					)
 				),
 				'headers' => array(

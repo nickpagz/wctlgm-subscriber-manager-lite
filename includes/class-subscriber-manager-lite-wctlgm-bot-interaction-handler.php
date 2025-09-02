@@ -29,11 +29,19 @@ class Subscriber_Manager_Lite_WCTLGM_Bot_Interaction_Handler {
 		}
 
 		if ( ( isset( $data['edited_channel_post'] ) ) || ( isset( $data['edited_message'] ) ) ) {
-			$chat_id = sanitize_text_field( $data['edited_channel_post']['chat']['id'] ?? $data['edited_message']['chat']['id'] );
+			$chat_id = null;
+			if ( isset( $data['edited_channel_post']['chat']['id'] ) ) {
+				$chat_id = $data['edited_channel_post']['chat']['id'];
+			} elseif ( isset( $data['edited_message']['chat']['id'] ) ) {
+				$chat_id = $data['edited_message']['chat']['id'];
+			}
 
-			if ( $this->is_action_initiated_from_settings() ) {
-				// Optionally check if the chat ID matches expected channels
-				return $this->save_channel_id( $chat_id );
+			if ( null !== $chat_id ) {
+				$chat_id = sanitize_text_field( $chat_id );
+				if ( $this->is_action_initiated_from_settings() ) {
+					// Optionally check if the chat ID matches expected channels
+					return $this->save_channel_id( $chat_id );
+				}
 			}
 			return array( 'action' => 'none' );
 		}
@@ -92,8 +100,19 @@ class Subscriber_Manager_Lite_WCTLGM_Bot_Interaction_Handler {
 	}
 
 	private function extract_command_and_args( $message ) {
-		$text     = $message['text'] ?? ( $message['caption'] ?? '' );
-		$entities = $message['entities'] ?? ( $message['caption_entities'] ?? array() );
+		$text = '';
+		if ( isset( $message['text'] ) ) {
+			$text = $message['text'];
+		} elseif ( isset( $message['caption'] ) ) {
+			$text = $message['caption'];
+		}
+
+		$entities = array();
+		if ( isset( $message['entities'] ) ) {
+			$entities = $message['entities'];
+		} elseif ( isset( $message['caption_entities'] ) ) {
+			$entities = $message['caption_entities'];
+		}
 
 		if ( empty( $entities ) || empty( $text ) ) {
 			return array( null, null );
