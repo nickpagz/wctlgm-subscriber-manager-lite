@@ -18,7 +18,7 @@ class Subscriber_Manager_Lite_WCTLGM_API_Handler {
 
 	public function __construct() {
 		$this->bot_token = get_option( 'wctlgm_bot_token' );
-		$this->logger    = new Subscriber_Manager_Lite_WCTLGM_Logger();
+		$this->logger    = new \Subscriber_Manager_Lite_for_Telegram\Subscriber_Manager_Lite_WCTLGM_Logger();
 		$this->commands  = array(
 			array(
 				'command'     => 'start',

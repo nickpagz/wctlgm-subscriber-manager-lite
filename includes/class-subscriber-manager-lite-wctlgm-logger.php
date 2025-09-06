@@ -1,5 +1,7 @@
 <?php
 
+namespace Subscriber_Manager_Lite_for_Telegram;
+
 /**
  * Class Subscriber_Manager_Lite_WCTLGM_Logger
  *
