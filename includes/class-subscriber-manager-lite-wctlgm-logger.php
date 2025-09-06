@@ -164,7 +164,7 @@ class Subscriber_Manager_Lite_WCTLGM_Logger {
 			? "API Response: Success for {$endpoint}"
 			: "API Response: Error for {$endpoint}";
 
-		self::$level(
+		self::{$level}(
 			$message,
 			array_merge(
 				$context,
