@@ -12,7 +12,6 @@ namespace Subscriber_Manager_Lite_for_Telegram;
 class Subscriber_Manager_Lite_WCTLGM_Bot_Interaction_Handler {
 
 	private $api_handler;
-	private $text;
 	private $chat_id;
 	private $user_id;
 
@@ -29,12 +28,20 @@ class Subscriber_Manager_Lite_WCTLGM_Bot_Interaction_Handler {
 			return $this->process_join_request( $data );
 		}
 
-		if ( isset( $data['edited_channel_post'] ) ) {
-			$chat_id = sanitize_text_field( $data['edited_channel_post']['chat']['id'] );
+		if ( ( isset( $data['edited_channel_post'] ) ) || ( isset( $data['edited_message'] ) ) ) {
+			$chat_id = null;
+			if ( isset( $data['edited_channel_post']['chat']['id'] ) ) {
+				$chat_id = $data['edited_channel_post']['chat']['id'];
+			} elseif ( isset( $data['edited_message']['chat']['id'] ) ) {
+				$chat_id = $data['edited_message']['chat']['id'];
+			}
 
-			if ( $this->is_action_initiated_from_settings() ) {
-				// Optionally check if the chat ID matches expected channels
-				return $this->save_channel_id( $chat_id );
+			if ( null !== $chat_id ) {
+				$chat_id = sanitize_text_field( $chat_id );
+				if ( $this->is_action_initiated_from_settings() ) {
+					// Optionally check if the chat ID matches expected channels
+					return $this->save_channel_id( $chat_id );
+				}
 			}
 			return array( 'action' => 'none' );
 		}
@@ -43,18 +50,24 @@ class Subscriber_Manager_Lite_WCTLGM_Bot_Interaction_Handler {
 			return array( 'action' => 'none' );
 		}
 
-		$this->text    = sanitize_text_field( $data['message']['text'] );
+		if ( isset( $data['message']['chat']['type'] ) && 'private' !== $data['message']['chat']['type'] ) {
+			return array( 'action' => 'none' );
+		}
+
 		$this->chat_id = sanitize_text_field( $data['message']['chat']['id'] );
 		$this->user_id = sanitize_text_field( $data['message']['from']['id'] );
 
-		if ( strpos( $this->text, '/start' ) === 0 ) {
-			return $this->handle_start_command();
-		} elseif ( strpos( $this->text, '/activate' ) === 0 ) {
-			return $this->handle_activation_command();
-		} elseif ( strpos( $this->text, '/help' ) === 0 ) {
-			return $this->handle_help_command();
-		} else {
-			return $this->build_response( 'Invalid. Please use the /help command for more information.' );
+		list( $command, $args ) = $this->extract_command_and_args( $data['message'] );
+
+		switch ( $command ) {
+			case '/start':
+				return $this->handle_start_command( $args );
+			case '/activate':
+				return $this->handle_activation_command( $args );
+			case '/help':
+				return $this->handle_help_command();
+			default:
+				return $this->build_response( __( 'Invalid. Please use the /help command for more information.', 'wctlgm-subscriber-manager-lite' ) );
 		}
 	}
 
@@ -86,9 +99,60 @@ class Subscriber_Manager_Lite_WCTLGM_Bot_Interaction_Handler {
 		return array( 'action' => 'none' );
 	}
 
-	protected function handle_start_command() {
-		$message = __( 'Welcome! Please use the /activate <code> command to start the activation process for your subscription.', 'wctlgm-subscriber-manager-lite' );
-		return $this->build_response( $message );
+	private function extract_command_and_args( $message ) {
+		$text = '';
+		if ( isset( $message['text'] ) ) {
+			$text = $message['text'];
+		} elseif ( isset( $message['caption'] ) ) {
+			$text = $message['caption'];
+		}
+
+		$entities = array();
+		if ( isset( $message['entities'] ) ) {
+			$entities = $message['entities'];
+		} elseif ( isset( $message['caption_entities'] ) ) {
+			$entities = $message['caption_entities'];
+		}
+
+		if ( empty( $entities ) || empty( $text ) ) {
+			return array( null, null );
+		}
+
+		foreach ( $entities as $entity ) {
+			if ( 'bot_command' === $entity['type'] ) {
+				$offset  = (int) $entity['offset'];
+				$length  = (int) $entity['length'];
+				$command = substr( $text, $offset, $length ); // e.g. "/start" or "/start@YourBot"
+
+				// Normalize "/start@YourBot" → "/start"
+				$command = strtolower( preg_replace( '/@.+$/', '', $command ) );
+
+				// Arguments are whatever comes after the command
+				$args = trim( substr( $text, $offset + $length ) );
+
+				return array( strtolower( $command ), $args );
+			}
+		}
+		return array( null, null );
+	}
+
+	protected function handle_start_command( $args = '' ) {
+		$args = trim( (string) $args );
+
+		// No payload → normal welcome
+		if ( '' === $args ) {
+			$message = __( 'Welcome! If you already have an activation code, click your activation link or use /activate <code>.', 'wctlgm-subscriber-manager-lite' );
+			return $this->build_response( $message );
+		}
+
+		// Accept either plain token ("ztS63PRL") or namespaced ("activate_ztS63PRL" or "activate.ztS63PRL")
+		if ( preg_match( '/^(?:activate[._])?([A-Za-z0-9_-]{4,64})$/', $args, $m ) ) {
+			$token = $m[1];
+			return $this->handle_activation_command( $token );
+		}
+
+		// Fallback: invalid payload
+		return $this->build_response( __( 'That activation link looks invalid or expired. Please request a new one or use /help.', 'wctlgm-subscriber-manager-lite' ) );
 	}
 
 	protected function handle_help_command() {
@@ -98,19 +162,19 @@ class Subscriber_Manager_Lite_WCTLGM_Bot_Interaction_Handler {
 			__( 'Welcome! This bot is used to help verify your Telegram User ID and link it to your subscription with %s.', 'wctlgm-subscriber-manager-lite' ),
 			$site_name
 		);
-		$message .= "\n" . __( 'Please use the /activate <code> command to start the activation process for your subscription.', 'wctlgm-subscriber-manager-lite' );
+		$message .= "\n" . __( 'If required, use the /activate <code> command to start the activation process for your subscription.', 'wctlgm-subscriber-manager-lite' );
 		$message .= "\n" . __( 'For example, /activate Aq371Do4, and hit enter.', 'wctlgm-subscriber-manager-lite' );
+		$message .= "\n" . __( 'This is only required in some cases. If you see an "Activation successful!" message in this chat, you can skip this command.', 'wctlgm-subscriber-manager-lite' );
 		return $this->build_response( $message );
 	}
 
-	protected function handle_activation_command() {
-		$parts = explode( ' ', $this->text );
-		if ( count( $parts ) < 2 ) {
+	protected function handle_activation_command( $activation_code ) {
+		if ( empty( $activation_code ) ) {
 			$message = __( 'Please include your activation code. Try the /help command for more information.', 'wctlgm-subscriber-manager-lite' );
 			return $this->build_response( $message );
 		}
 
-		$code = sanitize_text_field( $parts[1] );
+		$code = sanitize_text_field( $activation_code );
 
 		$subscriptions_handler = new \Subscriber_Manager_Lite_for_Telegram\Subscriber_Manager_Lite_WCTLGM_Subscriptions_Handler();
 		$results               = $subscriptions_handler->process_activation_code( $code, $this->user_id );
