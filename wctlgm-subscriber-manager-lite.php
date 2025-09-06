@@ -134,6 +134,7 @@ function wctlgm_subscriber_manager_lite_pro_plugin_active_notice() {
 }
 
 require WCTLGM_SML_PLUGIN_DIR . 'includes/class-subscriber-manager-lite-wctlgm.php';
+require WCTLGM_SML_PLUGIN_DIR . 'includes/class-subscriber-manager-lite-wctlgm-logger.php';
 
 function wctlgm_subscriber_manager_lite_start() {
 	new \Subscriber_Manager_Lite_for_Telegram\Subscriber_Manager_Lite_WCTLGM();

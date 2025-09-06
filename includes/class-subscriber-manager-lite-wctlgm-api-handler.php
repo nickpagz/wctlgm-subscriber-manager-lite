@@ -13,10 +13,12 @@ use WP_Error;
  */
 class Subscriber_Manager_Lite_WCTLGM_API_Handler {
 	private $bot_token;
+	private $logger;
 	private $commands;
 
 	public function __construct() {
 		$this->bot_token = get_option( 'wctlgm_bot_token' );
+		$this->logger    = new Subscriber_Manager_Lite_WCTLGM_Logger();
 		$this->commands  = array(
 			array(
 				'command'     => 'start',
@@ -49,6 +51,7 @@ class Subscriber_Manager_Lite_WCTLGM_API_Handler {
 
 	public function set_webhook( $url, $secret_token ) {
 		if ( empty( $this->bot_token ) ) {
+			$this->logger->error( __( 'No Bot Token found in set_webhook.', 'wctlgm-subscriber-manager-lite' ) );
 			return new \WP_Error( 'no_bot_token', __( 'No Bot Token found.', 'wctlgm-subscriber-manager-lite' ) );
 		}
 
@@ -70,6 +73,7 @@ class Subscriber_Manager_Lite_WCTLGM_API_Handler {
 		);
 
 		if ( is_wp_error( $response ) ) {
+			$this->logger->error( __( 'Failed to set_webhook. WordPress error: ', 'wctlgm-subscriber-manager-lite' ) . $response->get_error_message() );
 			return $response;
 		}
 
@@ -78,6 +82,7 @@ class Subscriber_Manager_Lite_WCTLGM_API_Handler {
 
 		if ( ! isset( $data['ok'] ) || ! $data['ok'] ) {
 			$error_message = isset( $data['description'] ) ? $data['description'] : 'Unknown error';
+			$this->logger->error( __( 'Failed to set_webhook. Telegram API error: ', 'wctlgm-subscriber-manager-lite' ) . $body );
 			return new \WP_Error( 'telegram_api_error', $error_message );
 		}
 
@@ -102,6 +107,7 @@ class Subscriber_Manager_Lite_WCTLGM_API_Handler {
 		);
 
 		if ( is_wp_error( $response ) ) {
+			$this->logger->error( __( 'Failed to set_commands. WordPress error: ', 'wctlgm-subscriber-manager-lite' ) . $response->get_error_message() );
 			return $response;
 		}
 
@@ -110,6 +116,7 @@ class Subscriber_Manager_Lite_WCTLGM_API_Handler {
 
 		if ( ! isset( $data['ok'] ) || ! $data['ok'] ) {
 			$error_message = isset( $data['description'] ) ? $data['description'] : 'Unknown error';
+			$this->logger->error( __( 'Failed to set_commands. Telegram API error: ', 'wctlgm-subscriber-manager-lite' ) . $body );
 			return new \WP_Error( 'telegram_api_error', $error_message );
 		}
 
