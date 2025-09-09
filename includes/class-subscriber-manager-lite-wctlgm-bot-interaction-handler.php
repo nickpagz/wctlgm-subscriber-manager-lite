@@ -92,7 +92,11 @@ class Subscriber_Manager_Lite_WCTLGM_Bot_Interaction_Handler {
 		if ( $subscriptions_handler->is_join_request_valid( $user_id, $invite_link ) ) {
 			$response_approval = $this->api_handler->approve_join_request( $chat_id, $user_id );
 			$response_revoke   = $this->api_handler->revoke_invite_link( $chat_id, $invite_link );
-		} elseif ( ! $allow_external_invites ) {
+		} elseif ( $allow_external_invites ) {
+			// External invite link approval in case it requires approval.
+			$response_approval = $this->api_handler->approve_join_request( $chat_id, $user_id );
+			// To-do: capture the Telegram User ID for the external invite link.
+		} else {
 			$response_deny = $this->api_handler->deny_join_request( $chat_id, $user_id );
 		}
 

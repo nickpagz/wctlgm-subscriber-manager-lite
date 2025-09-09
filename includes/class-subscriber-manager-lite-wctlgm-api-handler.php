@@ -55,6 +55,8 @@ class Subscriber_Manager_Lite_WCTLGM_API_Handler {
 			return new \WP_Error( 'no_bot_token', __( 'No Bot Token found.', 'wctlgm-subscriber-manager-lite' ) );
 		}
 
+		$allowed_updates = $this->get_allowed_updates();
+
 		$api_url  = "https://api.telegram.org/bot{$this->bot_token}/setWebhook";
 		$response = wp_remote_post(
 			$api_url,
@@ -63,7 +65,7 @@ class Subscriber_Manager_Lite_WCTLGM_API_Handler {
 					array(
 						'url'             => $url,
 						'secret_token'    => $secret_token,
-						'allowed_updates' => array( 'message', 'edited_message', 'edited_channel_post', 'chat_member', 'chat_join_request' ),
+						'allowed_updates' => $allowed_updates,
 					)
 				),
 				'headers' => array(
@@ -270,5 +272,27 @@ class Subscriber_Manager_Lite_WCTLGM_API_Handler {
 		}
 
 		return $data;
+	}
+
+	/**
+	 * Get allowed updates based on activation flow setting.
+	 *
+	 * @return array
+	 */
+	private function get_allowed_updates() {
+		$require_activation = get_option( 'wctlgm_require_activation_flow', false );
+
+		// Base updates (for now)
+		$allowed_updates = array( 'chat_join_request', 'edited_message', 'edited_channel_post', 'chat_member' );
+
+		// Add message updates only if activation flow is enabled
+		if ( $require_activation ) {
+			$allowed_updates[] = 'message';
+		}
+
+		// Log allowed_updates.
+		$this->logger->info( __( 'Allowed updates: ', 'wctlgm-subscriber-manager-lite' ) . implode( ',', $allowed_updates ) );
+
+		return $allowed_updates;
 	}
 }

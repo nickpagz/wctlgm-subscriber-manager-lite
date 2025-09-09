@@ -1,6 +1,6 @@
 <?php
 /**
- * Telegram Channel Activation email (plain text)
+ * Telegram Channel Post-Activation email with invitation links (plain text)
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/emails/plain/telegram-channel-activation.php.
  *
@@ -16,7 +16,7 @@ echo "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n";
 echo esc_html( wp_strip_all_tags( $email_heading ) );
 echo "\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
 
-echo esc_html__( 'Thank you for activating your subscription. Below are your private channel invite links:', 'wctlgm-subscriber-manager-lite' ) . "\n\n";
+echo esc_html__( 'Thank you for activating your subscription. Below are your invitation links:', 'wctlgm-subscriber-manager-lite' ) . "\n\n";
 
 if ( ! empty( $invites ) ) {
 	foreach ( $invites as $invite ) {

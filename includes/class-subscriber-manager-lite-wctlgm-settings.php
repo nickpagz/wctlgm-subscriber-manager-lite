@@ -169,6 +169,7 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 		$result       = $api_handler->handle_set_webhook_actions( $webhook_url, $secret_token );
 
 		if ( is_wp_error( $result ) ) {
+			// To-do: add logging.
 			$error_message = $result->get_error_message();
 			wp_send_json_error( array( 'message' => $error_message ) );
 		} else {
@@ -235,6 +236,7 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 		register_setting( 'wctlgm_settings_group', 'wctlgm_bot_token', array( $this, 'sanitize_text_field' ) );
 		register_setting( 'wctlgm_settings_group', 'wctlgm_bot_url', array( $this, 'sanitize_url' ) );
 		register_setting( 'wctlgm_settings_group', 'wctlgm_allow_external_invites', array( $this, 'sanitize_checkbox' ) );
+		register_setting( 'wctlgm_settings_group', 'wctlgm_require_activation_flow', array( $this, 'sanitize_checkbox' ) );
 		register_setting( 'wctlgm_settings_group', 'wctlgm_channels', array( $this, 'sanitize_channels' ) );
 
 		add_settings_section(
@@ -264,6 +266,14 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 			'wctlgm_allow_external_invites',
 			__( 'Allow External Invites', 'wctlgm-subscriber-manager-lite' ),
 			array( $this, 'allow_external_invites_field' ),
+			'wctlgm-settings',
+			'wctlgm_settings_section'
+		);
+
+		add_settings_field(
+			'wctlgm_require_activation_flow',
+			__( 'Require Activation Step', 'wctlgm-subscriber-manager-lite' ),
+			array( $this, 'require_activation_field' ),
 			'wctlgm-settings',
 			'wctlgm_settings_section'
 		);
@@ -344,5 +354,27 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 	 */
 	public function channels_field() {
 		$this->custom_channels_input();
+	}
+
+	public function require_activation_field() {
+		// Ensure upgrades don't break expected activation flow. Since version 1.2.0.
+		$legacy_activation  = get_option( 'wctlgm_force_activation_flow', false );
+		$require_activation = get_option( 'wctlgm_require_activation_flow', false );
+
+		// If the new option doesn't exist but the old one does, migrate it
+		if ( false === $require_activation && false !== $legacy_activation ) {
+			$require_activation = $legacy_activation;
+			update_option( 'wctlgm_require_activation_flow', $require_activation );
+			// Clean up old option
+			delete_option( 'wctlgm_force_activation_flow' );
+		}
+
+		// If neither option exists, default to false (activation not required)
+		if ( false === $require_activation ) {
+			$require_activation = false;
+		}
+
+		echo '<input type="checkbox" name="wctlgm_require_activation_flow" value="1" ' . checked( $require_activation, true, false ) . ' />';
+		echo '<p class="description">' . esc_html__( 'If disabled, invite links are sent directly on order completion. The subscriber\'s Telegram ID is captured when they request to join.', 'wctlgm-subscriber-manager-lite' ) . '</p>';
 	}
 }

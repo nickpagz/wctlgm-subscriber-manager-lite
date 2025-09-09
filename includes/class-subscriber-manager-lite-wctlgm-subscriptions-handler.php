@@ -37,9 +37,20 @@ class Subscriber_Manager_Lite_WCTLGM_Subscriptions_Handler {
 	public function is_join_request_valid( $user_id, $invite_link ) {
 		$order = $this->find_order_by( '_channel_invite', sanitize_url( $invite_link ) );
 		if ( $order ) {
-			$order_id         = $order->get_id();
-			$telegram_user_id = $order->get_meta( '_telegram_user_id', true );
-			if ( (string) $telegram_user_id === (string) $user_id ) {
+			// Ensure order is in a valid status (completed or processing)
+			if ( ! in_array( $order->get_status(), array( 'completed', 'processing' ), true ) ) {
+				return false;
+			}
+
+			$order_id           = $order->get_id();
+			$telegram_user_id   = $order->get_meta( '_telegram_user_id', true );
+			$require_activation = get_option( 'wctlgm_require_activation_flow', true );
+			if ( $require_activation ) {
+				return (string) $telegram_user_id === (string) $user_id;
+			} else {
+				// Activation disabled - capture the user ID and approve
+				$order->update_meta_data( '_telegram_user_id', sanitize_text_field( $user_id ) );
+				$order->save();
 				return true;
 			}
 		}
@@ -70,7 +81,7 @@ class Subscriber_Manager_Lite_WCTLGM_Subscriptions_Handler {
 		return null;
 	}
 
-	private function get_channel_invites( $order ) {
+	public function get_channel_invites( $order ) {
 		$invites = array();
 
 		foreach ( $order->get_items() as $item_id => $item ) {
