@@ -12,11 +12,13 @@ namespace Subscriber_Manager_Lite_for_Telegram;
 class Subscriber_Manager_Lite_WCTLGM_Bot_Interaction_Handler {
 
 	private $api_handler;
+	private $logger;
 	private $chat_id;
 	private $user_id;
 
 	public function __construct() {
 		$this->api_handler = new \Subscriber_Manager_Lite_for_Telegram\Subscriber_Manager_Lite_WCTLGM_API_Handler();
+		$this->logger      = new \Subscriber_Manager_Lite_for_Telegram\Subscriber_Manager_Lite_WCTLGM_Logger();
 	}
 
 	public static function init() {
@@ -24,6 +26,8 @@ class Subscriber_Manager_Lite_WCTLGM_Bot_Interaction_Handler {
 	}
 
 	public function process_telegram_request( $data ) {
+		$this->logger->info( __( 'Processing Telegram request: ', 'wctlgm-subscriber-manager-lite' ) . wp_json_encode( $data ) );
+
 		if ( isset( $data['chat_join_request'] ) ) {
 			return $this->process_join_request( $data );
 		}
@@ -92,12 +96,16 @@ class Subscriber_Manager_Lite_WCTLGM_Bot_Interaction_Handler {
 		if ( $subscriptions_handler->is_join_request_valid( $user_id, $invite_link ) ) {
 			$response_approval = $this->api_handler->approve_join_request( $chat_id, $user_id );
 			$response_revoke   = $this->api_handler->revoke_invite_link( $chat_id, $invite_link );
+			$this->logger->info( __( 'Join request approved and invite link revoked: ', 'wctlgm-subscriber-manager-lite' ) . wp_json_encode( $response_approval ) . wp_json_encode( $response_revoke ) . ' - ' . $user_id . ' - ' . $chat_id );
 		} elseif ( $allow_external_invites ) {
 			// External invite link approval in case it requires approval.
+			// To-do: What if the invite link is not valid, ie from a cancelled order?
 			$response_approval = $this->api_handler->approve_join_request( $chat_id, $user_id );
+			$this->logger->info( __( 'External join request approved: ', 'wctlgm-subscriber-manager-lite' ) . wp_json_encode( $response_approval ) . ' - ' . $user_id . ' - ' . $chat_id );
 			// To-do: capture the Telegram User ID for the external invite link.
 		} else {
 			$response_deny = $this->api_handler->deny_join_request( $chat_id, $user_id );
+			$this->logger->info( __( 'Join request denied: ', 'wctlgm-subscriber-manager-lite' ) . wp_json_encode( $response_deny ) . ' - ' . $user_id . ' - ' . $chat_id );
 		}
 
 		return array( 'action' => 'none' );

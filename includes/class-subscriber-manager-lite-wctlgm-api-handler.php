@@ -141,6 +141,7 @@ class Subscriber_Manager_Lite_WCTLGM_API_Handler {
 		);
 
 		if ( is_wp_error( $response ) ) {
+			$this->logger->error( __( 'Failed to send message. WordPress error: ', 'wctlgm-subscriber-manager-lite' ) . $response->get_error_message() );
 			return $response;
 		}
 	}
@@ -165,6 +166,7 @@ class Subscriber_Manager_Lite_WCTLGM_API_Handler {
 		);
 
 		if ( is_wp_error( $response ) ) {
+			$this->logger->error( __( 'Failed to generate invite link. WordPress error: ', 'wctlgm-subscriber-manager-lite' ) . $response->get_error_message() );
 			return $response;
 		}
 
@@ -174,6 +176,7 @@ class Subscriber_Manager_Lite_WCTLGM_API_Handler {
 		if ( isset( $data['ok'] ) && $data['ok'] ) {
 			return $data['result']['invite_link'];
 		}
+		$this->logger->error( __( 'Failed to generate invite link. Telegram API error: ', 'wctlgm-subscriber-manager-lite' ) . $body );
 
 		return new \WP_Error( 'api_error', isset( $data['description'] ) ? $data['description'] : 'Failed to create invite link.' );
 	}
@@ -196,6 +199,7 @@ class Subscriber_Manager_Lite_WCTLGM_API_Handler {
 		);
 
 		if ( is_wp_error( $response ) ) {
+			$this->logger->error( __( 'Failed to approve join request. WordPress error: ', 'wctlgm-subscriber-manager-lite' ) . $response->get_error_message() );
 			return $response;
 		}
 
@@ -204,6 +208,7 @@ class Subscriber_Manager_Lite_WCTLGM_API_Handler {
 
 		if ( ! isset( $data['ok'] ) || ! $data['ok'] ) {
 			$error_message = isset( $data['description'] ) ? $data['description'] : 'Unknown error';
+			$this->logger->error( __( 'Failed to approve join request. Telegram API error: ', 'wctlgm-subscriber-manager-lite' ) . $body );
 			return new \WP_Error( 'telegram_api_error', $error_message );
 		}
 
@@ -228,6 +233,7 @@ class Subscriber_Manager_Lite_WCTLGM_API_Handler {
 		);
 
 		if ( is_wp_error( $response ) ) {
+			$this->logger->error( __( 'Failed to revoke invite link. WordPress error: ', 'wctlgm-subscriber-manager-lite' ) . $response->get_error_message() );
 			return $response;
 		}
 
@@ -236,6 +242,7 @@ class Subscriber_Manager_Lite_WCTLGM_API_Handler {
 
 		if ( ! isset( $data['ok'] ) || ! $data['ok'] ) {
 			$error_message = isset( $data['description'] ) ? $data['description'] : 'Unknown error';
+			$this->logger->error( __( 'Failed to revoke invite link. Telegram API error: ', 'wctlgm-subscriber-manager-lite' ) . $body );
 			return new \WP_Error( 'telegram_api_error', $error_message );
 		}
 
@@ -260,6 +267,7 @@ class Subscriber_Manager_Lite_WCTLGM_API_Handler {
 		);
 
 		if ( is_wp_error( $response ) ) {
+			$this->logger->error( __( 'Failed to deny join request. WordPress error: ', 'wctlgm-subscriber-manager-lite' ) . $response->get_error_message() );
 			return $response;
 		}
 
@@ -268,6 +276,7 @@ class Subscriber_Manager_Lite_WCTLGM_API_Handler {
 
 		if ( ! isset( $data['ok'] ) || ! $data['ok'] ) {
 			$error_message = isset( $data['description'] ) ? $data['description'] : 'Unknown error';
+			$this->logger->error( __( 'Failed to deny join request. Telegram API error: ', 'wctlgm-subscriber-manager-lite' ) . $body );
 			return new \WP_Error( 'telegram_api_error', $error_message );
 		}
 

@@ -77,8 +77,6 @@ function wctlgm_subscriber_manager_lite_activation() {
 	if ( ! class_exists( 'WooCommerce' ) ) {
 		wp_die( esc_html__( 'Plugin not activated. WooCommerce not found.', 'wctlgm-subscriber-manager-lite' ) );
 	}
-
-	// Migration handled in settings class
 }
 
 register_activation_hook( __FILE__, 'wctlgm_subscriber_manager_lite_activation' );

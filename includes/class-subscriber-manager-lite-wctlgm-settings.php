@@ -11,10 +11,13 @@ namespace Subscriber_Manager_Lite_for_Telegram;
  */
 class Subscriber_Manager_Lite_WCTLGM_Settings {
 
+	private $logger;
+
 	/**
 	 * Constructor for the settings class.
 	 */
 	public function __construct() {
+		$this->logger = new \Subscriber_Manager_Lite_for_Telegram\Subscriber_Manager_Lite_WCTLGM_Logger();
 		add_action( 'wp_ajax_wctlgm_set_webhook', array( $this, 'handle_set_webhook' ) );
 		add_filter( 'woocommerce_product_data_tabs', array( $this, 'wctlgm_add_product_data_tab' ) );
 		add_action( 'woocommerce_product_data_panels', array( $this, 'wctlgm_telegram_product_data_fields' ) );
@@ -169,8 +172,8 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 		$result       = $api_handler->handle_set_webhook_actions( $webhook_url, $secret_token );
 
 		if ( is_wp_error( $result ) ) {
-			// To-do: add logging.
 			$error_message = $result->get_error_message();
+			$this->logger->error( __( 'Failed to set webhook: ', 'wctlgm-subscriber-manager-lite' ) . $error_message );
 			wp_send_json_error( array( 'message' => $error_message ) );
 		} else {
 			wp_send_json_success( array( 'message' => 'Webhook set successfully.' ) );
