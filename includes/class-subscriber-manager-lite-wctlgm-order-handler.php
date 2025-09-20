@@ -78,7 +78,7 @@ class Subscriber_Manager_Lite_WCTLGM_Order_Handler {
 
 	private static function get_activation_info_text_for_order( $order, $activation_code ) {
 		$bot_url = get_option( 'wctlgm_bot_url' );
-		$output .= '<h2>' . esc_html__( 'Telegram Activation Code', 'wctlgm-subscriber-manager-lite' ) . '</h2>';
+		$output  = '<h2>' . esc_html__( 'Telegram Activation Code', 'wctlgm-subscriber-manager-lite' ) . '</h2>';
 		$output .= '<p>' . esc_html__( 'Here is your activation code:', 'wctlgm-subscriber-manager-lite' ) . ' <strong>' . esc_html( $activation_code ) . '</strong></p>';
 		$output .= sprintf(
 			'<p>%s <a href="%s" target="_blank">%s</a></p>',
@@ -183,8 +183,8 @@ class Subscriber_Manager_Lite_WCTLGM_Order_Handler {
 		$response              = $subscriptions_handler->get_channel_invites( $order );
 		if ( $response['success'] && ! empty( $response['channels'] ) ) {
 			foreach ( $response['channels'] as $invite ) {
-				// To-do: Index the invite link meta key with the channel ID. Maybe.
-				$order->add_meta_data( '_channel_invite', sanitize_url( $invite['invite_link'] ) );
+				// Store invite link with channel ID as meta key suffix
+				$order->add_meta_data( '_channel_invite_' . $invite['channel_id'], sanitize_url( $invite['invite_link'] ) );
 			}
 			$order->save();
 
@@ -226,11 +226,12 @@ class Subscriber_Manager_Lite_WCTLGM_Order_Handler {
 	 * Display invite links in order details when activation is disabled.
 	 */
 	private static function display_invite_links_in_order_details( $order ) {
-		$invites = $order->get_meta( '_channel_invite', false );
+		// Get all indexed channel invite meta data
+		$invites = self::get_all_channel_invites_for_order( $order );
 		if ( empty( $invites ) ) {
 			// Generate invites if not already stored
 			self::generate_and_store_invites( $order );
-			$invites = $order->get_meta( '_channel_invite', false );
+			$invites = self::get_all_channel_invites_for_order( $order );
 		}
 
 		if ( empty( $invites ) ) {
@@ -239,39 +240,62 @@ class Subscriber_Manager_Lite_WCTLGM_Order_Handler {
 			return;
 		}
 
-		// Get channel names for display
-		$channels      = get_option( 'wctlgm_channels', array() );
-		$channel_names = array();
-		foreach ( $channels as $channel ) {
-			$channel_names[ $channel['id'] ] = $channel['name'];
-		}
-
 		echo '<h2>' . esc_html__( 'Telegram Channel Access', 'wctlgm-subscriber-manager-lite' ) . '</h2>';
 		echo '<p>' . esc_html__( 'Below are your private channel invite links:', 'wctlgm-subscriber-manager-lite' ) . '</p>';
-		foreach ( $invites as $invite_meta ) {
-			// Extract the actual value from WC_Meta_Data object
-			$invite_link = is_object( $invite_meta ) ? $invite_meta->get_data()['value'] : $invite_meta;
-
-			// Find channel name by matching invite link to stored channel IDs
-			$channel_name = 'Channel';
-			foreach ( $order->get_items() as $item ) {
-				$product_id  = $item->get_product_id();
-				$channel_ids = get_post_meta( $product_id, '_telegram_channel_ids', true );
-				if ( ! empty( $channel_ids ) ) {
-					foreach ( $channel_ids as $channel_id ) {
-						if ( isset( $channel_names[ $channel_id ] ) ) {
-							$channel_name = $channel_names[ $channel_id ];
-							break 2;
-						}
-					}
-				}
-			}
+		foreach ( $invites as $invite ) {
 			printf(
 				'<p><strong>%s:</strong> <a href="%s" target="_blank">%s</a></p>',
-				esc_html( $channel_name ),
-				esc_url( $invite_link ),
+				esc_html( $invite['name'] ),
+				esc_url( $invite['invite_link'] ),
 				esc_html__( 'Join Channel', 'wctlgm-subscriber-manager-lite' )
 			);
 		}
+	}
+
+	/**
+	 * Get all channel invites for an order using indexed meta keys.
+	 *
+	 * @param WC_Order $order The order object.
+	 * @return array Array of invite data with channel_id, channel_name, and invite_link.
+	 */
+	private static function get_all_channel_invites_for_order( $order ) {
+		$invites = array();
+		// Get all meta data for this order
+		$meta_data = $order->get_meta_data();
+		foreach ( $meta_data as $meta ) {
+			$meta_key   = $meta->get_data()['key'];
+			$meta_value = $meta->get_data()['value'];
+			// Check if this is a channel invite meta
+			if ( strpos( $meta_key, '_channel_invite_' ) === 0 ) {
+				// Extract channel ID from meta key
+				$channel_id = str_replace( '_channel_invite_', '', $meta_key );
+				// Get channel name
+				$channel_name = self::get_channel_name_by_id( $channel_id );
+				$invites[]    = array(
+					'channel_id'  => $channel_id,
+					'name'        => $channel_name ? $channel_name : 'Channel',
+					'invite_link' => $meta_value,
+				);
+			}
+		}
+		return $invites;
+	}
+
+	/**
+	 * Get channel name by channel ID.
+	 *
+	 * @param string $channel_id The channel ID.
+	 * @return string|null The channel name or null if not found.
+	 */
+	private static function get_channel_name_by_id( $channel_id ) {
+		$channels = get_option( 'wctlgm_channels', array() );
+
+		foreach ( $channels as $channel ) {
+			if ( $channel['id'] === $channel_id ) {
+				return $channel['name'];
+			}
+		}
+
+		return null;
 	}
 }

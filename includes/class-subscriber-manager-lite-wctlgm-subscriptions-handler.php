@@ -26,7 +26,7 @@ class Subscriber_Manager_Lite_WCTLGM_Subscriptions_Handler {
 			$response        = $this->get_channel_invites( $order );
 			$channel_invites = $response['channels'];
 			foreach ( $channel_invites as $invite ) {
-				$order->add_meta_data( '_channel_invite', sanitize_url( $invite['invite_link'] ) );
+				$order->add_meta_data( '_channel_invite_' . $invite['channel_id'], sanitize_url( $invite['invite_link'] ) );
 			}
 			$order->save();
 			return array( $response, $order_id );
@@ -35,7 +35,7 @@ class Subscriber_Manager_Lite_WCTLGM_Subscriptions_Handler {
 	}
 
 	public function is_join_request_valid( $user_id, $invite_link ) {
-		$order = $this->find_order_by( '_channel_invite', sanitize_url( $invite_link ) );
+		$order = $this->find_order_by_invite_link( '_channel_invite', sanitize_url( $invite_link ) );
 		if ( $order ) {
 			// Ensure order is in a valid status (completed or processing)
 			if ( ! in_array( $order->get_status(), array( 'completed', 'processing' ), true ) ) {
@@ -57,14 +57,14 @@ class Subscriber_Manager_Lite_WCTLGM_Subscriptions_Handler {
 		return false;
 	}
 
-	private function find_order_by( $meta_key, $meta_value ) {
+	private function find_order_by( $meta_key, $meta_value, $compare = '=' ) {
 		$orders = wc_get_orders(
 			array(
 				'meta_query' => array(
 					array(
 						'key'     => $meta_key,
 						'value'   => $meta_value,
-						'compare' => '=',
+						'compare' => $compare,
 					),
 				),
 			)
@@ -81,6 +81,31 @@ class Subscriber_Manager_Lite_WCTLGM_Subscriptions_Handler {
 		return null;
 	}
 
+	/**
+	 * Find order by invite link, searching through all indexed channel invite meta keys.
+	 *
+	 * @param string $invite_link The invite link to search for.
+	 * @return WC_Order|null The order if found, null otherwise.
+	 */
+	private function find_order_by_invite_link( $meta_key, $invite_link, $compare = 'LIKE' ) {
+		// Get all orders with any _channel_invite_* meta key
+		$orders = $this->find_order_by( $meta_key, $invite_link, $compare );
+
+		foreach ( $orders as $order ) {
+			// Get all meta data for this order
+			$meta_data = $order->get_meta_data();
+			foreach ( $meta_data as $meta ) {
+				$meta_key   = $meta->get_data()['key'];
+				$meta_value = $meta->get_data()['value'];// Check if this is a channel invite meta and matches our invite link
+				if ( strpos( $meta_key, '_channel_invite_' ) === 0 && $meta_value === $invite_link ) {
+					return $order;
+				}
+			}
+		}
+
+		return null;
+	}
+
 	public function get_channel_invites( $order ) {
 		$invites = array();
 
@@ -92,11 +117,12 @@ class Subscriber_Manager_Lite_WCTLGM_Subscriptions_Handler {
 				foreach ( $channel_ids as $channel_id ) {
 
 					// Check if invite link already exists for this order and channel
-					$existing_invite = $this->get_existing_invite_for_channel( $order );
+					$existing_invite = $this->get_existing_invite_for_channel( $order, $channel_id );
 
 					if ( $existing_invite ) {
 						// Use existing invite link
 						$invites[] = array(
+							'channel_id'  => $channel_id,
 							'name'        => $this->get_channel_name_by_id( $channel_id ),
 							'invite_link' => $existing_invite,
 						);
@@ -105,6 +131,7 @@ class Subscriber_Manager_Lite_WCTLGM_Subscriptions_Handler {
 						$invite_link = $this->api_handler->generate_invite_link( $channel_id );
 						if ( $invite_link && ! is_wp_error( $invite_link ) ) {
 							$invites[] = array(
+								'channel_id'  => $channel_id,
 								'name'        => $this->get_channel_name_by_id( $channel_id ),
 								'invite_link' => $invite_link,
 							);
@@ -154,18 +181,13 @@ class Subscriber_Manager_Lite_WCTLGM_Subscriptions_Handler {
 	 * @param string   $channel_id The channel ID to check for.
 	 * @return string|null The existing invite link or null if not found.
 	 */
-	private function get_existing_invite_for_channel( $order ) {
-		$existing_invite = $order->get_meta( '_channel_invite', true );
+	private function get_existing_invite_for_channel( $order, $channel_id ) {
+		$existing_invite = $order->get_meta( '_channel_invite_' . $channel_id, true );
 
 		if ( empty( $existing_invite ) ) {
 			return null;
-		} else {
-			return $existing_invite;
 		}
 
-		// To-do: Pro version is more complex as we don't currently store the channel ID against the invite link.
-		// Maybe we index the invite link meta key with the channel ID.
-
-		return null;
+		return $existing_invite;
 	}
 }
