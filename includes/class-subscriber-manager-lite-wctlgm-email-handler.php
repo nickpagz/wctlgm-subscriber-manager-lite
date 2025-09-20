@@ -28,11 +28,13 @@ class Subscriber_Manager_Lite_WCTLGM_Email_Handler {
 	 * @return array
 	 */
 	public static function add_email_classes( $email_classes ) {
-		// Load the email class file only when WooCommerce is ready
+		// Load the email class files only when WooCommerce is ready
 		require_once WCTLGM_SML_PLUGIN_DIR . 'includes/emails/class-subscriber-manager-lite-wctlgm-activation-email.php';
+		require_once WCTLGM_SML_PLUGIN_DIR . 'includes/emails/class-subscriber-manager-lite-wctlgm-invite-links-email.php';
 
-		// Add our email class
-		$email_classes['wctlgm_activation'] = new \Subscriber_Manager_Lite_for_Telegram\Subscriber_Manager_Lite_WCTLGM_Activation_Email();
+		// Add our email classes
+		$email_classes['wctlgm_activation']   = new \Subscriber_Manager_Lite_for_Telegram\Subscriber_Manager_Lite_WCTLGM_Activation_Email();
+		$email_classes['wctlgm_invite_links'] = new \Subscriber_Manager_Lite_for_Telegram\Subscriber_Manager_Lite_WCTLGM_Invite_Links_Email();
 
 		return $email_classes;
 	}

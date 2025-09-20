@@ -90,12 +90,25 @@ class Subscriber_Manager_Lite_WCTLGM_Subscriptions_Handler {
 
 			if ( ! empty( $channel_ids ) ) {
 				foreach ( $channel_ids as $channel_id ) {
-					$invite_link = $this->api_handler->generate_invite_link( $channel_id );
-					if ( $invite_link && ! is_wp_error( $invite_link ) ) {
+
+					// Check if invite link already exists for this order and channel
+					$existing_invite = $this->get_existing_invite_for_channel( $order );
+
+					if ( $existing_invite ) {
+						// Use existing invite link
 						$invites[] = array(
 							'name'        => $this->get_channel_name_by_id( $channel_id ),
-							'invite_link' => $invite_link,
+							'invite_link' => $existing_invite,
 						);
+					} else {
+						// Generate new invite link only if none exists
+						$invite_link = $this->api_handler->generate_invite_link( $channel_id );
+						if ( $invite_link && ! is_wp_error( $invite_link ) ) {
+							$invites[] = array(
+								'name'        => $this->get_channel_name_by_id( $channel_id ),
+								'invite_link' => $invite_link,
+							);
+						}
 					}
 				}
 			}
@@ -130,6 +143,28 @@ class Subscriber_Manager_Lite_WCTLGM_Subscriptions_Handler {
 				return $channel['name'];
 			}
 		}
+
+		return null;
+	}
+
+	/**
+	 * Check if an invite link already exists for a specific order and channel.
+	 *
+	 * @param WC_Order $order The order object.
+	 * @param string   $channel_id The channel ID to check for.
+	 * @return string|null The existing invite link or null if not found.
+	 */
+	private function get_existing_invite_for_channel( $order ) {
+		$existing_invite = $order->get_meta( '_channel_invite', true );
+
+		if ( empty( $existing_invite ) ) {
+			return null;
+		} else {
+			return $existing_invite;
+		}
+
+		// To-do: Pro version is more complex as we don't currently store the channel ID against the invite link.
+		// Maybe we index the invite link meta key with the channel ID.
 
 		return null;
 	}

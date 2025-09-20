@@ -14,21 +14,29 @@ use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 class Subscriber_Manager_Lite_WCTLGM_Order_Handler {
 
 	public static function init() {
-		add_action( 'woocommerce_checkout_update_order_meta', array( __CLASS__, 'maybe_process_order' ), 11, 1 );
-		add_action( 'woocommerce_store_api_checkout_update_order_meta', array( __CLASS__, 'maybe_process_order' ), 11, 1 );
+		add_action( 'woocommerce_order_status_changed', array( __CLASS__, 'maybe_process_order' ), 10, 3 );
 		add_action( 'woocommerce_email_order_details', array( __CLASS__, 'wctlgm_email_activation_info' ), 10, 4 );
 		add_action( 'woocommerce_order_details_before_order_table', array( __CLASS__, 'display_activation_code_in_order_details' ), 10, 1 );
+		add_action( 'wctlgm_send_invite_links_email', array( __CLASS__, 'send_invite_links_email' ), 10, 1 );
 	}
 
-	public static function maybe_process_order( $order ) {
-		if ( is_numeric( $order ) ) {
-			$order_id = $order;
-			$order    = wc_get_order( $order_id );
-		} else {
-			$order_id = $order->get_id();
+	public static function maybe_process_order( $order_id, $old_status, $new_status ) {
+		$order = wc_get_order( $order_id );
+
+		if ( ! $order ) {
+			return;
 		}
 
 		if ( ! self::order_has_telegram_product( $order ) ) {
+			return;
+		}
+
+		if ( ! in_array( $new_status, array( 'processing', 'completed' ), true ) ) {
+			return;
+		}
+
+		// Skip if already processed (processing → completed)
+		if ( 'processing' === $old_status && 'completed' === $new_status ) {
 			return;
 		}
 
@@ -40,7 +48,7 @@ class Subscriber_Manager_Lite_WCTLGM_Order_Handler {
 			}
 			$code_generated = self::generate_activation_code( $order );
 		} else {
-			// Generate invites directly when activation flow is disabled
+			// Generate invites immediately when activation flow is disabled
 			self::generate_and_store_invites( $order );
 		}
 	}
@@ -82,16 +90,16 @@ class Subscriber_Manager_Lite_WCTLGM_Order_Handler {
 	}
 
 	/**
-	 * Email activation info or invite links to the customer when the order is completed.
-	 * Injects into WooCommerce's order completed email.
+	 * Email activation info to the customer when the order is completed.
+	 * Injects into WooCommerce's order processing or completed email.
 	 */
 	public static function wctlgm_email_activation_info( $order, $sent_to_admin, $plain_text, $email ) {
 		if ( 'customer_completed_order' === $email->id || 'customer_processing_order' === $email->id ) {
-			self::email_activation_info( $order, $plain_text );
+			self::maybe_email_activation_info( $order, $plain_text );
 		}
 	}
 
-	private static function email_activation_info( $order, $plain_text = false ) {
+	private static function maybe_email_activation_info( $order, $plain_text = false ) {
 		$require_activation = get_option( 'wctlgm_require_activation_flow', true );
 
 		if ( $require_activation ) {
@@ -112,9 +120,6 @@ class Subscriber_Manager_Lite_WCTLGM_Order_Handler {
 					);
 				}
 			}
-		} else {
-			// Show invite links when activation is disabled
-			self::email_invite_links( $order, $plain_text );
 		}
 	}
 
@@ -149,7 +154,7 @@ class Subscriber_Manager_Lite_WCTLGM_Order_Handler {
 				echo wp_kses_post( self::get_activation_info_text_for_order( $order, $activation_code ) );
 			}
 		} else {
-			// Display invite links when activation is disabled
+			// Display invite links when activation flow is disabled
 			self::display_invite_links_in_order_details( $order );
 		}
 	}
@@ -178,78 +183,42 @@ class Subscriber_Manager_Lite_WCTLGM_Order_Handler {
 		$response              = $subscriptions_handler->get_channel_invites( $order );
 		if ( $response['success'] && ! empty( $response['channels'] ) ) {
 			foreach ( $response['channels'] as $invite ) {
+				// To-do: Index the invite link meta key with the channel ID. Maybe.
 				$order->add_meta_data( '_channel_invite', sanitize_url( $invite['invite_link'] ) );
 			}
 			$order->save();
+
+			// Schedule email to be sent with a slight delay using Action Scheduler
+			as_schedule_single_action(
+				time() + 5, // 5 seconds delay
+				'wctlgm_send_invite_links_email',
+				array( array( $order->get_id(), $response['channels'] ) ),
+			);
 		}
 	}
 
 	/**
-	 * Email invite links when activation is disabled.
+	 * Send invite links email via Action Scheduler.
+	 *
+	 * @param array $data Array containing order_id and invites data.
 	 */
-	private static function email_invite_links( $order, $plain_text = false ) {
-		$invites = $order->get_meta( '_channel_invite', false );
-		if ( empty( $invites ) ) {
-			// Generate invites if not already stored
-			self::generate_and_store_invites( $order );
-			$invites = $order->get_meta( '_channel_invite', false );
-		}
-
-		if ( empty( $invites ) ) {
+	public static function send_invite_links_email( $data ) {
+		if ( empty( $data ) || ! is_array( $data ) || count( $data ) < 2 ) {
 			return;
 		}
 
-		// Get channel names for display
-		$channels      = get_option( 'wctlgm_channels', array() );
-		$channel_names = array();
-		foreach ( $channels as $channel ) {
-			$channel_names[ $channel['id'] ] = $channel['name'];
+		$order_id = $data[0];
+		$invites  = $data[1];
+
+		$order = wc_get_order( $order_id );
+		if ( ! $order ) {
+			return;
 		}
 
-		if ( $plain_text ) {
-			echo "\n" . esc_html__( 'Telegram Channel Access:', 'wctlgm-subscriber-manager-lite' );
-			foreach ( $invites as $invite_link ) {
-				// Find channel name by matching invite link to stored channel IDs
-				$channel_name = 'Channel';
-				foreach ( $order->get_items() as $item ) {
-					$product_id  = $item->get_product_id();
-					$channel_ids = get_post_meta( $product_id, '_telegram_channel_ids', true );
-					if ( ! empty( $channel_ids ) ) {
-						foreach ( $channel_ids as $channel_id ) {
-							if ( isset( $channel_names[ $channel_id ] ) ) {
-								$channel_name = $channel_names[ $channel_id ];
-								break 2;
-							}
-						}
-					}
-				}
-				echo "\n" . esc_html( $channel_name ) . ': ' . esc_url( $invite_link );
-			}
-		} else {
-			echo '<h2>' . esc_html__( 'Telegram Channel Access', 'wctlgm-subscriber-manager-lite' ) . '</h2>';
-			echo '<p>' . esc_html__( 'Below are your private channel invite links:', 'wctlgm-subscriber-manager-lite' ) . '</p>';
-			foreach ( $invites as $invite_link ) {
-				// Find channel name by matching invite link to stored channel IDs
-				$channel_name = 'Channel';
-				foreach ( $order->get_items() as $item ) {
-					$product_id  = $item->get_product_id();
-					$channel_ids = get_post_meta( $product_id, '_telegram_channel_ids', true );
-					if ( ! empty( $channel_ids ) ) {
-						foreach ( $channel_ids as $channel_id ) {
-							if ( isset( $channel_names[ $channel_id ] ) ) {
-								$channel_name = $channel_names[ $channel_id ];
-								break 2;
-							}
-						}
-					}
-				}
-				printf(
-					'<p><strong>%s:</strong> <a href="%s" target="_blank">%s</a></p>',
-					esc_html( $channel_name ),
-					esc_url( $invite_link ),
-					esc_html__( 'Join Channel', 'wctlgm-subscriber-manager-lite' )
-				);
-			}
+		// Get the email instance
+		$email = \WC_Emails::instance()->emails['wctlgm_invite_links'];
+		if ( $email ) {
+			$email->trigger( $order_id, $invites );
 		}
 	}
 
@@ -261,7 +230,8 @@ class Subscriber_Manager_Lite_WCTLGM_Order_Handler {
 		if ( empty( $invites ) ) {
 			// Generate invites if not already stored
 			self::generate_and_store_invites( $order );
-			$invites = $order->get_meta( '_channel_invite', false );}
+			$invites = $order->get_meta( '_channel_invite', false );
+		}
 
 		if ( empty( $invites ) ) {
 			echo '<h2>' . esc_html__( 'Telegram Channel Access', 'wctlgm-subscriber-manager-lite' ) . '</h2>';
@@ -278,7 +248,10 @@ class Subscriber_Manager_Lite_WCTLGM_Order_Handler {
 
 		echo '<h2>' . esc_html__( 'Telegram Channel Access', 'wctlgm-subscriber-manager-lite' ) . '</h2>';
 		echo '<p>' . esc_html__( 'Below are your private channel invite links:', 'wctlgm-subscriber-manager-lite' ) . '</p>';
-		foreach ( $invites as $invite_link ) {
+		foreach ( $invites as $invite_meta ) {
+			// Extract the actual value from WC_Meta_Data object
+			$invite_link = is_object( $invite_meta ) ? $invite_meta->get_data()['value'] : $invite_meta;
+
 			// Find channel name by matching invite link to stored channel IDs
 			$channel_name = 'Channel';
 			foreach ( $order->get_items() as $item ) {
