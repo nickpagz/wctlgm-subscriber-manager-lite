@@ -23,8 +23,8 @@ do_action( 'woocommerce_email_header', $email_heading, $email );
 <?php if ( ! empty( $invites ) ) : ?>
 	<?php foreach ( $invites as $invite ) : ?>
 		<div style="margin-bottom: 10px;">
-			<span style="font-weight: bold;"><?php echo esc_html( $invite['name'] ); ?>:</span>
-			<a href="<?php echo esc_url( $invite['invite_link'] ); ?>" style="color: <?php echo esc_attr( $email->get_option( 'link_color', '#96588a' ) ); ?>;"><?php esc_html_e( 'Join Channel', 'wctlgm-subscriber-manager-lite' ); ?></a>
+			<span style="font-weight: bold;"><?php echo esc_html( $invite['name'] ); ?>:</span><br>
+			<a href="<?php echo esc_url( $invite['invite_link'] ); ?>" style="color: <?php echo esc_attr( $email->get_option( 'link_color', '#96588a' ) ); ?>; text-decoration: underline;"><?php echo esc_url( $invite['invite_link'] ); ?></a>
 		</div>
 	<?php endforeach; ?>
 <?php endif; ?>

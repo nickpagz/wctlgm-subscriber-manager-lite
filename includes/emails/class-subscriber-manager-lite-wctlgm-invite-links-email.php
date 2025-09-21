@@ -7,9 +7,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Telegram Channel Invite Links Email
+ * Telegram Invite Links Email. Used when the activation flow is disabled.
  *
- * An email sent to the customer with their Telegram channel invite links when activation is disabled.
+ * An email sent to the customer with their Telegram invite links when activation is disabled.
  *
  * @class       Subscriber_Manager_Lite_WCTLGM_Invite_Links_Email
  * @version     1.2.0
@@ -31,8 +31,8 @@ class Subscriber_Manager_Lite_WCTLGM_Invite_Links_Email extends \WC_Email {
 	public function __construct() {
 		$this->id             = 'wctlgm_invite_links';
 		$this->customer_email = true;
-		$this->title          = __( 'Telegram Channel Invite Links', 'wctlgm-subscriber-manager-lite' );
-		$this->description    = __( 'This email is sent to customers with their Telegram channel invite links when activation is disabled.', 'wctlgm-subscriber-manager-lite' );
+		$this->title          = __( 'Telegram Invite Links', 'wctlgm-subscriber-manager-lite' );
+		$this->description    = __( 'This email is sent to customers with their Telegram invite links when activation flow is disabled.', 'wctlgm-subscriber-manager-lite' );
 		$this->template_html  = 'emails/telegram-channel-invite-links.php';
 		$this->template_plain = 'emails/plain/telegram-channel-invite-links.php';
 		$this->template_base  = WCTLGM_SML_PLUGIN_DIR . 'templates/';
@@ -47,7 +47,7 @@ class Subscriber_Manager_Lite_WCTLGM_Invite_Links_Email extends \WC_Email {
 	 * @return string
 	 */
 	public function get_default_subject() {
-		return __( 'Your Telegram Channel Access - Order #{order_number}', 'wctlgm-subscriber-manager-lite' );
+		return __( 'Your Telegram Invite Links', 'wctlgm-subscriber-manager-lite' );
 	}
 
 	/**
@@ -56,7 +56,7 @@ class Subscriber_Manager_Lite_WCTLGM_Invite_Links_Email extends \WC_Email {
 	 * @return string
 	 */
 	public function get_default_heading() {
-		return __( 'Your Telegram Channel Access', 'wctlgm-subscriber-manager-lite' );
+		return __( 'Your Telegram Invite Links', 'wctlgm-subscriber-manager-lite' );
 	}
 
 	/**

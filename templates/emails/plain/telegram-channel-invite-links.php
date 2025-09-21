@@ -1,6 +1,6 @@
 <?php
 /**
- * Telegram Channel Invite Links email (plain text)
+ * Telegram Channel Invite Links email (plain text). Used when the activation flow is disabled.
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/emails/plain/telegram-channel-invite-links.php.
  *
@@ -16,7 +16,7 @@ echo "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n";
 echo esc_html( wp_strip_all_tags( $email_heading ) );
 echo "\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
 
-echo esc_html__( 'Thank you for your purchase! Below are your private channel invite links:', 'wctlgm-subscriber-manager-lite' ) . "\n\n";
+echo esc_html__( 'Thank you for your purchase! Below are your invite links:', 'wctlgm-subscriber-manager-lite' ) . "\n\n";
 
 if ( ! empty( $invites ) ) {
 	foreach ( $invites as $invite ) {
@@ -25,7 +25,7 @@ if ( ! empty( $invites ) ) {
 	}
 }
 
-echo esc_html__( 'These invite links are private and should not be shared with others.', 'wctlgm-subscriber-manager-lite' ) . "\n\n";
+echo esc_html__( 'These invite links are one-time use only and should not be shared with others.', 'wctlgm-subscriber-manager-lite' ) . "\n\n";
 
 echo esc_html__( 'If you have any issues or questions, please contact support.', 'wctlgm-subscriber-manager-lite' ) . "\n\n";
 
