@@ -133,9 +133,9 @@ class Subscriber_Manager_Lite_WCTLGM_Order_Handler {
 		if ( ! in_array( $order->get_status(), array( 'processing', 'completed' ), true ) ) {
 			if ( $require_activation ) {
 				echo '<h2>' . esc_html__( 'Telegram Activation Code', 'wctlgm-subscriber-manager-lite' ) . '</h2>';
-				echo '<p>' . esc_html__( 'Telegram Channel activation details will be emailed and available in your dashboard after payment processing is complete.', 'wctlgm-subscriber-manager-lite' ) . '</p>';
+				echo '<p>' . esc_html__( 'Telegram access activation details will be emailed and available in your dashboard after payment processing is complete.', 'wctlgm-subscriber-manager-lite' ) . '</p>';
 			} else {
-				echo '<h2>' . esc_html__( 'Telegram Channel Access', 'wctlgm-subscriber-manager-lite' ) . '</h2>';
+				echo '<h2>' . esc_html__( 'Telegram Access', 'wctlgm-subscriber-manager-lite' ) . '</h2>';
 				echo '<p>' . esc_html__( 'Invite links will be emailed and available in your dashboard after payment processing is complete.', 'wctlgm-subscriber-manager-lite' ) . '</p>';
 			}
 			return;
@@ -235,25 +235,25 @@ class Subscriber_Manager_Lite_WCTLGM_Order_Handler {
 		}
 
 		if ( empty( $invites ) ) {
-			echo '<h2>' . esc_html__( 'Telegram Channel Access', 'wctlgm-subscriber-manager-lite' ) . '</h2>';
-			echo '<p>' . esc_html__( 'No channels available for this order.', 'wctlgm-subscriber-manager-lite' ) . '</p>';
+			echo '<h2>' . esc_html__( 'Telegram Access', 'wctlgm-subscriber-manager-lite' ) . '</h2>';
+			echo '<p>' . esc_html__( 'No Telegram access available for this order.', 'wctlgm-subscriber-manager-lite' ) . '</p>';
 			return;
 		}
 
-		echo '<h2>' . esc_html__( 'Telegram Channel Access', 'wctlgm-subscriber-manager-lite' ) . '</h2>';
-		echo '<p>' . esc_html__( 'Below are your private channel invite links:', 'wctlgm-subscriber-manager-lite' ) . '</p>';
+		echo '<h2>' . esc_html__( 'Telegram Access', 'wctlgm-subscriber-manager-lite' ) . '</h2>';
+		echo '<p>' . esc_html__( 'Below are your private invite links:', 'wctlgm-subscriber-manager-lite' ) . '</p>';
 		foreach ( $invites as $invite ) {
 			printf(
 				'<p><strong>%s:</strong> <a href="%s" target="_blank">%s</a></p>',
 				esc_html( $invite['name'] ),
 				esc_url( $invite['invite_link'] ),
-				esc_html__( 'Join Channel', 'wctlgm-subscriber-manager-lite' )
+				esc_html__( 'Join', 'wctlgm-subscriber-manager-lite' )
 			);
 		}
 	}
 
 	/**
-	 * Get all channel invites for an order using indexed meta keys.
+	 * Get all channel or group invites for an order using indexed meta keys.
 	 *
 	 * @param WC_Order $order The order object.
 	 * @return array Array of invite data with channel_id, channel_name, and invite_link.
@@ -265,7 +265,7 @@ class Subscriber_Manager_Lite_WCTLGM_Order_Handler {
 		foreach ( $meta_data as $meta ) {
 			$meta_key   = $meta->get_data()['key'];
 			$meta_value = $meta->get_data()['value'];
-			// Check if this is a channel invite meta
+			// Check if this is a channel or group invite meta
 			if ( strpos( $meta_key, '_channel_invite_' ) === 0 ) {
 				// Extract channel ID from meta key
 				$channel_id = str_replace( '_channel_invite_', '', $meta_key );
@@ -273,7 +273,7 @@ class Subscriber_Manager_Lite_WCTLGM_Order_Handler {
 				$channel_name = self::get_channel_name_by_id( $channel_id );
 				$invites[]    = array(
 					'channel_id'  => $channel_id,
-					'name'        => $channel_name ? $channel_name : 'Channel',
+					'name'        => $channel_name ? $channel_name : 'Channel or Group',
 					'invite_link' => $meta_value,
 				);
 			}
@@ -282,10 +282,10 @@ class Subscriber_Manager_Lite_WCTLGM_Order_Handler {
 	}
 
 	/**
-	 * Get channel name by channel ID.
+	 * Get channel or group name by ID.
 	 *
-	 * @param string $channel_id The channel ID.
-	 * @return string|null The channel name or null if not found.
+	 * @param string $channel_id The channel or group ID.
+	 * @return string|null The channel or group name or null if not found.
 	 */
 	private static function get_channel_name_by_id( $channel_id ) {
 		$channels = get_option( 'wctlgm_channels', array() );

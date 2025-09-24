@@ -34,7 +34,7 @@ class Subscriber_Manager_Lite_WCTLGM_Subscriptions_Handler {
 		return false;
 	}
 
-	public function is_join_request_valid( $user_id, $invite_link ) {
+	public function is_join_request_valid( $user_id, $invite_link, $allow_external_invites = false ) {
 		$order = $this->find_order_by_invite_link( sanitize_url( $invite_link ) );
 		if ( $order ) {
 			// Ensure order is in a valid status (completed or processing)
@@ -54,6 +54,13 @@ class Subscriber_Manager_Lite_WCTLGM_Subscriptions_Handler {
 				return true;
 			}
 		}
+
+		if ( $allow_external_invites ) {
+			// To-do: This is where we would add external users for 2.0.
+			$this->logger->info( __( 'External invite link approved: ', 'wctlgm-subscriber-manager' ) . $user_id . ' - ' . $invite_link );
+			return true;
+		}
+
 		return false;
 	}
 

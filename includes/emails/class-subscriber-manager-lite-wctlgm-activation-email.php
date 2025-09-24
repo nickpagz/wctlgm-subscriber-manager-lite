@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * An email sent to the customer with their Telegram invite links after their Telegram access is activated.
  *
  * @class       Subscriber_Manager_Lite_WCTLGM_Activation_Email
- * @version     1.2.0
+ * @version     1.4.0
  * @extends     WC_Email
  * @since       1.2.0
  */

@@ -93,16 +93,10 @@ class Subscriber_Manager_Lite_WCTLGM_Bot_Interaction_Handler {
 		$subscriptions_handler  = new \Subscriber_Manager_Lite_for_Telegram\Subscriber_Manager_Lite_WCTLGM_Subscriptions_Handler();
 		$allow_external_invites = get_option( 'wctlgm_allow_external_invites', false );
 
-		if ( $subscriptions_handler->is_join_request_valid( $user_id, $invite_link ) ) {
+		if ( $subscriptions_handler->is_join_request_valid( $user_id, $invite_link, $allow_external_invites ) ) {
 			$response_approval = $this->api_handler->approve_join_request( $chat_id, $user_id );
 			$response_revoke   = $this->api_handler->revoke_invite_link( $chat_id, $invite_link );
 			$this->logger->info( __( 'Join request approved and invite link revoked: ', 'wctlgm-subscriber-manager-lite' ) . wp_json_encode( $response_approval ) . wp_json_encode( $response_revoke ) . ' - ' . $user_id . ' - ' . $chat_id );
-		} elseif ( $allow_external_invites ) {
-			// External invite link approval in case it requires approval.
-			// To-do: What if the invite link is not valid, ie from a cancelled order?
-			$response_approval = $this->api_handler->approve_join_request( $chat_id, $user_id );
-			$this->logger->info( __( 'External join request approved: ', 'wctlgm-subscriber-manager-lite' ) . wp_json_encode( $response_approval ) . ' - ' . $user_id . ' - ' . $chat_id );
-			// To-do: capture the Telegram User ID for the external invite link.
 		} else {
 			$response_deny = $this->api_handler->deny_join_request( $chat_id, $user_id );
 			$this->logger->info( __( 'Join request denied: ', 'wctlgm-subscriber-manager-lite' ) . wp_json_encode( $response_deny ) . ' - ' . $user_id . ' - ' . $chat_id );

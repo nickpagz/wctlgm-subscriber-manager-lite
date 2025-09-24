@@ -5,7 +5,7 @@
  * This template can be overridden by copying it to yourtheme/woocommerce/emails/plain/telegram-channel-activation.php.
  *
  * @package WooCommerce\Templates\Emails\Plain
- * @version 1.2.0
+ * @version 1.4.0
  *
  * @since 1.2.0
  */
@@ -16,7 +16,7 @@ echo "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n";
 echo esc_html( wp_strip_all_tags( $email_heading ) );
 echo "\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
 
-echo esc_html__( 'Thank you for activating your subscription. Below are your invitation links:', 'wctlgm-subscriber-manager-lite' ) . "\n\n";
+echo esc_html__( 'Thank you for activating your subscription. Below are your invite links:', 'wctlgm-subscriber-manager-lite' ) . "\n\n";
 
 if ( ! empty( $invites ) ) {
 	foreach ( $invites as $invite ) {
