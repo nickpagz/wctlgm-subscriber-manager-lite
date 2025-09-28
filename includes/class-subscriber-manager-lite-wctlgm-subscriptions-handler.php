@@ -12,14 +12,16 @@ namespace Subscriber_Manager_Lite_for_Telegram;
 class Subscriber_Manager_Lite_WCTLGM_Subscriptions_Handler {
 
 	private $api_handler;
+	private $logger;
 
 	public function __construct() {
 		$this->api_handler = new \Subscriber_Manager_Lite_for_Telegram\Subscriber_Manager_Lite_WCTLGM_API_Handler();
+		$this->logger      = new \Subscriber_Manager_Lite_for_Telegram\Subscriber_Manager_Lite_WCTLGM_Logger();
 	}
 
 	public function process_activation_code( $code, $telegram_user_id ) {
 		$order = $this->find_order_by( '_activation_code', sanitize_text_field( $code ) );
-		if ( $order ) {
+		if ( $order && in_array( $order->get_status(), array( 'completed', 'processing' ), true ) ) {
 			$order_id = $order->get_id();
 			$order->update_meta_data( '_telegram_user_id', sanitize_text_field( $telegram_user_id ) );
 			$order->delete_meta_data( '_activation_code', sanitize_text_field( $code ) );
@@ -34,8 +36,8 @@ class Subscriber_Manager_Lite_WCTLGM_Subscriptions_Handler {
 		return false;
 	}
 
-	public function is_join_request_valid( $user_id, $invite_link, $allow_external_invites = false ) {
-		$order = $this->find_order_by_invite_link( sanitize_url( $invite_link ) );
+	public function is_join_request_valid( $user_id, $invite_link, $chat_id, $allow_external_invites = false ) {
+		$order = $this->find_order_by_invite_link( sanitize_url( $invite_link ), $chat_id );
 		if ( $order ) {
 			// Ensure order is in a valid status (completed or processing)
 			if ( ! in_array( $order->get_status(), array( 'completed', 'processing' ), true ) ) {
@@ -94,31 +96,10 @@ class Subscriber_Manager_Lite_WCTLGM_Subscriptions_Handler {
 	 * @param string $invite_link The invite link to search for.
 	 * @return WC_Order|null The order if found, null otherwise.
 	 */
-	private function find_order_by_invite_link( $invite_link ) {
-		// Get all orders with any _channel_invite_* meta key
-		$orders = wc_get_orders(
-			array(
-				'meta_query' => array(
-					array(
-						'key'     => '_channel_invite_',
-						'value'   => '',
-						'compare' => 'LIKE',
-					),
-				),
-			)
-		);
-
-		foreach ( $orders as $order ) {
-			// Get all meta data for this order
-			$meta_data = $order->get_meta_data();
-			foreach ( $meta_data as $meta ) {
-				$meta_key   = $meta->get_data()['key'];
-				$meta_value = $meta->get_data()['value'];
-				// Check if this is a channel invite meta and matches our invite link
-				if ( strpos( $meta_key, '_channel_invite_' ) === 0 && $meta_value === $invite_link ) {
-					return $order;
-				}
-			}
+	private function find_order_by_invite_link( $invite_link, $chat_id = null ) {
+		if ( $chat_id ) {
+			$meta_key = '_channel_invite_' . $chat_id;
+			return $this->find_order_by( $meta_key, $invite_link );
 		}
 
 		return null;
