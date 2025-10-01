@@ -81,7 +81,7 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 				</table>
 				<?php
 				if ( wctlgm_fs()->is_not_paying() ) {
-					echo wp_kses_post( sprintf( '<em>Need to add multiple channels? <a href="%s">Upgrade to Pro Now!</a></em>', wctlgm_fs()->get_upgrade_url() ) );
+					echo wp_kses_post( sprintf( '<em>Need to add multiple channels or groups? <a href="%s">Upgrade to Pro Now!</a></em>', wctlgm_fs()->get_upgrade_url() ) );
 					echo '</section>';
 				}
 				?>
@@ -92,7 +92,7 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 
 	public function wctlgm_add_product_data_tab( $tabs ) {
 		$tabs['telegram'] = array(
-			'label'    => __( 'Telegram Channels', 'wctlgm-subscriber-manager-lite' ),
+			'label'    => __( 'Telegram Access', 'wctlgm-subscriber-manager-lite' ),
 			'target'   => 'telegram_product_data',
 			'class'    => array( 'show_if_simple', 'hide_if_subscription' ),
 			'priority' => 80,
@@ -111,7 +111,7 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 		<div id='telegram_product_data' class='panel woocommerce_options_panel'>
 			<div class='options_group'>
 				<p class="form-field">
-					<label for="telegram_channel_ids"><?php esc_html_e( 'Select Channels', 'wctlgm-subscriber-manager-lite' ); ?></label>
+					<label for="telegram_channel_ids"><?php esc_html_e( 'Select Channels/Groups', 'wctlgm-subscriber-manager-lite' ); ?></label>
 					<select class="wc-enhanced-select" multiple="multiple" id="telegram_channel_ids" name="telegram_channel_ids[]" style="width: 50%;">
 						<?php foreach ( $channels as $channel ) : ?>
 							<option value="<?php echo esc_attr( $channel['id'] ); ?>" <?php echo in_array( $channel['id'], $saved_channels, true ) ? 'selected' : ''; ?>>
