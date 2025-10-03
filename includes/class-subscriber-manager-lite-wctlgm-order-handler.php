@@ -216,8 +216,9 @@ class Subscriber_Manager_Lite_WCTLGM_Order_Handler {
 		}
 
 		// Get the email instance
-		$email = \WC_Emails::instance()->emails['wctlgm_invite_links'];
-		if ( $email ) {
+		$emails = \WC_Emails::instance()->emails;
+		if ( isset( $emails['wctlgm_invite_links'] ) ) {
+			$email = $emails['wctlgm_invite_links'];
 			$email->trigger( $order_id, $invites );
 		}
 	}

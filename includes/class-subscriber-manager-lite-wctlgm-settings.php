@@ -241,8 +241,8 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 			<?php if ( $show_webhook_notification ) : ?>
 			<div class="notice notice-warning is-dismissible" id="wctlgm-webhook-notice">
 				<p>
-					<strong><?php esc_html_e( 'Action Required:', 'wctlgm-subscriber-manager' ); ?></strong>
-					<?php esc_html_e( 'You have changed the "Require Activation Step" setting. Please click the "Set Webhook" button below to update your bot\'s settings.', 'wctlgm-subscriber-manager' ); ?>
+					<strong><?php esc_html_e( 'Action Required:', 'wctlgm-subscriber-manager-lite' ); ?></strong>
+					<?php esc_html_e( 'You have changed the "Require Activation Step" setting. Please click the "Set Webhook" button below to update your bot\'s settings.', 'wctlgm-subscriber-manager-lite' ); ?>
 				</p>
 			</div>
 			<?php endif; ?>

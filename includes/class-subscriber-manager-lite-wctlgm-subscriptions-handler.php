@@ -51,6 +51,20 @@ class Subscriber_Manager_Lite_WCTLGM_Subscriptions_Handler {
 				return (string) $telegram_user_id === (string) $user_id;
 			} else {
 				// Activation disabled - capture the user ID and approve
+				// Check if user ID already exists and log if overwriting
+				if ( ! empty( $telegram_user_id ) && $telegram_user_id !== $user_id ) {
+					$this->logger->warning(
+						sprintf(
+							'Attempted User ID overwrite in order %1$d: %2$s -> %3$s',
+							$order_id,
+							$telegram_user_id,
+							$user_id
+						)
+					);
+					return false;
+				}
+
+				// Only update if no user ID exists
 				$order->update_meta_data( '_telegram_user_id', sanitize_text_field( $user_id ) );
 				$order->save();
 				return true;
@@ -59,7 +73,7 @@ class Subscriber_Manager_Lite_WCTLGM_Subscriptions_Handler {
 
 		if ( $allow_external_invites ) {
 			// To-do: This is where we would add external users for 2.0.
-			$this->logger->info( __( 'External invite link approved: ', 'wctlgm-subscriber-manager' ) . $user_id . ' - ' . $invite_link );
+			$this->logger->info( __( 'External invite link approved: ', 'wctlgm-subscriber-manager-lite' ) . $user_id . ' - ' . $invite_link );
 			return true;
 		}
 
