@@ -46,7 +46,7 @@ class Subscriber_Manager_Lite_WCTLGM_Subscriptions_Handler {
 
 			$order_id           = $order->get_id();
 			$telegram_user_id   = $order->get_meta( '_telegram_user_id', true );
-			$require_activation = get_option( 'wctlgm_require_activation_flow', true );
+			$require_activation = get_option( 'wctlgm_require_activation_flow', false );
 			if ( $require_activation ) {
 				return (string) $telegram_user_id === (string) $user_id;
 			} else {

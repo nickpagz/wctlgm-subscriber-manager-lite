@@ -40,7 +40,7 @@ class Subscriber_Manager_Lite_WCTLGM_Order_Handler {
 			return;
 		}
 
-		$require_activation = get_option( 'wctlgm_require_activation_flow', true );
+		$require_activation = get_option( 'wctlgm_require_activation_flow', false );
 
 		if ( $require_activation ) {
 			if ( $order->get_meta( '_activation_code', true ) ) {
@@ -100,7 +100,7 @@ class Subscriber_Manager_Lite_WCTLGM_Order_Handler {
 	}
 
 	private static function maybe_email_activation_info( $order, $plain_text = false ) {
-		$require_activation = get_option( 'wctlgm_require_activation_flow', true );
+		$require_activation = get_option( 'wctlgm_require_activation_flow', false );
 
 		if ( $require_activation ) {
 			$bot_url         = get_option( 'wctlgm_bot_url' );
@@ -128,7 +128,7 @@ class Subscriber_Manager_Lite_WCTLGM_Order_Handler {
 			return;
 		}
 
-		$require_activation = get_option( 'wctlgm_require_activation_flow', true );
+		$require_activation = get_option( 'wctlgm_require_activation_flow', false );
 
 		if ( ! in_array( $order->get_status(), array( 'processing', 'completed' ), true ) ) {
 			if ( $require_activation ) {

@@ -414,10 +414,6 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 			delete_option( 'wctlgm_force_activation_flow' );
 		}
 
-		if ( false === $require_activation ) {
-			$require_activation = false;
-		}
-
 		echo '<input type="checkbox" name="wctlgm_require_activation_flow" value="1" ' . checked( $require_activation, true, false ) . ' />';
 		echo '<p class="description">' . esc_html__( 'Use the Telegram bot chat to validate users and generate invite links. Not recommended for large or active groups.', 'wctlgm-subscriber-manager-lite' ) . '</p>';
 	}
