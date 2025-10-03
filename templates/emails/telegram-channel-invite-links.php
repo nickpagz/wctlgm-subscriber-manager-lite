@@ -5,9 +5,9 @@
  * This template can be overridden by copying it to yourtheme/woocommerce/emails/telegram-channel-invite-links.php.
  *
  * @package WooCommerce\Templates\Emails
- * @version 1.2.0
+ * @version 1.4.0
  *
- * @since 1.2.0
+ * @since 1.4.0
  */
 
 defined( 'ABSPATH' ) || exit;

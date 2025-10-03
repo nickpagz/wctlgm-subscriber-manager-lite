@@ -12,9 +12,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  * An email sent to the customer with their Telegram invite links when activation is disabled.
  *
  * @class       Subscriber_Manager_Lite_WCTLGM_Invite_Links_Email
- * @version     1.2.0
+ * @version     1.4.0
  * @extends     WC_Email
- * @since       1.2.0
+ * @since       1.4.0
  */
 class Subscriber_Manager_Lite_WCTLGM_Invite_Links_Email extends \WC_Email {
 
