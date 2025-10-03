@@ -19,6 +19,7 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 	public function __construct() {
 		$this->logger = new \Subscriber_Manager_Lite_for_Telegram\Subscriber_Manager_Lite_WCTLGM_Logger();
 		add_action( 'wp_ajax_wctlgm_set_webhook', array( $this, 'handle_set_webhook' ) );
+		add_action( 'wp_ajax_wctlgm_dismiss_webhook_notice', array( $this, 'handle_dismiss_webhook_notice' ) );
 		add_filter( 'woocommerce_product_data_tabs', array( $this, 'wctlgm_add_product_data_tab' ) );
 		add_action( 'woocommerce_product_data_panels', array( $this, 'wctlgm_telegram_product_data_fields' ) );
 		add_action( 'woocommerce_process_product_meta', array( $this, 'wctlgm_save_telegram_meta_box_data' ) );
@@ -176,6 +177,7 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 			$this->logger->error( __( 'Failed to set webhook: ', 'wctlgm-subscriber-manager-lite' ) . $error_message );
 			wp_send_json_error( array( 'message' => $error_message ) );
 		} else {
+			delete_transient( 'wctlgm_activation_flow_changed' );
 			wp_send_json_success( array( 'message' => 'Webhook set successfully.' ) );
 		}
 	}
@@ -197,6 +199,21 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 	}
 
 	/**
+	 * Handle dismissing the webhook notification.
+	 */
+	public function handle_dismiss_webhook_notice() {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( array( 'message' => 'Insufficient permissions' ) );
+			return;
+		}
+
+		delete_transient( 'wctlgm_activation_flow_changed' );
+		wp_send_json_success();
+	}
+
+
+
+	/**
 	 * Add a new settings page under the Settings menu.
 	 */
 	public function add_settings_page() {
@@ -213,12 +230,23 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 	 * Display the settings page.
 	 */
 	public function settings_page() {
+		$show_webhook_notification = get_transient( 'wctlgm_activation_flow_changed' );
 		?>
 		<div class="wrap fs-section">
 			<h1><?php esc_html_e( 'Telegram Subscriber Manager Settings', 'wctlgm-subscriber-manager-lite' ); ?></h1>
 			<h2 class="nav-tab-wrapper">
 				<a href="#" class="nav-tab fs-tab nav-tab-active home">Settings</a>
 			</h2>
+
+			<?php if ( $show_webhook_notification ) : ?>
+			<div class="notice notice-warning is-dismissible" id="wctlgm-webhook-notice">
+				<p>
+					<strong><?php esc_html_e( 'Action Required:', 'wctlgm-subscriber-manager' ); ?></strong>
+					<?php esc_html_e( 'You have changed the "Require Activation Step" setting. Please click the "Set Webhook" button below to update your bot\'s settings.', 'wctlgm-subscriber-manager' ); ?>
+				</p>
+			</div>
+			<?php endif; ?>
+			
 			<form method="post" action="options.php">
 				<?php
 				settings_fields( 'wctlgm_settings_group' );
@@ -239,7 +267,7 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 		register_setting( 'wctlgm_settings_group', 'wctlgm_bot_token', array( $this, 'sanitize_text_field' ) );
 		register_setting( 'wctlgm_settings_group', 'wctlgm_bot_url', array( $this, 'sanitize_url' ) );
 		register_setting( 'wctlgm_settings_group', 'wctlgm_allow_external_invites', array( $this, 'sanitize_checkbox' ) );
-		register_setting( 'wctlgm_settings_group', 'wctlgm_require_activation_flow', array( $this, 'sanitize_checkbox' ) );
+		register_setting( 'wctlgm_settings_group', 'wctlgm_require_activation_flow', array( $this, 'sanitize_activation_flow' ) );
 		register_setting( 'wctlgm_settings_group', 'wctlgm_channels', array( $this, 'sanitize_channels' ) );
 
 		add_settings_section(
@@ -312,6 +340,21 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 	}
 
 	/**
+	 * Sanitize activation flow field and track changes.
+	 */
+	public function sanitize_activation_flow( $input ) {
+		$new_value = isset( $input ) ? true : false;
+		$old_value = get_option( 'wctlgm_require_activation_flow', false );
+
+		// If the value has changed, set a flag to show webhook notification
+		if ( $new_value !== $old_value ) {
+			set_transient( 'wctlgm_activation_flow_changed', true, DAY_IN_SECONDS );
+		}
+
+		return $new_value;
+	}
+
+	/**
 	 * Sanitize channels.
 	 */
 	public function sanitize_channels( $input ) {
@@ -349,7 +392,7 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 	public function allow_external_invites_field() {
 		$allow_external_invites = get_option( 'wctlgm_allow_external_invites', false );
 		echo '<input type="checkbox" name="wctlgm_allow_external_invites" value="1" ' . checked( $allow_external_invites, true, false ) . ' />';
-		echo '<p class="description">' . esc_html__( 'When enabled, join requests from external or manually created invite links will skip validation checks.', 'wctlgm-subscriber-manager-lite' ) . '</p>';
+		echo '<p class="description">' . esc_html__( 'When enabled, join requests from external or manually created invite links will skip order validation checks.', 'wctlgm-subscriber-manager-lite' ) . '</p>';
 	}
 
 	/**
@@ -368,16 +411,14 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 		if ( false === $require_activation && false !== $legacy_activation ) {
 			$require_activation = $legacy_activation;
 			update_option( 'wctlgm_require_activation_flow', $require_activation );
-			// Clean up old option
 			delete_option( 'wctlgm_force_activation_flow' );
 		}
 
-		// If neither option exists, default to false (activation not required)
 		if ( false === $require_activation ) {
 			$require_activation = false;
 		}
 
 		echo '<input type="checkbox" name="wctlgm_require_activation_flow" value="1" ' . checked( $require_activation, true, false ) . ' />';
-		echo '<p class="description">' . esc_html__( 'If disabled, invite links are sent directly on order completion. The subscriber\'s Telegram ID is captured when they request to join.', 'wctlgm-subscriber-manager-lite' ) . '</p>';
+		echo '<p class="description">' . esc_html__( 'Use the Telegram bot chat to validate users and generate invite links. Not recommended for large or active groups.', 'wctlgm-subscriber-manager-lite' ) . '</p>';
 	}
 }
