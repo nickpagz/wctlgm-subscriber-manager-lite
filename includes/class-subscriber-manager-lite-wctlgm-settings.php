@@ -27,6 +27,29 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 		add_action( 'admin_menu', array( $this, 'add_settings_page' ) );
 		add_action( 'admin_init', array( $this, 'register_settings' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_subscriber_manager_scripts' ) );
+		add_action( 'init', array( $this, 'migrate_activation_flow_setting' ) );
+	}
+
+	/**
+	 * Migrate activation flow setting from legacy option.
+	 * Runs once on plugin initialization to ensure all users get migrated.
+	 */
+	public function migrate_activation_flow_setting() {
+		if ( get_option( 'wctlgm_activation_flow_migrated', false ) ) {
+			return;
+		}
+
+		$legacy_activation  = get_option( 'wctlgm_force_activation_flow', false );
+		$require_activation = get_option( 'wctlgm_require_activation_flow', false );
+
+		// Only migrate if new option doesn't exist (hasn't been set by user)
+		// and legacy option exists
+		if ( false === $require_activation && false !== $legacy_activation ) {
+			update_option( 'wctlgm_require_activation_flow', $legacy_activation );
+			delete_option( 'wctlgm_force_activation_flow' );
+		}
+
+		update_option( 'wctlgm_activation_flow_migrated', true );
 	}
 
 	/**
@@ -403,16 +426,7 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 	}
 
 	public function require_activation_field() {
-		// Ensure upgrades don't break expected activation flow. Since version 1.2.0.
-		$legacy_activation  = get_option( 'wctlgm_force_activation_flow', false );
 		$require_activation = get_option( 'wctlgm_require_activation_flow', false );
-
-		// If the new option doesn't exist but the old one does, migrate it
-		if ( false === $require_activation && false !== $legacy_activation ) {
-			$require_activation = $legacy_activation;
-			update_option( 'wctlgm_require_activation_flow', $require_activation );
-			delete_option( 'wctlgm_force_activation_flow' );
-		}
 
 		echo '<input type="checkbox" name="wctlgm_require_activation_flow" value="1" ' . checked( $require_activation, true, false ) . ' />';
 		echo '<p class="description">' . esc_html__( 'Use the Telegram bot chat to validate users and generate invite links. Not recommended for large or active groups.', 'wctlgm-subscriber-manager-lite' ) . '</p>';
