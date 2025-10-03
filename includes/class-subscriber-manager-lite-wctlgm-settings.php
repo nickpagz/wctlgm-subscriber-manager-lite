@@ -68,14 +68,14 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 						<tr>
 							<td style="padding-top: 0;">
 								<input type="text" name="wctlgm_channels[0][name]" value="<?php echo esc_attr( $channel['name'] ); ?>" />
-								<p class="description"><?php esc_html_e( 'Channel Name', 'wctlgm-subscriber-manager-lite' ); ?></p>
+								<p class="description"><?php esc_html_e( 'Channel/Group Name', 'wctlgm-subscriber-manager-lite' ); ?></p>
 							</td>
 							<td style="padding-top: 0;">
 								<input type="text" name="wctlgm_channels[0][id]" value="<?php echo esc_attr( $channel['id'] ); ?>" />
-								<p class="description"><?php esc_html_e( 'Channel ID', 'wctlgm-subscriber-manager-lite' ); ?></p>
+								<p class="description"><?php esc_html_e( 'Channel/Group ID', 'wctlgm-subscriber-manager-lite' ); ?></p>
 							</td>
 							<td style="vertical-align: top; padding-top: 0;">
-								<button type="button" class="button wctlgm_fetch_channel_id"><?php esc_html_e( 'Get Channel ID', 'wctlgm-subscriber-manager-lite' ); ?></button>
+								<button type="button" class="button wctlgm_fetch_channel_id"><?php esc_html_e( 'Get ID', 'wctlgm-subscriber-manager-lite' ); ?></button>
 							</td>
 						</tr>
 					</tbody>
@@ -194,7 +194,7 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 			wp_send_json_success( array( 'channel_id' => $channel_id ) );
 		} else {
 			set_transient( 'wctlgm_telegram_fetch_channel_id_active', true, HOUR_IN_SECONDS );
-			wp_send_json_error( array( 'message' => 'Please post a message in your Telegram channel and then edit it. Then click "Get Channel ID" again.' ) );
+			wp_send_json_error( array( 'message' => 'Please post a message in your Telegram channel or group and then edit it. Then click "Get ID" again.' ) );
 		}
 	}
 
@@ -311,7 +311,7 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 
 		add_settings_field(
 			'wctlgm_channels',
-			__( 'Telegram Channels:', 'wctlgm-subscriber-manager-lite' ),
+			__( 'Telegram Channels/Groups:', 'wctlgm-subscriber-manager-lite' ),
 			array( $this, 'channels_field' ),
 			'wctlgm-settings',
 			'wctlgm_settings_section'

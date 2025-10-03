@@ -12,7 +12,7 @@ jQuery(document).ready(function($) {
 			success: function(response) {
 				if (response.success) {
 					$('input[name="wctlgm_channels[0][id]"]').val(response.data.channel_id);
-					alert('Channel ID fetched successfully.');
+					alert('ID fetched successfully.');
 				} else {
 					alert(response.data.message);
 				}
