@@ -48,8 +48,11 @@ class Subscriber_Manager_Lite_WCTLGM_Order_Handler {
 			}
 			$code_generated = self::generate_activation_code( $order );
 		} else {
-			// Generate invites immediately when activation flow is disabled
-			self::generate_and_store_invites( $order );
+			// Check if invites already exist before generating
+			$existing_invites = self::get_all_channel_invites_for_order( $order );
+			if ( empty( $existing_invites ) ) {
+				self::generate_and_store_invites( $order );
+			}
 		}
 	}
 
@@ -216,7 +219,7 @@ class Subscriber_Manager_Lite_WCTLGM_Order_Handler {
 		}
 
 		// Get the email instance
-		$emails = \WC_Emails::instance()->emails;
+		$emails = WC()->mailer()->get_emails();
 		if ( isset( $emails['wctlgm_invite_links'] ) ) {
 			$email = $emails['wctlgm_invite_links'];
 			$email->trigger( $order_id, $invites );
