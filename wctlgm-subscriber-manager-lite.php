@@ -71,11 +71,23 @@ if ( ! defined( 'WCTLGM_SML_PLUGIN_DIR' ) ) {
 }
 
 /**
+ * Load plugin text domain for translations.
+ */
+function wctlgm_load_textdomain() {
+	load_plugin_textdomain(
+		'wctlgm-subscriber-manager-lite',
+		false,
+		dirname( plugin_basename( __FILE__ ) ) . '/languages'
+	);
+}
+add_action( 'init', 'wctlgm_load_textdomain' );
+
+/**
  * Plugin activation.
  */
 function wctlgm_subscriber_manager_lite_activation() {
 	if ( ! class_exists( 'WooCommerce' ) ) {
-		wp_die( esc_html__( 'Plugin not activated. WooCommerce not found.', 'wctlgm-subscriber-manager-lite' ) );
+		wp_die( 'Plugin not activated. WooCommerce not found.' );
 	}
 }
 
