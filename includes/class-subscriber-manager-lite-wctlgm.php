@@ -37,6 +37,13 @@ class Subscriber_Manager_Lite_WCTLGM {
 	 * Defines the admin settings page.
 	 */
 	private function define_admin_settings() {
+		add_action( 'init', array( $this, 'init_settings' ) );
+	}
+
+	/**
+	 * Initialize settings.
+	 */
+	public function init_settings() {
 		new \Subscriber_Manager_Lite_for_Telegram\Subscriber_Manager_Lite_WCTLGM_Settings();
 	}
 

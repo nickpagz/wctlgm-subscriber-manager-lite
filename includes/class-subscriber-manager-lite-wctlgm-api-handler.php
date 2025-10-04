@@ -55,6 +55,8 @@ class Subscriber_Manager_Lite_WCTLGM_API_Handler {
 			return new \WP_Error( 'no_bot_token', __( 'No Bot Token found.', 'wctlgm-subscriber-manager-lite' ) );
 		}
 
+		$allowed_updates = $this->get_allowed_updates();
+
 		$api_url  = "https://api.telegram.org/bot{$this->bot_token}/setWebhook";
 		$response = wp_remote_post(
 			$api_url,
@@ -63,7 +65,7 @@ class Subscriber_Manager_Lite_WCTLGM_API_Handler {
 					array(
 						'url'             => $url,
 						'secret_token'    => $secret_token,
-						'allowed_updates' => array( 'message', 'edited_message', 'edited_channel_post', 'chat_member', 'chat_join_request' ),
+						'allowed_updates' => $allowed_updates,
 					)
 				),
 				'headers' => array(
@@ -139,6 +141,7 @@ class Subscriber_Manager_Lite_WCTLGM_API_Handler {
 		);
 
 		if ( is_wp_error( $response ) ) {
+			$this->logger->error( __( 'Failed to send message. WordPress error: ', 'wctlgm-subscriber-manager-lite' ) . $response->get_error_message() );
 			return $response;
 		}
 	}
@@ -163,6 +166,7 @@ class Subscriber_Manager_Lite_WCTLGM_API_Handler {
 		);
 
 		if ( is_wp_error( $response ) ) {
+			$this->logger->error( __( 'Failed to generate invite link. WordPress error: ', 'wctlgm-subscriber-manager-lite' ) . $response->get_error_message() );
 			return $response;
 		}
 
@@ -172,6 +176,7 @@ class Subscriber_Manager_Lite_WCTLGM_API_Handler {
 		if ( isset( $data['ok'] ) && $data['ok'] ) {
 			return $data['result']['invite_link'];
 		}
+		$this->logger->error( __( 'Failed to generate invite link. Telegram API error: ', 'wctlgm-subscriber-manager-lite' ) . $body );
 
 		return new \WP_Error( 'api_error', isset( $data['description'] ) ? $data['description'] : 'Failed to create invite link.' );
 	}
@@ -194,6 +199,7 @@ class Subscriber_Manager_Lite_WCTLGM_API_Handler {
 		);
 
 		if ( is_wp_error( $response ) ) {
+			$this->logger->error( __( 'Failed to approve join request. WordPress error: ', 'wctlgm-subscriber-manager-lite' ) . $response->get_error_message() );
 			return $response;
 		}
 
@@ -202,6 +208,7 @@ class Subscriber_Manager_Lite_WCTLGM_API_Handler {
 
 		if ( ! isset( $data['ok'] ) || ! $data['ok'] ) {
 			$error_message = isset( $data['description'] ) ? $data['description'] : 'Unknown error';
+			$this->logger->error( __( 'Failed to approve join request. Telegram API error: ', 'wctlgm-subscriber-manager-lite' ) . $body );
 			return new \WP_Error( 'telegram_api_error', $error_message );
 		}
 
@@ -226,6 +233,7 @@ class Subscriber_Manager_Lite_WCTLGM_API_Handler {
 		);
 
 		if ( is_wp_error( $response ) ) {
+			$this->logger->error( __( 'Failed to revoke invite link. WordPress error: ', 'wctlgm-subscriber-manager-lite' ) . $response->get_error_message() );
 			return $response;
 		}
 
@@ -234,6 +242,7 @@ class Subscriber_Manager_Lite_WCTLGM_API_Handler {
 
 		if ( ! isset( $data['ok'] ) || ! $data['ok'] ) {
 			$error_message = isset( $data['description'] ) ? $data['description'] : 'Unknown error';
+			$this->logger->error( __( 'Failed to revoke invite link. Telegram API error: ', 'wctlgm-subscriber-manager-lite' ) . $body );
 			return new \WP_Error( 'telegram_api_error', $error_message );
 		}
 
@@ -258,6 +267,7 @@ class Subscriber_Manager_Lite_WCTLGM_API_Handler {
 		);
 
 		if ( is_wp_error( $response ) ) {
+			$this->logger->error( __( 'Failed to deny join request. WordPress error: ', 'wctlgm-subscriber-manager-lite' ) . $response->get_error_message() );
 			return $response;
 		}
 
@@ -266,9 +276,32 @@ class Subscriber_Manager_Lite_WCTLGM_API_Handler {
 
 		if ( ! isset( $data['ok'] ) || ! $data['ok'] ) {
 			$error_message = isset( $data['description'] ) ? $data['description'] : 'Unknown error';
+			$this->logger->error( __( 'Failed to deny join request. Telegram API error: ', 'wctlgm-subscriber-manager-lite' ) . $body );
 			return new \WP_Error( 'telegram_api_error', $error_message );
 		}
 
 		return $data;
+	}
+
+	/**
+	 * Get allowed updates based on activation flow setting.
+	 *
+	 * @return array
+	 */
+	private function get_allowed_updates() {
+		$require_activation = get_option( 'wctlgm_require_activation_flow', false );
+
+		// Base updates (for now)
+		$allowed_updates = array( 'chat_join_request', 'edited_message', 'edited_channel_post', 'chat_member' );
+
+		// Add message updates only if activation flow is enabled
+		if ( $require_activation ) {
+			$allowed_updates[] = 'message';
+		}
+
+		// Log allowed_updates.
+		$this->logger->info( __( 'Allowed updates: ', 'wctlgm-subscriber-manager-lite' ) . implode( ',', $allowed_updates ) );
+
+		return $allowed_updates;
 	}
 }

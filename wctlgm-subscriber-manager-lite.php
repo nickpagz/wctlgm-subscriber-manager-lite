@@ -2,11 +2,11 @@
 
 /**
  * @package Subscriber_Manager_Lite_for_Telegram
- * @version 1.3.0
+ * @version 1.4.0
  * Plugin Name: Subscriber Manager Lite for Telegram
  * Plugin URI: https://github.com/nickpagz/wctlgm-subscriber-manager-lite
- * Description: A plugin to automatically manage Telegram private channel subscribers via WooCommerce.
- * Version: 1.3.0
+ * Description: A plugin to automatically manage Telegram private channel or group subscribers via WooCommerce.
+ * Version: 1.4.0
  * Author: Rektification
  * Author URI: https://turtlesignals.com
  * License: GPL-2.0-or-later
@@ -71,31 +71,27 @@ if ( ! defined( 'WCTLGM_SML_PLUGIN_DIR' ) ) {
 }
 
 /**
+ * Load plugin text domain for translations.
+ */
+function wctlgm_load_textdomain() {
+	load_plugin_textdomain(
+		'wctlgm-subscriber-manager-lite',
+		false,
+		dirname( plugin_basename( __FILE__ ) ) . '/languages'
+	);
+}
+add_action( 'init', 'wctlgm_load_textdomain' );
+
+/**
  * Plugin activation.
  */
 function wctlgm_subscriber_manager_lite_activation() {
 	if ( ! class_exists( 'WooCommerce' ) ) {
-		wp_die( esc_html__( 'Plugin not activated. WooCommerce not found.', 'wctlgm-subscriber-manager-lite' ) );
-	}
-
-	// Run upgrade routine on activation - Temp
-	wctlgm_lite_setup_activation_default();
-}
-
-/**
- * Set up the default activation requirement for new installations - Temp
- */
-function wctlgm_lite_setup_activation_default() {
-	// Only run if the option hasn't been explicitly set
-	if ( false === get_option( 'wctlgm_force_activation_flow', false ) ) {
-		update_option( 'wctlgm_force_activation_flow', true );
+		wp_die( 'Plugin not activated. WooCommerce not found.' );
 	}
 }
 
 register_activation_hook( __FILE__, 'wctlgm_subscriber_manager_lite_activation' );
-
-// Check for upgrades on every plugin load - TEMP
-add_action( 'plugins_loaded', 'wctlgm_lite_setup_activation_default' );
 
 /**
  * Plugin deactivation.

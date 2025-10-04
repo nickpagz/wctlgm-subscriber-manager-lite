@@ -2,8 +2,8 @@
 Contributors:      rektification, npagazani
 Tags:              woocommerce, telegram, subscriptions
 Requires at least: 6.0
-Tested up to:      6.8.2
-Stable tag:        1.3.0
+Tested up to:      6.8.3
+Stable tag:        1.4.0
 License:           GPL-2.0-or-later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -14,26 +14,28 @@ Automatically manage Telegram private channel and group subscribers via WooComme
 Automatically manage Telegram private channel and group subscribers via WooCommerce.
 
 With Subscriber Manager Lite for Telegram you can sell access to your private Telegram channels and groups via a Simple product in
-WooCommerce. Following a successful checkout, users will be able to link to and submit an activation code in your chat bot.
-This automatically generates an invite link for the user to click on. The invite link is validated in the back-end, and the user is automatically granted access.
+WooCommerce. Following a successful checkout, users will be provided with an automatically generated one-time use invite link for channel or group access.
+The invite link is validated in the back-end, and the user is automatically granted access. No admin interaction is required.
 
 == Features ==
 
 * Grant access to a single private Telegram channel or group after successful WooCommerce checkout.
 * You only need to enter your bot token and URL to get started.
 * Semi-automatic channel or group ID retrieval.
-* Telegram user ID's automatically retrieved and validated during activation.
+* Telegram user ID's automatically retrieved and validated during activation or join request approval.
 * Set channel or group access to any Simple product in WooCommerce.
+* Choose between two different post-checkout flows (Activation via bot, or direct invite link generation).
+* Allow or block external or manual Telgram invites.
 * Secure webhook validation.
-* Works with WooCommerce HPOS
+* Works with WooCommerce HPOS.
 
-Note, in the Lite version members are not automatically removed. They can be removed manually from within Telegram.
+Note, in the Lite version members are not automatically removed from channels or groups. They can be removed manually from within Telegram.
 
 == Pro version ==
 
 * Control access to **unlimited** Telegram private channels or groups.
 * Control access to multiple channels or groups per product. 
-* Use with both Simple and Simple Subscription products in WooCommerce.
+* Use with both **Simple** and **Simple Subscription** products in WooCommerce.
 * Automatically removes members when their subscriptions expire.
 * Members won't be removed if they have multiple subscriptions and at least one is still active.
 * Works best with WooCommerce Subscriptions. Other subscription plugins support coming soon.
@@ -46,7 +48,7 @@ Note, in the Lite version members are not automatically removed. They can be rem
 Use the standard WordPress plugins installation page and install or upload the plugin.
 
 After plugin activation plugin settings are in **Settings > Telegram Subscriber Manager** in the wp-admin dashboard.
-Individual product settings are in the **Product data** settings in the **Telegram Channels** tab (available for Simple and Simple Subscription products only).
+Individual product settings are in the **Product data** settings in the **Telegram Channels** tab (available for **Simple** and **Simple Subscription** products only).
 
 
 == External services ==
@@ -66,6 +68,15 @@ It also sets a webhook to handle communication between your WooCommerce store an
 
 
 == Changelog ==
+
+= 1.4.0 =
+* New: Make the activation step optional.
+* Update: Emails formatting and wording.
+* Update: Additional logging throughout.
+* Fix: Several text updates to remove specific references to "Channels" as the plugin now supports groups.
+* Fix: Internal order search functions to improve validation.
+* Fix: Add contextual bot allowed_updates depending on checkout flow to prevent overwhelming site with webhook calls which might occur in large or busy groups.
+* Fix: Contextual switching of available product setting options when editing products.
 
 = 1.3.0 =
 * Improved private group compatibility. Now supports private groups and supergroups.

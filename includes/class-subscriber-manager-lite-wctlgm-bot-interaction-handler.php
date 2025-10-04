@@ -12,11 +12,13 @@ namespace Subscriber_Manager_Lite_for_Telegram;
 class Subscriber_Manager_Lite_WCTLGM_Bot_Interaction_Handler {
 
 	private $api_handler;
+	private $logger;
 	private $chat_id;
 	private $user_id;
 
 	public function __construct() {
 		$this->api_handler = new \Subscriber_Manager_Lite_for_Telegram\Subscriber_Manager_Lite_WCTLGM_API_Handler();
+		$this->logger      = new \Subscriber_Manager_Lite_for_Telegram\Subscriber_Manager_Lite_WCTLGM_Logger();
 	}
 
 	public static function init() {
@@ -24,6 +26,8 @@ class Subscriber_Manager_Lite_WCTLGM_Bot_Interaction_Handler {
 	}
 
 	public function process_telegram_request( $data ) {
+		$this->logger->info( __( 'Processing Telegram request: ', 'wctlgm-subscriber-manager-lite' ) . wp_json_encode( $data ) );
+
 		if ( isset( $data['chat_join_request'] ) ) {
 			return $this->process_join_request( $data );
 		}
@@ -89,11 +93,13 @@ class Subscriber_Manager_Lite_WCTLGM_Bot_Interaction_Handler {
 		$subscriptions_handler  = new \Subscriber_Manager_Lite_for_Telegram\Subscriber_Manager_Lite_WCTLGM_Subscriptions_Handler();
 		$allow_external_invites = get_option( 'wctlgm_allow_external_invites', false );
 
-		if ( $subscriptions_handler->is_join_request_valid( $user_id, $invite_link ) ) {
+		if ( $subscriptions_handler->is_join_request_valid( $user_id, $invite_link, $chat_id, $allow_external_invites ) ) {
 			$response_approval = $this->api_handler->approve_join_request( $chat_id, $user_id );
 			$response_revoke   = $this->api_handler->revoke_invite_link( $chat_id, $invite_link );
-		} elseif ( ! $allow_external_invites ) {
+			$this->logger->info( __( 'Join request approved and invite link revoked: ', 'wctlgm-subscriber-manager-lite' ) . wp_json_encode( $response_approval ) . wp_json_encode( $response_revoke ) . ' - ' . $user_id . ' - ' . $chat_id );
+		} else {
 			$response_deny = $this->api_handler->deny_join_request( $chat_id, $user_id );
+			$this->logger->info( __( 'Join request denied: ', 'wctlgm-subscriber-manager-lite' ) . wp_json_encode( $response_deny ) . ' - ' . $user_id . ' - ' . $chat_id );
 		}
 
 		return array( 'action' => 'none' );
@@ -190,10 +196,10 @@ class Subscriber_Manager_Lite_WCTLGM_Bot_Interaction_Handler {
 		if ( $result['success'] ) {
 			$message = __( 'Activation successful!', 'wctlgm-subscriber-manager-lite' );
 			if ( ! empty( $result['channels'] ) ) {
-				$message .= "\n" . __( 'Use the following link to access the private channel:', 'wctlgm-subscriber-manager-lite' );
+				$message .= "\n" . __( 'Use the following link to access the private channel or group:', 'wctlgm-subscriber-manager-lite' );
 				foreach ( $result['channels'] as $channel ) {
 					// translators: %1$s is the channel name, %2$s is the invite link
-					$message .= "\n" . sprintf( __( 'Channel: %1$s - %2$s', 'wctlgm-subscriber-manager-lite' ), $channel['name'], $channel['invite_link'] );
+					$message .= "\n" . sprintf( __( 'Channel/Group: %1$s - %2$s', 'wctlgm-subscriber-manager-lite' ), $channel['name'], $channel['invite_link'] );
 				}
 			}
 			as_schedule_single_action(

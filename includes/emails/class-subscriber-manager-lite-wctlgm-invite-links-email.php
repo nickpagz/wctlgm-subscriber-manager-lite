@@ -7,16 +7,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Telegram Post-Activation Email. Used when the activation checkout flow is enabled.
+ * Telegram Invite Links Email. Used when the activation flow is disabled.
  *
- * An email sent to the customer with their Telegram invite links after their Telegram access is activated.
+ * An email sent to the customer with their Telegram invite links when activation is disabled.
  *
- * @class       Subscriber_Manager_Lite_WCTLGM_Activation_Email
+ * @class       Subscriber_Manager_Lite_WCTLGM_Invite_Links_Email
  * @version     1.4.0
  * @extends     WC_Email
- * @since       1.2.0
+ * @since       1.4.0
  */
-class Subscriber_Manager_Lite_WCTLGM_Activation_Email extends \WC_Email {
+class Subscriber_Manager_Lite_WCTLGM_Invite_Links_Email extends \WC_Email {
 
 	/**
 	 * Channel invites data.
@@ -29,12 +29,12 @@ class Subscriber_Manager_Lite_WCTLGM_Activation_Email extends \WC_Email {
 	 * Constructor.
 	 */
 	public function __construct() {
-		$this->id             = 'wctlgm_activation';
+		$this->id             = 'wctlgm_invite_links';
 		$this->customer_email = true;
-		$this->title          = __( 'Telegram Post-Activation Invite Links', 'wctlgm-subscriber-manager-lite' );
-		$this->description    = __( 'This email is sent to customers when their Telegram access is activated, and includes their invite links. Used when the activation checkout flow is enabled.', 'wctlgm-subscriber-manager-lite' );
-		$this->template_html  = 'emails/telegram-channel-activation.php';
-		$this->template_plain = 'emails/plain/telegram-channel-activation.php';
+		$this->title          = __( 'Telegram Invite Links', 'wctlgm-subscriber-manager-lite' );
+		$this->description    = __( 'This email is sent to customers with their Telegram invite links when activation flow is disabled.', 'wctlgm-subscriber-manager-lite' );
+		$this->template_html  = 'emails/telegram-channel-invite-links.php';
+		$this->template_plain = 'emails/plain/telegram-channel-invite-links.php';
 		$this->template_base  = WCTLGM_SML_PLUGIN_DIR . 'templates/';
 
 		// Call parent constructor
