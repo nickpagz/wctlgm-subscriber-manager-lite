@@ -202,6 +202,7 @@ class Subscriber_Manager_Lite_WCTLGM_Order_Handler {
 
 	/**
 	 * Send invite links email via Action Scheduler.
+	 * (Action Scheduler unwraps the nested array for us).
 	 *
 	 * @param array $data Array containing order_id and invites data.
 	 */

@@ -73,14 +73,14 @@ if ( ! defined( 'WCTLGM_SML_PLUGIN_DIR' ) ) {
 /**
  * Load plugin text domain for translations.
  */
-function wctlgm_load_textdomain() {
+function wctlgm_lite_load_textdomain() {
 	load_plugin_textdomain(
 		'wctlgm-subscriber-manager-lite',
 		false,
 		dirname( plugin_basename( __FILE__ ) ) . '/languages'
 	);
 }
-add_action( 'init', 'wctlgm_load_textdomain' );
+add_action( 'init', 'wctlgm_lite_load_textdomain' );
 
 /**
  * Plugin activation.
@@ -88,6 +88,16 @@ add_action( 'init', 'wctlgm_load_textdomain' );
 function wctlgm_subscriber_manager_lite_activation() {
 	if ( ! class_exists( 'WooCommerce' ) ) {
 		wp_die( 'Plugin not activated. WooCommerce not found.' );
+	}
+
+	// Check if the pro plugin is active and prevent activation
+	if ( is_plugin_active( 'wctlgm-subscriber-manager/wctlgm-subscriber-manager.php' ) ) {
+		deactivate_plugins( plugin_basename( __FILE__ ) );
+		wp_die(
+			'<h1>' . esc_html__( 'Plugin Activation Failed', 'wctlgm-subscriber-manager-lite' ) . '</h1>' .
+			'<p>' . esc_html__( 'The Pro version of Subscriber Manager for Telegram is already active. Please deactivate the Pro version before activating the Lite version.', 'wctlgm-subscriber-manager-lite' ) . '</p>' .
+			'<p><a href="' . esc_url( admin_url( 'plugins.php' ) ) . '">' . esc_html__( 'Return to Plugins page', 'wctlgm-subscriber-manager-lite' ) . '</a></p>'
+		);
 	}
 }
 
