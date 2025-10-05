@@ -145,9 +145,7 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 					</select>
 				</p>
 				<?php
-				if ( wctlgm_fs()->is_not_paying() ) {
 					echo wp_kses_post( sprintf( '<p><em>Need to set access expiry? Automatic user removal? Works with subscriptions? <a href="%s">Upgrade to Pro Now!</a></em></p>', wctlgm_fs()->get_upgrade_url() ) );
-				}
 				?>
 			</div>
 			
