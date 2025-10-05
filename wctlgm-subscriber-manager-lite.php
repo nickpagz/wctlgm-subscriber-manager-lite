@@ -70,17 +70,6 @@ if ( ! defined( 'WCTLGM_SML_PLUGIN_DIR' ) ) {
 	define( 'WCTLGM_SML_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 }
 
-/**
- * Load plugin text domain for translations.
- */
-function wctlgm_lite_load_textdomain() {
-	load_plugin_textdomain(
-		'wctlgm-subscriber-manager-lite',
-		false,
-		dirname( plugin_basename( __FILE__ ) ) . '/languages'
-	);
-}
-add_action( 'init', 'wctlgm_lite_load_textdomain' );
 
 /**
  * Plugin activation.
