@@ -91,7 +91,8 @@ function wctlgm_subscriber_manager_lite_activation() {
 	}
 
 	// Check if the pro plugin is active and prevent activation
-	if ( is_plugin_active( 'wctlgm-subscriber-manager/wctlgm-subscriber-manager.php' ) ) {
+	$active_plugins = get_option( 'active_plugins', array() );
+	if ( in_array( 'wctlgm-subscriber-manager/wctlgm-subscriber-manager.php', $active_plugins, true ) ) {
 		deactivate_plugins( plugin_basename( __FILE__ ) );
 		wp_die(
 			'<h1>' . esc_html__( 'Plugin Activation Failed', 'wctlgm-subscriber-manager-lite' ) . '</h1>' .
@@ -123,7 +124,8 @@ add_action(
 
 function wctlgm_subscriber_manager_lite_check_for_pro_plugin() {
 	// Check if the pro plugin is active
-	if ( is_plugin_active( 'wctlgm-subscriber-manager/wctlgm-subscriber-manager.php' ) ) {
+	$active_plugins = get_option( 'active_plugins', array() );
+	if ( in_array( 'wctlgm-subscriber-manager/wctlgm-subscriber-manager.php', $active_plugins, true ) ) {
 		deactivate_plugins( plugin_basename( __FILE__ ) );
 
 		add_action( 'admin_notices', 'wctlgm_subscriber_manager_lite_pro_plugin_active_notice' );
