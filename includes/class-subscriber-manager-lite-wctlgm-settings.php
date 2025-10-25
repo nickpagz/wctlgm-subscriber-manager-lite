@@ -28,6 +28,8 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 		add_action( 'admin_init', array( $this, 'register_settings' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_subscriber_manager_scripts' ) );
 		add_action( 'init', array( $this, 'migrate_activation_flow_setting' ) );
+		add_action( 'admin_notices', array( $this, 'display_webhook_warning_notice' ) );
+		add_action( 'update_option_wctlgm_require_activation_flow', array( $this, 'handle_activation_flow_change' ), 10, 2 );
 	}
 
 	/**
@@ -147,6 +149,16 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 				<?php
 					echo wp_kses_post( sprintf( '<p><em>Need to set access expiry? Automatic user removal? Works with subscriptions? <a href="%s">Upgrade to Pro Now!</a></em></p>', wctlgm_fs()->get_upgrade_url() ) );
 				?>
+				<div class="wctlgm-support-link" style="margin: 20px 0 0 0; padding: 12px; background: #f9f9f9; border-left: 4px solid #0073aa;">
+					<p style="margin: 0; font-size: 13px;">
+						<strong><?php esc_html_e( 'Need Help?', 'wctlgm-subscriber-manager-lite' ); ?></strong>
+						<?php esc_html_e( 'Check our comprehensive setup guide and documentation.', 'wctlgm-subscriber-manager-lite' ); ?>
+						<a href="https://wctlgm.com/kb-category/getting-started/" target="_blank" style="margin-left: 8px;">
+							<?php esc_html_e( 'View Documentation', 'wctlgm-subscriber-manager-lite' ); ?> →
+						</a>
+					</p>
+				</div>
+
 			</div>
 			
 		</div>
@@ -198,6 +210,8 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 			$this->logger->error( __( 'Failed to set webhook: ', 'wctlgm-subscriber-manager-lite' ) . $error_message );
 			wp_send_json_error( array( 'message' => $error_message ) );
 		} else {
+			// Set the webhook clicked option to true
+			update_option( 'wctlgm_webhook_clicked', true );
 			delete_transient( 'wctlgm_activation_flow_changed' );
 			wp_send_json_success( array( 'message' => 'Webhook set successfully.' ) );
 		}
@@ -220,21 +234,6 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 	}
 
 	/**
-	 * Handle dismissing the webhook notification.
-	 */
-	public function handle_dismiss_webhook_notice() {
-		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( array( 'message' => 'Insufficient permissions' ) );
-			return;
-		}
-
-		delete_transient( 'wctlgm_activation_flow_changed' );
-		wp_send_json_success();
-	}
-
-
-
-	/**
 	 * Add a new settings page under the Settings menu.
 	 */
 	public function add_settings_page() {
@@ -251,22 +250,12 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 	 * Display the settings page.
 	 */
 	public function settings_page() {
-		$show_webhook_notification = get_transient( 'wctlgm_activation_flow_changed' );
 		?>
 		<div class="wrap fs-section">
 			<h1><?php esc_html_e( 'Telegram Subscriber Manager Settings', 'wctlgm-subscriber-manager-lite' ); ?></h1>
 			<h2 class="nav-tab-wrapper">
 				<a href="#" class="nav-tab fs-tab nav-tab-active home">Settings</a>
 			</h2>
-
-			<?php if ( $show_webhook_notification ) : ?>
-			<div class="notice notice-warning is-dismissible" id="wctlgm-webhook-notice">
-				<p>
-					<strong><?php esc_html_e( 'Action Required:', 'wctlgm-subscriber-manager-lite' ); ?></strong>
-					<?php esc_html_e( 'You have changed the "Require Activation Step" setting. Please click the "Set Webhook" button below to update your bot\'s settings.', 'wctlgm-subscriber-manager-lite' ); ?>
-				</p>
-			</div>
-			<?php endif; ?>
 			
 			<form method="post" action="options.php">
 				<?php
@@ -277,6 +266,17 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 				submit_button();
 				?>
 			</form>
+
+			<div class="wctlgm-support-link" style="margin: 20px 0; padding: 15px; background: #f9f9f9; border-left: 4px solid #0073aa;">
+				<p style="margin: 0;">
+					<strong><?php esc_html_e( 'Need Help?', 'wctlgm-subscriber-manager-lite' ); ?></strong>
+					<?php esc_html_e( 'Check out our comprehensive setup guide and documentation.', 'wctlgm-subscriber-manager-lite' ); ?>
+					<a href="https://wctlgm.com/kb-category/getting-started/" target="_blank" style="margin-left: 10px;">
+						<?php esc_html_e( 'View Support Documentation', 'wctlgm-subscriber-manager-lite' ); ?> →
+					</a>
+				</p>
+			</div>
+
 		</div>
 		<?php
 	}
@@ -361,18 +361,20 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 	}
 
 	/**
-	 * Sanitize activation flow field and track changes.
+	 * Sanitize activation flow field.
 	 */
 	public function sanitize_activation_flow( $input ) {
-		$new_value = isset( $input ) ? true : false;
-		$old_value = get_option( 'wctlgm_require_activation_flow', false );
+		return isset( $input ) ? true : false;
+	}
 
-		// If the value has changed, set a flag to show webhook notification
-		if ( $new_value !== $old_value ) {
-			set_transient( 'wctlgm_activation_flow_changed', true, DAY_IN_SECONDS );
-		}
-
-		return $new_value;
+	/**
+	 * Handle activation flow setting changes.
+	 *
+	 * @param mixed $_old_value The old option value.
+	 * @param mixed $_new_value The new option value.
+	 */
+	public function handle_activation_flow_change( $_old_value, $_new_value ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter
+		delete_option( 'wctlgm_webhook_clicked' );
 	}
 
 	/**
@@ -428,5 +430,36 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 
 		echo '<input type="checkbox" name="wctlgm_require_activation_flow" value="1" ' . checked( $require_activation, true, false ) . ' />';
 		echo '<p class="description">' . esc_html__( 'Use the Telegram bot chat to validate users and generate invite links. Not recommended for large or active groups.', 'wctlgm-subscriber-manager-lite' ) . '</p>';
+	}
+
+	/**
+	 * Display webhook warning notice across all wp-admin pages.
+	 */
+	public function display_webhook_warning_notice() {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+
+		$bot_token = get_option( 'wctlgm_bot_token' );
+		if ( empty( $bot_token ) ) {
+			return;
+		}
+
+		$webhook_clicked = get_option( 'wctlgm_webhook_clicked', false );
+
+		if ( ! $webhook_clicked ) {
+			$settings_url = admin_url( 'options-general.php?page=wctlgm-settings' );
+			?>
+			<div class="notice notice-warning is-dismissible" id="wctlgm-webhook-notice">
+				<p>
+					<strong><?php esc_html_e( 'Action Required:', 'wctlgm-subscriber-manager-lite' ); ?></strong>
+					<?php esc_html_e( 'Please click the "Set Webhook" button in your Telegram Subscriber Manager settings to ensure proper functionality.', 'wctlgm-subscriber-manager-lite' ); ?>
+					<a href="<?php echo esc_url( $settings_url ); ?>" style="margin-left: 8px;">
+						<?php esc_html_e( 'Go to Settings', 'wctlgm-subscriber-manager-lite' ); ?> →
+					</a>
+				</p>
+			</div>
+			<?php
+		}
 	}
 }
