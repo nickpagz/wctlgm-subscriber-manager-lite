@@ -19,7 +19,6 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 	public function __construct() {
 		$this->logger = new \Subscriber_Manager_Lite_for_Telegram\Subscriber_Manager_Lite_WCTLGM_Logger();
 		add_action( 'wp_ajax_wctlgm_set_webhook', array( $this, 'handle_set_webhook' ) );
-		add_action( 'wp_ajax_wctlgm_dismiss_webhook_notice', array( $this, 'handle_dismiss_webhook_notice' ) );
 		add_filter( 'woocommerce_product_data_tabs', array( $this, 'wctlgm_add_product_data_tab' ) );
 		add_action( 'woocommerce_product_data_panels', array( $this, 'wctlgm_telegram_product_data_fields' ) );
 		add_action( 'woocommerce_process_product_meta', array( $this, 'wctlgm_save_telegram_meta_box_data' ) );
