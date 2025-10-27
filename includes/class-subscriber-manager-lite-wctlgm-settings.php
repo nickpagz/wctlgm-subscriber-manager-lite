@@ -222,11 +222,16 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 			return;
 		}
 
+		$this->logger->info( __( 'Channel ID fetch initiated from settings', 'wctlgm-subscriber-manager-lite' ) );
+
 		$channel_id = get_transient( 'wctlgm_channel_id_temp_store' );
 		if ( $channel_id ) {
+			// translators: %s is the stored channel ID
+			$this->logger->info( sprintf( __( 'Found stored channel ID: %s', 'wctlgm-subscriber-manager-lite' ), $channel_id ) );
 			delete_transient( 'wctlgm_channel_id_temp_store' );
 			wp_send_json_success( array( 'channel_id' => $channel_id ) );
 		} else {
+			$this->logger->info( __( 'No stored channel ID found, setting active transient for 1 hour', 'wctlgm-subscriber-manager-lite' ) );
 			set_transient( 'wctlgm_telegram_fetch_channel_id_active', true, HOUR_IN_SECONDS );
 			wp_send_json_error( array( 'message' => 'Please post a message in your Telegram channel or group and then edit it. Then click "Get ID" again.' ) );
 		}
