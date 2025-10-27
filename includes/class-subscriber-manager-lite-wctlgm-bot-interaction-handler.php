@@ -22,7 +22,7 @@ class Subscriber_Manager_Lite_WCTLGM_Bot_Interaction_Handler {
 	}
 
 	public static function init() {
-		add_action( 'wctglm_send_activation_email', array( __CLASS__, 'send_activation_email' ) );
+		add_action( 'wctlgm_send_activation_email', array( __CLASS__, 'send_activation_email' ) );
 	}
 
 	public function process_telegram_request( $data ) {
@@ -219,7 +219,7 @@ class Subscriber_Manager_Lite_WCTLGM_Bot_Interaction_Handler {
 			}
 			as_schedule_single_action(
 				time(),
-				'wctglm_send_activation_email',
+				'wctlgm_send_activation_email',
 				array( array( $order_id, $result['channels'] ) ),
 			);
 		} else {
