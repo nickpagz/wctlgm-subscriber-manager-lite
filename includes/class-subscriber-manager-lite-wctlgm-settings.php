@@ -105,10 +105,8 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 					</tbody>
 				</table>
 				<?php
-				if ( wctlgm_fs()->is_not_paying() ) {
-					echo wp_kses_post( sprintf( '<em>Need to add multiple channels or groups? <a href="%s">Upgrade to Pro Now!</a></em>', wctlgm_fs()->get_upgrade_url() ) );
-					echo '</section>';
-				}
+				echo wp_kses_post( sprintf( '<em>Need to add multiple channels or groups? <a href="%s">Upgrade to Pro Now!</a></em>', wctlgm_fs()->get_upgrade_url() ) );
+				echo '</section>';
 				?>
 			</td>
 		</tr>
