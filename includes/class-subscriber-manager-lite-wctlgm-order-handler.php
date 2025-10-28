@@ -192,7 +192,7 @@ class Subscriber_Manager_Lite_WCTLGM_Order_Handler {
 			}
 			$order->save();
 
-			do_action( 'woocommerce_wctlgm_invite_links_generated', $order_id, $response['channels'] );
+			do_action( 'wc_wctlgm_invite_links_generated', $order_id, $response['channels'] );
 
 			// Schedule email to be sent with a slight delay using Action Scheduler
 			as_schedule_single_action(
