@@ -40,12 +40,15 @@ jQuery(document).ready(function($) {
 			success: function(response) {
 				if (response.success) {
 					alert(response.data.message);
+					window.location.reload();
 				} else {
 					alert('Error: ' + response.data.message);
+					window.location.reload();
 				}
 			},
 			error: function() {
 				alert('Failed to set webhook.');
+				window.location.reload();
 			},
 			complete: function() {
 				$button.prop('disabled', false).text(originalText);
