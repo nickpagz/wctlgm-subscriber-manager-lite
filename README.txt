@@ -3,7 +3,7 @@ Contributors:      rektification, npagazani
 Tags:              woocommerce, telegram, subscriptions
 Requires at least: 6.0
 Tested up to:      6.8
-Stable tag:        1.4.0
+Stable tag:        1.5.0
 License:           GPL-2.0-or-later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -16,6 +16,8 @@ Automatically manage Telegram private channel and group subscribers via WooComme
 With Subscriber Manager Lite for Telegram you can sell access to your private Telegram channels and groups via a Simple product in
 WooCommerce. Following a successful checkout, users will be provided with an automatically generated one-time use invite link for channel or group access.
 The invite link is validated in the back-end, and the user is automatically granted access. No admin interaction is required.
+
+[Website](https://wctlgm.com) | [Documentation](https://wctlgm.com/kb/)
 
 == Features ==
 
@@ -36,6 +38,7 @@ Note, in the Lite version members are not automatically removed from channels or
 * Control access to **unlimited** Telegram private channels or groups.
 * Control access to multiple channels or groups per product. 
 * Use with both **Simple** and **Simple Subscription** products in WooCommerce.
+* Connect to automation services such as Make.com, n8n, Paddly Connect, etc. to trigger external automations or notifications.
 * Automatically removes members when their subscriptions expire.
 * Members won't be removed if they have multiple subscriptions and at least one is still active.
 * Works best with WooCommerce Subscriptions. Other subscription plugins support coming soon.
@@ -68,6 +71,13 @@ It also sets a webhook to handle communication between your WooCommerce store an
 
 
 == Changelog ==
+
+= 1.5.0 =
+* Update: Improve Set Webhook warning message.
+* New: Add support documentation links in settings pages.
+* New: Action hook for invite links generation.
+* New: (Pro version) Webhook for connecting to automation services such as Make, N8N, Pabbly Connect, etc.
+* Fix: (Pro version) remove invalid support tab link in settings page.
 
 = 1.4.0 =
 * New: Make the activation step optional.

@@ -39,36 +39,20 @@ jQuery(document).ready(function($) {
 			},
 			success: function(response) {
 				if (response.success) {
-					$('#wctlgm-webhook-notice').fadeOut();
 					alert(response.data.message);
+					window.location.reload();
 				} else {
 					alert('Error: ' + response.data.message);
+					window.location.reload();
 				}
 			},
 			error: function() {
 				alert('Failed to set webhook.');
+				window.location.reload();
 			},
 			complete: function() {
 				$button.prop('disabled', false).text(originalText);
 			}
 		});
-	});
-
-	// Handle notification dismissal
-	$(document).on('click', '#wctlgm-webhook-notice .notice-dismiss', function() {
-		// Optional: Send AJAX request to clear the transient
-		$.ajax({
-			url: ajaxurl,
-			method: 'POST',
-			data: {
-				action: 'wctlgm_dismiss_webhook_notice',
-			}
-		});
-	});
-
-	// Highlight the Set Webhook button when notification is present
-	if ($('#wctlgm-webhook-notice').length > 0) {
-		$('#wctlgm_set_webhook_button').addClass('button-primary').removeClass('button-secondary');
-	}
-	
+	});	
 });

@@ -182,6 +182,7 @@ class Subscriber_Manager_Lite_WCTLGM_Order_Handler {
 	 * Generate and store invite links for an order when activation is disabled.
 	 */
 	private static function generate_and_store_invites( $order ) {
+		$order_id              = $order->get_id();
 		$subscriptions_handler = new \Subscriber_Manager_Lite_for_Telegram\Subscriber_Manager_Lite_WCTLGM_Subscriptions_Handler();
 		$response              = $subscriptions_handler->get_channel_invites( $order );
 		if ( $response['success'] && ! empty( $response['channels'] ) ) {
@@ -190,6 +191,8 @@ class Subscriber_Manager_Lite_WCTLGM_Order_Handler {
 				$order->add_meta_data( '_channel_invite_' . $invite['channel_id'], sanitize_url( $invite['invite_link'] ) );
 			}
 			$order->save();
+
+			do_action( 'wc_wctlgm_invite_links_generated', $order_id, $response['channels'] );
 
 			// Schedule email to be sent with a slight delay using Action Scheduler
 			as_schedule_single_action(

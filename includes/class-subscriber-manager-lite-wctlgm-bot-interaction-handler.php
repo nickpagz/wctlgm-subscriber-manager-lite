@@ -22,7 +22,7 @@ class Subscriber_Manager_Lite_WCTLGM_Bot_Interaction_Handler {
 	}
 
 	public static function init() {
-		add_action( 'wctglm_send_activation_email', array( __CLASS__, 'send_activation_email' ) );
+		add_action( 'wctlgm_send_activation_email', array( __CLASS__, 'send_activation_email' ) );
 	}
 
 	public function process_telegram_request( $data ) {
@@ -33,6 +33,7 @@ class Subscriber_Manager_Lite_WCTLGM_Bot_Interaction_Handler {
 		}
 
 		if ( ( isset( $data['edited_channel_post'] ) ) || ( isset( $data['edited_message'] ) ) ) {
+			$this->logger->info( __( 'Edited message/channel post detected', 'wctlgm-subscriber-manager-lite' ) );
 			$chat_id = null;
 			if ( isset( $data['edited_channel_post']['chat']['id'] ) ) {
 				$chat_id = $data['edited_channel_post']['chat']['id'];
@@ -42,10 +43,16 @@ class Subscriber_Manager_Lite_WCTLGM_Bot_Interaction_Handler {
 
 			if ( null !== $chat_id ) {
 				$chat_id = sanitize_text_field( $chat_id );
+				// translators: %s is the extracted chat ID
+				$this->logger->info( sprintf( __( 'Extracted chat ID: %s', 'wctlgm-subscriber-manager-lite' ), $chat_id ) );
 				if ( $this->is_action_initiated_from_settings() ) {
 					// Optionally check if the chat ID matches expected channels
 					return $this->save_channel_id( $chat_id );
+				} else {
+					$this->logger->info( __( 'Channel ID fetch not initiated from settings, skipping save', 'wctlgm-subscriber-manager-lite' ) );
 				}
+			} else {
+				$this->logger->warning( __( 'Edited message detected but chat ID could not be extracted', 'wctlgm-subscriber-manager-lite' ) );
 			}
 			return array( 'action' => 'none' );
 		}
@@ -76,12 +83,20 @@ class Subscriber_Manager_Lite_WCTLGM_Bot_Interaction_Handler {
 	}
 
 	private function is_action_initiated_from_settings() {
-		return get_transient( 'wctlgm_telegram_fetch_channel_id_active' ) === true;
+		$transient_value = get_transient( 'wctlgm_telegram_fetch_channel_id_active' );
+		// Check both strict and loose comparison for better reliability across different caching backends
+		$is_active = ( true === $transient_value || '1' === $transient_value || 1 === $transient_value || 'true' === $transient_value );
+		// translators: %1$s is the transient value, %2$s is whether it's active (yes/no)
+		$this->logger->info( sprintf( __( 'Channel ID fetch check - Transient value: %1$s, Is active: %2$s', 'wctlgm-subscriber-manager-lite' ), wp_json_encode( $transient_value ), $is_active ? 'yes' : 'no' ) );
+		return $is_active;
 	}
 
 	private function save_channel_id( $chat_id ) {
+		// translators: %s is the chat ID being saved
+		$this->logger->info( sprintf( __( 'Saving channel ID: %s', 'wctlgm-subscriber-manager-lite' ), $chat_id ) );
 		set_transient( 'wctlgm_channel_id_temp_store', $chat_id, HOUR_IN_SECONDS );
 		delete_transient( 'wctlgm_telegram_fetch_channel_id_active' );
+		$this->logger->info( __( 'Channel ID saved successfully', 'wctlgm-subscriber-manager-lite' ) );
 		return array( 'action' => 'none' );
 	}
 
@@ -204,7 +219,7 @@ class Subscriber_Manager_Lite_WCTLGM_Bot_Interaction_Handler {
 			}
 			as_schedule_single_action(
 				time(),
-				'wctglm_send_activation_email',
+				'wctlgm_send_activation_email',
 				array( array( $order_id, $result['channels'] ) ),
 			);
 		} else {
