@@ -2,8 +2,8 @@
 Contributors:      rektification, npagazani
 Tags:              woocommerce, telegram, subscriptions
 Requires at least: 6.0
-Tested up to:      6.8
-Stable tag:        1.5.0
+Tested up to:      6.9
+Stable tag:        1.6.0
 License:           GPL-2.0-or-later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -35,13 +35,14 @@ Note, in the Lite version members are not automatically removed from channels or
 
 == Pro version ==
 
+* NEW: Now supports "Flexible Subscriptions"!
 * Control access to **unlimited** Telegram private channels or groups.
 * Control access to multiple channels or groups per product. 
 * Use with both **Simple** and **Simple Subscription** products in WooCommerce.
 * Connect to automation services such as Make.com, n8n, Paddly Connect, etc. to trigger external automations or notifications.
 * Automatically removes members when their subscriptions expire.
 * Members won't be removed if they have multiple subscriptions and at least one is still active.
-* Works best with WooCommerce Subscriptions. Other subscription plugins support coming soon.
+* Works best with [WooCommerce Subscriptions](https://woocommerce.com/products/woocommerce-subscriptions/), also supports [Flexible Subscriptions](https://wordpress.org/plugins/flexible-subscriptions/). Other subscription plugins support coming soon.
 * Set access expiry for Simple products (automatically removes members on expiration).
 * Set order cancellation access cut-off to match a refund policy (members can be optionally instantly removed if they cancel their subscription within the cut-off period).
 
@@ -71,6 +72,9 @@ It also sets a webhook to handle communication between your WooCommerce store an
 
 
 == Changelog ==
+
+= 1.6.0 =
+* New: (Pro version) Add support for Flexible Subscriptions by WP Desk as a subscription backend.
 
 = 1.5.0 =
 * Update: Improve Set Webhook warning message.
