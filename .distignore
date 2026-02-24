@@ -3,6 +3,7 @@
 /.github
 /.wordpress-org
 /.vscode
+/agent-context
 /bin
 /tests
 /node_modules
@@ -16,3 +17,4 @@ package-lock.json
 package.json
 README.md
 phpunit.xml.dist
+phpunit-integration.xml.dist

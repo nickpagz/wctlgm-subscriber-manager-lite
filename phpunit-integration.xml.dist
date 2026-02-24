@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<phpunit
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.6/phpunit.xsd"
+	bootstrap="tests/integration/bootstrap.php"
+	backupGlobals="false"
+	colors="true"
+	beStrictAboutTestsThatDoNotTestAnything="true"
+	verbose="true"
+	convertDeprecationsToExceptions="true">
+	<testsuites>
+		<testsuite name="integration">
+			<directory suffix="Test.php">tests/integration</directory>
+			<exclude>tests/integration/helpers</exclude>
+		</testsuite>
+	</testsuites>
+	<php>
+		<const name="WCTLGM_SML_INTEGRATION_TESTS" value="1" />
+	</php>
+</phpunit>
