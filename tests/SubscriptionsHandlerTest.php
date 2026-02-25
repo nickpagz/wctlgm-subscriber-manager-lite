@@ -298,6 +298,41 @@ class SubscriptionsHandlerTest extends WCTLGM_Lite_TestCase {
 	/**
 	 * @test
 	 */
+	public function get_channel_invites_uses_variation_id_for_meta_lookup() {
+		$variation_id = 789;
+		$product_id   = 456;
+
+		$order = $this->create_mock_order(
+			array(
+				'id'    => 100,
+				'items' => array( $this->create_mock_item( $product_id, $variation_id ) ),
+				'meta'  => array(
+					'_channel_invite_-1001234567890' => '',
+				),
+			)
+		);
+
+		Functions\when( 'get_post_meta' )->alias(
+			function ( $id, $key, $single = false ) use ( $variation_id ) {
+				// Should be called with variation ID, not product ID.
+				if ( $id === $variation_id && '_telegram_channel_ids' === $key ) {
+					return array( '-1001234567890' );
+				}
+				return '';
+			}
+		);
+
+		$handler  = new Subscriber_Manager_Lite_WCTLGM_Subscriptions_Handler();
+		$response = $handler->get_channel_invites( $order );
+
+		$this->assertTrue( $response['success'] );
+		$this->assertCount( 1, $response['channels'] );
+		$this->assertSame( '-1001234567890', $response['channels'][0]['channel_id'] );
+	}
+
+	/**
+	 * @test
+	 */
 	public function get_channel_invites_returns_failure_when_no_channels() {
 		$order = $this->create_mock_order(
 			array(

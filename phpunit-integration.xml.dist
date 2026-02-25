@@ -14,7 +14,4 @@
 			<exclude>tests/integration/helpers</exclude>
 		</testsuite>
 	</testsuites>
-	<php>
-		<const name="WCTLGM_SML_INTEGRATION_TESTS" value="1" />
-	</php>
 </phpunit>

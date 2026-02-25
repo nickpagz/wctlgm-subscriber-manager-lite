@@ -160,15 +160,14 @@ class WCTLGM_Lite_TestCase extends \PHPUnit\Framework\TestCase {
 	/**
 	 * Create a Mockery mock of a WC_Order_Item_Product.
 	 *
-	 * Lite only supports simple products — no variation_id parameter.
-	 *
-	 * @param int $product_id The product ID.
+	 * @param int $product_id   The product ID.
+	 * @param int $variation_id Optional variation ID for variable products. Defaults to 0 for simple products.
 	 * @return \Mockery\MockInterface
 	 */
-	protected function create_mock_item( $product_id ) {
+	protected function create_mock_item( $product_id, $variation_id = 0 ) {
 		$item = Mockery::mock( 'WC_Order_Item_Product' );
 		$item->shouldReceive( 'get_product_id' )->andReturn( $product_id );
-		$item->shouldReceive( 'get_variation_id' )->andReturn( 0 );
+		$item->shouldReceive( 'get_variation_id' )->andReturn( $variation_id );
 		return $item;
 	}
 

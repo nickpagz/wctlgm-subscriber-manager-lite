@@ -60,11 +60,26 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 	 *
 	 * @return void
 	 */
-	public function enqueue_subscriber_manager_scripts() {
+	public function enqueue_subscriber_manager_scripts( $hook ) {
+		$screen = get_current_screen();
+
+		// Only enqueue on plugin settings page and WooCommerce product screens.
+		$is_settings_page = ( 'settings_page_wctlgm-subscriber-manager-lite' === $hook );
+		$is_product_page  = ( $screen && 'product' === $screen->id );
+
+		if ( ! $is_settings_page && ! $is_product_page ) {
+			return;
+		}
+
+		$deps = array( 'jquery' );
+		if ( wp_script_is( 'wc-enhanced-select', 'registered' ) ) {
+			$deps[] = 'wc-enhanced-select';
+		}
+
 		wp_enqueue_script(
 			'subscriber-manager-lite-js',
 			plugin_dir_url( __FILE__ ) . '../assets/js/wctlgm-subscriber-manager-lite.js',
-			array( 'jquery', 'wc-enhanced-select' ),
+			$deps,
 			filemtime( plugin_dir_path( __FILE__ ) . '../assets/js/wctlgm-subscriber-manager-lite.js' ),
 			true
 		);
@@ -120,7 +135,13 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 		$tabs['telegram'] = array(
 			'label'    => __( 'Telegram Access', 'wctlgm-subscriber-manager-lite' ),
 			'target'   => 'telegram_product_data',
-			'class'    => array( 'show_if_simple', 'show_if_variable' ),
+			'class'    => array(
+				'show_if_simple',
+				'show_if_variable',
+				'hide_if_subscription',
+				'hide_if_variable-subscription',
+				'hide_if_simple-subscription',
+			),
 			'priority' => 80,
 		);
 
