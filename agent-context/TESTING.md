@@ -1,6 +1,6 @@
 # Testing Guide
 
-> **Version:** 1.6.0 | **Last updated:** 2026-02-24
+> **Version:** 1.7.0 | **Last updated:** 2026-02-25
 
 ## Current Status
 
@@ -89,11 +89,12 @@ class TestCase extends PHPUnitTestCase {
     }
 
     /**
-     * Create a mock WooCommerce order item for a simple product.
+     * Create a mock WooCommerce order item.
      */
-    protected function create_mock_item( $product_id ) {
+    protected function create_mock_item( $product_id, $variation_id = 0 ) {
         $item = Mockery::mock( 'WC_Order_Item_Product' );
         $item->shouldReceive( 'get_product_id' )->andReturn( $product_id );
+        $item->shouldReceive( 'get_variation_id' )->andReturn( $variation_id );
         return $item;
     }
 }
@@ -110,7 +111,7 @@ class TestCase extends PHPUnitTestCase {
 
 **`tests/stubs/woocommerce.php`** — Stub WooCommerce classes:
 - `WC_Order` with methods: `get_id()`, `get_items()`, `get_status()`, `get_meta()`, `update_meta_data()`, `delete_meta_data()`, `add_meta_data()`, `save()`, `get_meta_data()`
-- `WC_Order_Item_Product` with: `get_product_id()`
+- `WC_Order_Item_Product` with: `get_product_id()`, `get_variation_id()`
 - `WC_Product` with: `is_type()`, `get_id()`
 - `WC_Email` base class
 - `WC()` function returning mailer with `get_emails()`
@@ -134,6 +135,7 @@ class TestCase extends PHPUnitTestCase {
 | `test_is_join_request_valid_external_invites` | No order found + external invites enabled → true |
 | `test_is_join_request_valid_no_order_no_external` | No order found + external invites disabled → false |
 | `test_get_channel_invites_with_channels` | Products with channel IDs → generates invite links |
+| `test_get_channel_invites_variation` | Variable product variation with channel IDs → uses variation meta, not parent |
 | `test_get_channel_invites_existing_invite` | Existing invite link → reuses it |
 | `test_get_channel_invites_no_channels` | No channel IDs → returns success=false |
 | `test_find_order_by_multiple_matches` | Multiple orders match → returns null |
@@ -146,7 +148,8 @@ class TestCase extends PHPUnitTestCase {
 | `test_maybe_process_order_completed_status` | Status → completed → generates code/invites |
 | `test_maybe_process_order_skip_processing_to_completed` | processing → completed → skips |
 | `test_maybe_process_order_non_telegram_product` | No `_telegram_channel_ids` → skips |
-| `test_maybe_process_order_non_simple_product` | Variable/subscription product → skips |
+| `test_maybe_process_order_variable_product` | Variable product with variation channel IDs → processes |
+| `test_maybe_process_order_unsupported_product` | Subscription/grouped product → skips |
 | `test_maybe_process_order_wrong_status` | Status → on-hold → skips |
 | `test_activation_code_generation` | Generates 8-char code, saves to order |
 | `test_activation_code_not_regenerated` | Code already exists → skips |
@@ -273,9 +276,9 @@ $order->shouldReceive('update_meta_data')->with('_telegram_user_id', '999');
 $order->shouldReceive('delete_meta_data')->with('_activation_code', 'abc12345');
 $order->shouldReceive('save');
 
-// Mock product (simple product only in lite)
+// Mock product (simple or variable in lite)
 $product = Mockery::mock('WC_Product');
-$product->shouldReceive('is_type')->with('simple')->andReturn(true);
+$product->shouldReceive('is_type')->with(['simple', 'variable'])->andReturn(true);
 
 Functions\when('wc_get_product')->justReturn($product);
 ```

@@ -1,6 +1,6 @@
 # Data Flow Diagrams
 
-> **Version:** 1.6.0 | **Last updated:** 2026-02-24
+> **Version:** 1.7.0 | **Last updated:** 2026-02-25
 
 ## Order Processing Flow
 
@@ -8,7 +8,7 @@
 flowchart TD
     A[woocommerce_order_status_changed] --> B{order exists?}
     B -->|No| Z[return]
-    B -->|Yes| C{order_has_telegram_product?<br>simple product + _telegram_channel_ids}
+    B -->|Yes| C{order_has_telegram_product?<br>simple/variable product +<br>_telegram_channel_ids on product or variation}
     C -->|No| Z
     C -->|Yes| D{new_status in<br>processing, completed?}
     D -->|No| Z
@@ -23,7 +23,7 @@ flowchart TD
 
     F -->|No| J{existing invite<br>links on order?}
     J -->|Yes| Z
-    J -->|No| K[Subscriptions_Handler::get_channel_invites]
+    J -->|No| K[Subscriptions_Handler::get_channel_invites<br>resolves variation_id or product_id for meta]
     K --> L[Store _channel_invite_ meta per channel]
     L --> M[Fire wc_wctlgm_invite_links_generated action]
     M --> N[Schedule wctlgm_send_invite_links_email<br>5-second delay via Action Scheduler]

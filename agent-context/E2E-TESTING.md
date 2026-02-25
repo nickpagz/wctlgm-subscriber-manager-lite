@@ -1,12 +1,12 @@
 # E2E Testing Playbook
 
-> **Version:** 1.6.0 | **Last updated:** 2026-02-24
+> **Version:** 1.7.0 | **Last updated:** 2026-02-25
 
 ## Purpose
 
 End-to-end testing on a live staging site. Validates webhook flows, Telegram API timing, email delivery, WooCommerce integration, and admin UI behavior for the lite plugin.
 
-This playbook is simpler than the pro version's — no subscription rounds, no variable products, no expiry, no automatic removal.
+This playbook is simpler than the pro version's — no subscription rounds, no expiry, no automatic removal. Variable products are supported with per-variation channel settings.
 
 ## Automation Levels
 
@@ -85,8 +85,8 @@ tail -50 wp-content/uploads/wc-logs/wctlgm-subscriber-manager-lite-*.log
 
 | Round | Focus | Tests | Description |
 |-------|-------|-------|-------------|
-| 0 | Admin UI | 11 | Settings page, product panel, order details, emails |
-| 1 | Subscriber Flows | 3 | Direct invite and activation flow for simple products |
+| 0 | Admin UI | 15 | Settings page, product panel (simple + variable), subscription type guards, order details, emails |
+| 1 | Subscriber Flows | 5 | Direct invite and activation flow for simple and variable products |
 
 ## Round 0: Admin UI Validation
 
@@ -136,10 +136,14 @@ tail -50 wp-content/uploads/wc-logs/wctlgm-subscriber-manager-lite-*.log
 
 **Steps:**
 1. Edit a simple product → verify "Telegram Access" tab visible
-2. If WCS is active: verify tab hides for subscription products
-3. Verify tab is not visible for variable, grouped, or external products
+2. Edit a variable product → verify "Telegram Access" tab visible
+3. Switch product type to grouped → verify tab hides
+4. Switch product type to external → verify tab hides
+5. If WooCommerce Subscriptions active: switch to "Subscription" → verify tab hides; switch to "Variable Subscription" → verify tab hides
+6. If Flexible Subscriptions active: switch to "Subscription" → verify tab hides; switch to "Variable Subscription" → verify tab hides
+7. Switch back to simple → verify tab reappears
 
-**Expected:** Tab only shows for simple products.
+**Expected:** Tab shows only for simple and variable product types. Hidden for all other types including subscription variants.
 
 ### Test 0.6: Product Data Panel — Field Content [PLAYWRIGHT]
 
@@ -160,6 +164,53 @@ tail -50 wp-content/uploads/wc-logs/wctlgm-subscriber-manager-lite-*.log
 4. Verify channel ID saved correctly
 
 **Expected:** Product meta saved with selected channel ID.
+
+### Test 0.7a: Variable Product — Panel Message [PLAYWRIGHT]
+
+**Steps:**
+1. Edit a variable product → open "Telegram Access" tab
+2. Verify "configure on variations" message is shown
+3. Verify standard channel select is hidden
+
+**Expected:** Variable product message displayed, standard fields hidden.
+
+### Test 0.7b: Variable Product — Variation Channel Select [PLAYWRIGHT]
+
+**Steps:**
+1. Edit a variable product with at least one variation
+2. Expand a variation
+3. Verify "Telegram Access" section with channel multi-select
+4. Verify pro upsell link for expiry/removal features
+5. Select a channel, save the product
+6. `wp post meta get <variation_id> _telegram_channel_ids --format=json`
+7. Verify channel ID saved on the variation (not the parent product)
+
+**Expected:** Per-variation channel select renders and saves correctly.
+
+### Test 0.7c: Variable Product — New Variation [PLAYWRIGHT]
+
+**Steps:**
+1. Add a new variation to a variable product
+2. Verify Telegram channel select appears on the new variation
+3. Verify Select2 is initialized on the new select element
+
+**Expected:** New variations get the Telegram channel select initialized.
+
+### Test 0.7d: Variable Product — Variation Fields Hidden for Subscription Types [PLAYWRIGHT]
+
+**Steps:**
+1. Edit a variable product with variations
+2. Click the Variations tab and expand a variation → verify "Telegram Access" section with channel select is visible
+3. Switch product type to "Variable Subscription" (WCS or FSB) → verify:
+   a. "Telegram Access" tab is hidden
+   b. Telegram channel select fields inside each variation are hidden
+4. Switch back to "Variable" → verify:
+   a. "Telegram Access" tab reappears
+   b. Telegram channel select fields inside variations reappear after variations reload
+5. If Flexible Subscriptions active: repeat steps 3-4 with "Variable Subscription" (fsb-variable-subscription)
+6. If Flexible Subscriptions active: switch to "Subscription" (fsb-subscription) → verify variation fields are not visible
+
+**Expected:** Telegram variation fields only render/show for plain `variable` product type. Both the tab and per-variation fields are hidden for all subscription variable types. Server-side guard prevents rendering when product is saved as subscription type; JS guard hides fields when product type is switched client-side.
 
 ### Test 0.8: Order Details — Direct Invite Display [PLAYWRIGHT + AUTO]
 
@@ -260,6 +311,32 @@ tail -50 wp-content/uploads/wc-logs/wctlgm-subscriber-manager-lite-*.log
 6. Verify denied
 
 **Expected:** External invite setting correctly gates approval.
+
+### Test 1.4: Direct Invite Flow — Variable Product [AUTO + MANUAL]
+
+**Steps:**
+1. Ensure activation flow disabled
+2. Create a variable product with a variation that has `_telegram_channel_ids` set
+3. Create order containing the variation (status → processing)
+4. Verify `_channel_invite_*` meta exists on order (channel from variation, not parent)
+5. Verify email scheduled/sent
+6. [AUTO] Simulate join request webhook with the stored invite link
+7. Verify `_telegram_user_id` set on order
+
+**Expected:** Full flow completes using variation-level channel settings.
+
+### Test 1.5: Activation Flow — Variable Product [AUTO + MANUAL]
+
+**Steps:**
+1. Enable activation flow, re-set webhook
+2. Create order containing a variable product variation with channel set
+3. Verify `_activation_code` exists
+4. [AUTO] Simulate `/start` deep link with activation code
+5. Verify invite links generated using variation-level channel IDs
+6. [AUTO] Simulate join request
+7. Verify approved
+
+**Expected:** Activation flow works correctly with variable product variations.
 
 ## Error Monitoring Protocol
 

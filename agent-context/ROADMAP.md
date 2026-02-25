@@ -1,6 +1,6 @@
 # Development Roadmap
 
-> **Last updated:** 2026-02-24
+> **Last updated:** 2026-02-25
 
 Items are marked complete manually by the project owner.
 
@@ -15,9 +15,9 @@ Items are marked complete manually by the project owner.
 
 ## Phase 2: Sync with Pro
 
-- [ ] Audit lite codebase against pro v1.7.0 changes
-- [ ] Identify bug fixes or improvements from pro that apply to lite
-- [ ] Apply relevant updates
+- [x] Audit lite codebase against pro v1.7.0 changes
+- [x] Port variable product support (per-variation channel settings, order processing, invite generation)
+- [ ] Identify remaining bug fixes or improvements from pro that apply to lite
 - [ ] Release
 
 ## Phase 3: WordPress.org Maintenance

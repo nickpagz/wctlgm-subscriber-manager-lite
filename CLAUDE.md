@@ -45,7 +45,7 @@ There is no test suite, linter, or Node.js build step configured. The only JS fi
 
 | Class | Role |
 |-------|------|
-| `Settings` | Admin settings page (Settings → Telegram Subscriber Manager), product meta fields, AJAX handlers for webhook/channel setup |
+| `Settings` | Admin settings page (Settings → Telegram Subscriber Manager), product/variation meta fields, AJAX handlers for webhook/channel setup |
 | `API_Handler` | Telegram Bot API wrapper (`setWebhook`, `setCommands`, `getChatMember`, `approveChatJoinRequest`, etc.) |
 | `Endpoint_Handler` | REST endpoint `POST /wp-json/wctlgm/v1/telegram-bot/` — validates webhook secret token, routes incoming Telegram updates |
 | `Bot_Interaction_Handler` | Processes Telegram bot commands (`/start`, `/activate`, `/help`) and chat join requests |
@@ -62,12 +62,13 @@ Templates live in `templates/emails/` (HTML) and `templates/emails/plain/` (plai
 
 ### Data Flow
 
-1. Customer purchases product → WooCommerce order created
+1. Customer purchases simple or variable product → WooCommerce order created
 2. `Order_Handler` intercepts order status change to processing/completed
-3. **If activation required:** generates 8-char activation code, stores as `_activation_code` order meta
-4. **If activation disabled:** generates invite links immediately via Telegram API
-5. Customer receives email (activation code or direct invite links)
-6. With activation flow: customer sends code to Telegram bot → `Bot_Interaction_Handler` validates → `Subscriptions_Handler` generates invite links → email sent
+3. For each order item, resolves the correct meta ID (variation ID for variable products, product ID for simple)
+4. **If activation required:** generates 8-char activation code, stores as `_activation_code` order meta
+5. **If activation disabled:** generates invite links immediately via Telegram API (using variation-level `_telegram_channel_ids`)
+6. Customer receives email (activation code or direct invite links)
+7. With activation flow: customer sends code to Telegram bot → `Bot_Interaction_Handler` validates → `Subscriptions_Handler` generates invite links → email sent
 
 ### Key WordPress Options
 
@@ -80,7 +81,7 @@ Templates live in `templates/emails/` (HTML) and `templates/emails/plain/` (plai
 ### Key Order/Product Meta
 
 - Order: `_activation_code`, `_telegram_user_id`, `_channel_invite_{channel_id}`
-- Product: `_telegram_channel_ids` (array of channel IDs product grants access to)
+- Product/Variation: `_telegram_channel_ids` (array of channel IDs product/variation grants access to; stored per-variation for variable products)
 
 ## Conventions
 

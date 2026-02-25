@@ -1,6 +1,6 @@
 # Architecture Overview
 
-> **Version:** 1.6.0 | **Last updated:** 2026-02-24
+> **Version:** 1.7.0 | **Last updated:** 2026-02-25
 
 ## Directory Structure
 
@@ -86,12 +86,13 @@ Constructor calls three methods:
 ### Subscriber_Manager_Lite_WCTLGM_Settings
 
 **File:** `includes/class-subscriber-manager-lite-wctlgm-settings.php`
-**Role:** Admin settings page, product data panel, AJAX handlers.
+**Role:** Admin settings page, product/variation data panels, AJAX handlers.
 
 Key responsibilities:
 - Settings page at **Settings > Telegram Subscriber Manager** (`add_options_page`)
 - Registered settings: `wctlgm_bot_token`, `wctlgm_bot_url`, `wctlgm_allow_external_invites`, `wctlgm_require_activation_flow`, `wctlgm_channels`
-- Product data tab "Telegram Access" with classes `show_if_simple`, `hide_if_subscription`
+- Product data tab "Telegram Access" with classes `show_if_simple`, `show_if_variable`, `hide_if_subscription`
+- **Variable product support:** Tab panel shows "configure on variations" message for variable products (toggled by JS). Per-variation channel select rendered via `wctlgm_variation_telegram_fields()`. Variation data saved via `wctlgm_save_variation_telegram_data()` with dual nonce validation (AJAX `save-variations` + main form `woocommerce_save_data`).
 - **Single channel enforcement:** `sanitize_channels()` only processes `$input[0]`, always returns single-entry array
 - Upsell notices for multi-channel and pro features via `wctlgm_fs()->get_upgrade_url()`
 - AJAX handlers: `wctlgm_set_webhook`, `check_and_set_channel_id`
@@ -153,7 +154,8 @@ Methods:
   - Guards: order exists, has telegram product, new status is processing/completed, skip processing→completed
   - Activation flow: generates 8-char activation code if not already present
   - Direct flow: generates invite links via `Subscriptions_Handler::get_channel_invites()`, stores meta, fires `wc_wctlgm_invite_links_generated`, schedules email (5s delay)
-- **`order_has_telegram_product($order)`:** Checks for simple products with non-empty `_telegram_channel_ids`
+- **`get_telegram_meta_id($item)`:** Resolves the correct ID for Telegram meta lookups — returns variation ID if present, otherwise product ID
+- **`order_has_telegram_product($order)`:** Checks for simple or variable products with non-empty `_telegram_channel_ids` (using variation-level meta for variable products)
 - **Email injection:** Injects activation code into `customer_processing_order` and `customer_completed_order` emails
 - **Order details display:** Shows activation code (or "Activated"), invite links, or pending message
 
@@ -171,7 +173,7 @@ Methods:
   - Activation flow: checks `_telegram_user_id` matches requesting user
   - Direct flow: captures `_telegram_user_id` on first join, blocks overwrites
   - Falls through to `allow_external_invites` check
-- **`get_channel_invites($order)`:** Iterates order items, generates invite links per channel, deduplicates with `get_existing_invite_for_channel()`
+- **`get_channel_invites($order)`:** Iterates order items, resolves variation ID for meta lookups, generates invite links per channel, deduplicates with `get_existing_invite_for_channel()`
 - **`find_order_by($meta_key, $meta_value)`:** Meta query via `wc_get_orders()`, returns null if >1 match
 - **`find_order_by_invite_link($invite_link, $chat_id)`:** Uses indexed meta key `_channel_invite_{chat_id}`
 
@@ -207,7 +209,7 @@ Templates: `templates/emails/` (HTML) and `templates/emails/plain/` (plain text)
 | Feature | Lite | Pro |
 |---------|------|-----|
 | Channels per product | 1 | Unlimited |
-| Product types | Simple only | Simple, Variable, Subscription, Variable Subscription |
+| Product types | Simple, Variable | Simple, Variable, Subscription, Variable Subscription |
 | Subscription plugin support | None | WooCommerce Subscriptions, Flexible Subscriptions |
 | Automatic member removal | No (manual only) | Yes (on cancel/expire) |
 | Access expiry for simple products | No | Yes (scheduled via Action Scheduler) |
@@ -215,7 +217,7 @@ Templates: `templates/emails/` (HTML) and `templates/emails/plain/` (plain text)
 | Remove on cancel setting | N/A | Yes (`_telegram_remove_on_cancel` meta) |
 | Handler architecture | Single class | Factory + Interface pattern |
 | Webhook payload enrichment | No | Yes (for automation services) |
-| Variable product variation fields | No | Yes (per-variation Telegram settings) |
+| Variable product variation fields | Yes (channel select only) | Yes (channel select, expiry, remove-on-cancel, cut-off) |
 | Postmeta migrator | No | Yes |
 
 ## WordPress Options
@@ -233,11 +235,11 @@ Templates: `templates/emails/` (HTML) and `templates/emails/plain/` (plain text)
 
 ## Order/Product Meta Keys
 
-### Product Meta
+### Product/Variation Meta
 
 | Key | Type | Description |
 |-----|------|-------------|
-| `_telegram_channel_ids` | array | Channel/group IDs this product grants access to |
+| `_telegram_channel_ids` | array | Channel/group IDs this product/variation grants access to (stored on product for simple, on variation for variable) |
 
 **Not present in lite (pro-only):** `_telegram_channel_expiry`, `_telegram_remove_on_cancel`, `_telegram_cut_off`
 

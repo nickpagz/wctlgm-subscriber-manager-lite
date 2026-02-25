@@ -1,6 +1,6 @@
 # Coding Conventions & Patterns
 
-> **Version:** 1.6.0 | **Last updated:** 2026-02-24
+> **Version:** 1.7.0 | **Last updated:** 2026-02-25
 
 ## Naming Conventions
 
@@ -34,7 +34,7 @@
 
 ### No Factory Pattern
 
-Unlike the pro version, the lite plugin uses a **single `Subscriptions_Handler` class** instantiated directly wherever needed. There is no interface, no factory, no handler hierarchy. This is intentional — the lite version only supports simple products.
+Unlike the pro version, the lite plugin uses a **single `Subscriptions_Handler` class** instantiated directly wherever needed. There is no interface, no factory, no handler hierarchy. This is intentional — the lite version supports simple and variable products but not subscription types.
 
 ### Instance-Based Handlers
 
@@ -87,15 +87,19 @@ The Settings class enforces a single channel:
 
 ## Product Type Checking
 
-In lite, product type checking is hardcoded to `'simple'`:
+In lite, product type checking supports simple and variable products:
 
 ```php
-$product->is_type( 'simple' )
+$product->is_type( array( 'simple', 'variable' ) )
 ```
 
-This is correct for the lite version. The pro version uses `Factory::get_all_supported_product_types()` to support multiple product types. If/when lite adds support for new product types, this pattern must be updated throughout `Order_Handler` and `Settings`.
+The pro version uses `Factory::get_all_supported_product_types()` to support additional types including subscriptions.
 
-The product data tab uses CSS classes `show_if_simple` and `hide_if_subscription` to control visibility.
+### Variable Product Meta Resolution
+
+For variable products, Telegram channel settings are stored on each **variation**, not on the parent product. Use `get_telegram_meta_id($item)` (in Order_Handler) or check `$item->get_variation_id()` first (in Subscriptions_Handler) to resolve the correct ID for `_telegram_channel_ids` meta lookups.
+
+The product data tab uses CSS classes `show_if_simple`, `show_if_variable`, and `hide_if_subscription` to control visibility. JS toggles `.wctlgm-variable-message` vs `.wctlgm-standard-fields` based on product type.
 
 ## Channel Invite Meta Keys
 
