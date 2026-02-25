@@ -56,8 +56,11 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 	}
 
 	/**
-	 * Enqueue the JavaScript for the settings page.
+	 * Enqueue the plugin JavaScript on relevant admin screens.
 	 *
+	 * Only loads on the plugin settings page and WooCommerce product edit screens.
+	 *
+	 * @param string $hook The current admin page hook suffix.
 	 * @return void
 	 */
 	public function enqueue_subscriber_manager_scripts( $hook ) {
@@ -265,11 +268,13 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 	public function wctlgm_save_variation_telegram_data( $variation_id, $loop ) {
 		// Only save for plain variable products (not variable-subscription, etc.).
 		$variation = get_post( $variation_id );
-		if ( $variation ) {
-			$parent_product = wc_get_product( $variation->post_parent );
-			if ( ! $parent_product || ! $parent_product->is_type( 'variable' ) ) {
-				return;
-			}
+		if ( ! $variation ) {
+			return;
+		}
+
+		$parent_product = wc_get_product( $variation->post_parent );
+		if ( ! $parent_product || ! $parent_product->is_type( 'variable' ) ) {
+			return;
 		}
 
 		// Verify nonce — variations save via AJAX (save-variations) or main product Update (woocommerce_save_data).

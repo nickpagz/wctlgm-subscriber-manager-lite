@@ -28,7 +28,7 @@ The invite link is validated in the back-end, and the user is automatically gran
 * Set channel or group access to any Simple or Variable product in WooCommerce.
 * Variable product support: configure Telegram channel access per variation.
 * Choose between two different post-checkout flows (Activation via bot, or direct invite link generation).
-* Allow or block external or manual Telgram invites.
+* Allow or block external or manual Telegram invites.
 * Secure webhook validation.
 * Works with WooCommerce HPOS.
 
@@ -75,8 +75,8 @@ It also sets a webhook to handle communication between your WooCommerce store an
 
 = 1.7.0 =
 * New: Add support for Variable products with per-variation Telegram channel settings.
-* New: (Pro version) Add support for Variable Subscription products.
-* Update: Optimize user removal with a single API call instead of two.
+* New: (Pro version) Add support for Variable and Variable Subscription products.
+* Update: (Pro version) Optimize user removal with a single API call instead of two.
 
 = 1.6.0 =
 * New: (Pro version) Add support for Flexible Subscriptions by WP Desk as a subscription backend.
