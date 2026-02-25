@@ -3,6 +3,7 @@
 /.github
 /.wordpress-org
 /.vscode
+/agent-context
 /bin
 /tests
 /node_modules
@@ -10,9 +11,12 @@
 
 # Files
 .*
+.wp-env.json
 composer.lock
 composer.json
 package-lock.json
 package.json
 README.md
+CLAUDE.md
 phpunit.xml.dist
+phpunit-integration.xml.dist

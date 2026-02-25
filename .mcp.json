@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "playwright": {
+      "command": "zsh",
+      "args": [
+        "-lc",
+        "source ~/.nvm/nvm.sh && nvm use 22 && npx -y @playwright/mcp@latest"
+      ],
+      "env": {}
+    }
+  }
+}

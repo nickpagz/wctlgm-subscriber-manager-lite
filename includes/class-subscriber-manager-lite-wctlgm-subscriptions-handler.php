@@ -123,8 +123,9 @@ class Subscriber_Manager_Lite_WCTLGM_Subscriptions_Handler {
 		$invites = array();
 
 		foreach ( $order->get_items() as $item_id => $item ) {
-			$product_id  = $item->get_product_id();
-			$channel_ids = get_post_meta( $product_id, '_telegram_channel_ids', true );
+			$variation_id = $item->get_variation_id();
+			$meta_id      = $variation_id ? $variation_id : $item->get_product_id();
+			$channel_ids  = get_post_meta( $meta_id, '_telegram_channel_ids', true );
 
 			if ( ! empty( $channel_ids ) ) {
 				foreach ( $channel_ids as $channel_id ) {

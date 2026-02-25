@@ -22,6 +22,8 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 		add_filter( 'woocommerce_product_data_tabs', array( $this, 'wctlgm_add_product_data_tab' ) );
 		add_action( 'woocommerce_product_data_panels', array( $this, 'wctlgm_telegram_product_data_fields' ) );
 		add_action( 'woocommerce_process_product_meta', array( $this, 'wctlgm_save_telegram_meta_box_data' ) );
+		add_action( 'woocommerce_product_after_variable_attributes', array( $this, 'wctlgm_variation_telegram_fields' ), 10, 3 );
+		add_action( 'woocommerce_save_product_variation', array( $this, 'wctlgm_save_variation_telegram_data' ), 10, 2 );
 		add_action( 'wp_ajax_check_and_set_channel_id', array( $this, 'check_and_set_channel_id' ) );
 		add_action( 'admin_menu', array( $this, 'add_settings_page' ) );
 		add_action( 'admin_init', array( $this, 'register_settings' ) );
@@ -54,15 +56,33 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 	}
 
 	/**
-	 * Enqueue the JavaScript for the settings page.
+	 * Enqueue the plugin JavaScript on relevant admin screens.
 	 *
+	 * Only loads on the plugin settings page and WooCommerce product edit screens.
+	 *
+	 * @param string $hook The current admin page hook suffix.
 	 * @return void
 	 */
-	public function enqueue_subscriber_manager_scripts() {
+	public function enqueue_subscriber_manager_scripts( $hook ) {
+		$screen = get_current_screen();
+
+		// Only enqueue on plugin settings page and WooCommerce product screens.
+		$is_settings_page = ( 'settings_page_wctlgm-subscriber-manager-lite' === $hook );
+		$is_product_page  = ( $screen && 'product' === $screen->id );
+
+		if ( ! $is_settings_page && ! $is_product_page ) {
+			return;
+		}
+
+		$deps = array( 'jquery' );
+		if ( wp_script_is( 'wc-enhanced-select', 'registered' ) ) {
+			$deps[] = 'wc-enhanced-select';
+		}
+
 		wp_enqueue_script(
 			'subscriber-manager-lite-js',
 			plugin_dir_url( __FILE__ ) . '../assets/js/wctlgm-subscriber-manager-lite.js',
-			array( 'jquery' ),
+			$deps,
 			filemtime( plugin_dir_path( __FILE__ ) . '../assets/js/wctlgm-subscriber-manager-lite.js' ),
 			true
 		);
@@ -71,7 +91,8 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 			'subscriber-manager-lite-js',
 			'wctlgm_vars',
 			array(
-				'nonce' => wp_create_nonce( 'check_set_channel_id_nonce' ),
+				'nonce'                  => wp_create_nonce( 'check_set_channel_id_nonce' ),
+				'variable_product_types' => array( 'variable' ),
 			)
 		);
 	}
@@ -117,7 +138,13 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 		$tabs['telegram'] = array(
 			'label'    => __( 'Telegram Access', 'wctlgm-subscriber-manager-lite' ),
 			'target'   => 'telegram_product_data',
-			'class'    => array( 'show_if_simple', 'hide_if_subscription' ),
+			'class'    => array(
+				'show_if_simple',
+				'show_if_variable',
+				'hide_if_subscription',
+				'hide_if_variable-subscription',
+				'hide_if_simple-subscription',
+			),
 			'priority' => 80,
 		);
 
@@ -132,7 +159,17 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 		$channels       = get_option( 'wctlgm_channels', array() );
 		?>
 		<div id='telegram_product_data' class='panel woocommerce_options_panel'>
-			<div class='options_group'>
+			<!-- Message for variable product types (hidden by default, toggled by JS) -->
+			<div class="options_group wctlgm-variable-message" style="display:none;">
+				<div style="margin: 20px 0 0 0; padding: 12px; background: #f0f6fc; border-left: 4px solid #0073aa;">
+					<p style="margin: 0; font-size: 13px;">
+						<?php esc_html_e( 'Telegram channel access settings are configured on individual variations. Open each variation below to set channel access.', 'wctlgm-subscriber-manager-lite' ); ?>
+					</p>
+				</div>
+			</div>
+
+			<!-- Standard fields for simple products (hidden for variable types by JS) -->
+			<div class='options_group wctlgm-standard-fields'>
 				<p class="form-field">
 					<label for="telegram_channel_ids"><?php esc_html_e( 'Select Channels/Groups', 'wctlgm-subscriber-manager-lite' ); ?></label>
 					<select class="wc-enhanced-select" multiple="multiple" id="telegram_channel_ids" name="telegram_channel_ids[]" style="width: 50%;">
@@ -146,6 +183,9 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 				<?php
 					echo wp_kses_post( sprintf( '<p><em>Need to set access expiry? Automatic user removal? Works with subscriptions? <a href="%s">Upgrade to Pro Now!</a></em></p>', wctlgm_fs()->get_upgrade_url() ) );
 				?>
+			</div>
+
+			<div class="options_group">
 				<div class="wctlgm-support-link" style="margin: 20px 0 0 0; padding: 12px; background: #f9f9f9; border-left: 4px solid #0073aa;">
 					<p style="margin: 0; font-size: 13px;">
 						<strong><?php esc_html_e( 'Need Help?', 'wctlgm-subscriber-manager-lite' ); ?></strong>
@@ -155,9 +195,7 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 						</a>
 					</p>
 				</div>
-
 			</div>
-			
 		</div>
 		<?php
 	}
@@ -171,6 +209,98 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 				delete_post_meta( $post_id, '_telegram_channel_ids' );
 			}
 		}
+	}
+
+	/**
+	 * Render Telegram access fields for each product variation.
+	 *
+	 * @param int     $loop           Variation loop index.
+	 * @param array   $variation_data Variation data array.
+	 * @param WP_Post $variation      Variation post object.
+	 */
+	public function wctlgm_variation_telegram_fields( $loop, $variation_data, $variation ) {
+		// Only render for plain variable products (not variable-subscription, etc.).
+		$parent_product = wc_get_product( $variation->post_parent );
+		if ( ! $parent_product || ! $parent_product->is_type( 'variable' ) ) {
+			return;
+		}
+
+		$variation_id   = $variation->ID;
+		$channels       = get_option( 'wctlgm_channels', array() );
+		$saved_channels = get_post_meta( $variation_id, '_telegram_channel_ids', true );
+		$saved_channels = ! empty( $saved_channels ) ? $saved_channels : array();
+
+		?>
+		<div class="wctlgm-variation-fields" style="border-top: 1px solid #eee; margin-top: 1em; padding-top: 0.5em;">
+			<p class="form-row form-row-full" style="margin-bottom: 0;">
+				<strong><?php esc_html_e( 'Telegram Access', 'wctlgm-subscriber-manager-lite' ); ?></strong>
+			</p>
+			<p class="form-row form-row-full">
+				<label for="telegram_channel_ids_<?php echo esc_attr( $loop ); ?>">
+					<?php esc_html_e( 'Telegram Channels/Groups', 'wctlgm-subscriber-manager-lite' ); ?>
+				</label>
+				<select class="wc-enhanced-select wctlgm-variation-channel-select"
+						multiple="multiple"
+						id="telegram_channel_ids_<?php echo esc_attr( $loop ); ?>"
+						name="wctlgm_variation_channel_ids[<?php echo esc_attr( $loop ); ?>][]"
+						style="width: 100%;">
+					<?php foreach ( $channels as $channel ) : ?>
+						<option value="<?php echo esc_attr( $channel['id'] ); ?>"
+							<?php echo in_array( $channel['id'], $saved_channels, true ) ? 'selected' : ''; ?>>
+							<?php echo esc_html( $channel['name'] ); ?>
+						</option>
+					<?php endforeach; ?>
+				</select>
+			</p>
+			<?php
+				echo wp_kses_post( sprintf( '<p><em>Need access expiry or automatic removal? <a href="%s">Upgrade to Pro!</a></em></p>', wctlgm_fs()->get_upgrade_url() ) );
+			?>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Save Telegram access meta for a product variation.
+	 *
+	 * @param int $variation_id The variation ID.
+	 * @param int $loop         The variation loop index.
+	 */
+	public function wctlgm_save_variation_telegram_data( $variation_id, $loop ) {
+		// Only save for plain variable products (not variable-subscription, etc.).
+		$variation = get_post( $variation_id );
+		if ( ! $variation ) {
+			return;
+		}
+
+		$parent_product = wc_get_product( $variation->post_parent );
+		if ( ! $parent_product || ! $parent_product->is_type( 'variable' ) ) {
+			return;
+		}
+
+		// Verify nonce — variations save via AJAX (save-variations) or main product Update (woocommerce_save_data).
+		$nonce_valid = false;
+		if ( isset( $_POST['security'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['security'] ) ), 'save-variations' ) ) {
+			$nonce_valid = true;
+		} elseif ( isset( $_POST['woocommerce_meta_nonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['woocommerce_meta_nonce'] ) ), 'woocommerce_save_data' ) ) {
+			$nonce_valid = true;
+		}
+
+		if ( ! $nonce_valid ) {
+			return;
+		}
+
+		if ( ! current_user_can( 'edit_post', $variation_id ) ) {
+			return;
+		}
+
+		// Channel IDs.
+		$channel_ids_raw = array();
+		if ( isset( $_POST['wctlgm_variation_channel_ids'][ $loop ] ) ) {
+			$channel_ids_raw = wp_unslash( $_POST['wctlgm_variation_channel_ids'][ $loop ] );
+		}
+		$channel_ids_raw = (array) $channel_ids_raw;
+		$channel_ids     = array_map( 'sanitize_text_field', $channel_ids_raw );
+		update_post_meta( $variation_id, '_telegram_channel_ids', $channel_ids );
 	}
 
 	/**

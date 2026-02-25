@@ -1,0 +1,12 @@
+{
+	"private": true,
+	"scripts": {
+		"env:start": "wp-env start",
+		"env:stop": "wp-env stop",
+		"env:destroy": "wp-env destroy",
+		"test:integration": "wp-env run tests-cli --env-cwd=wp-content/plugins/wctlgm-subscriber-manager-lite vendor/bin/phpunit --configuration phpunit-integration.xml.dist"
+	},
+	"devDependencies": {
+		"@wordpress/env": "^10.0.0"
+	}
+}

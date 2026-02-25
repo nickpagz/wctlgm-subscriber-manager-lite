@@ -162,15 +162,26 @@ class Subscriber_Manager_Lite_WCTLGM_Order_Handler {
 		}
 	}
 
+	/**
+	 * Resolve the correct product/variation ID for Telegram meta lookups.
+	 *
+	 * @param WC_Order_Item_Product $item The order line item.
+	 * @return int The variation ID if present, otherwise the product ID.
+	 */
+	private static function get_telegram_meta_id( $item ) {
+		$variation_id = $item->get_variation_id();
+		return $variation_id ? $variation_id : $item->get_product_id();
+	}
+
 	private static function order_has_telegram_product( $order ) {
 		$items = $order->get_items();
 
 		foreach ( $items as $item ) {
-			$product_id  = $item->get_product_id();
-			$product     = wc_get_product( $product_id );
-			$channel_ids = get_post_meta( $product_id, '_telegram_channel_ids', true );
+			$meta_id     = self::get_telegram_meta_id( $item );
+			$product     = wc_get_product( $item->get_product_id() );
+			$channel_ids = get_post_meta( $meta_id, '_telegram_channel_ids', true );
 
-			if ( ! empty( $channel_ids ) && $product->is_type( 'simple' ) ) {
+			if ( ! empty( $channel_ids ) && $product->is_type( array( 'simple', 'variable' ) ) ) {
 				return true;
 			}
 		}

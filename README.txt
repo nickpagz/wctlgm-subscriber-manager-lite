@@ -2,8 +2,8 @@
 Contributors:      rektification, npagazani
 Tags:              woocommerce, telegram, subscriptions
 Requires at least: 6.0
-Tested up to:      6.9
-Stable tag:        1.6.0
+Tested up to:      6.9.0
+Stable tag:        1.7.0
 License:           GPL-2.0-or-later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -13,7 +13,7 @@ Automatically manage Telegram private channel and group subscribers via WooComme
 
 Automatically manage Telegram private channel and group subscribers via WooCommerce.
 
-With Subscriber Manager Lite for Telegram you can sell access to your private Telegram channels and groups via a Simple product in
+With Subscriber Manager Lite for Telegram you can sell access to your private Telegram channels and groups via Simple or Variable products in
 WooCommerce. Following a successful checkout, users will be provided with an automatically generated one-time use invite link for channel or group access.
 The invite link is validated in the back-end, and the user is automatically granted access. No admin interaction is required.
 
@@ -25,9 +25,10 @@ The invite link is validated in the back-end, and the user is automatically gran
 * You only need to enter your bot token and URL to get started.
 * Semi-automatic channel or group ID retrieval.
 * Telegram user ID's automatically retrieved and validated during activation or join request approval.
-* Set channel or group access to any Simple product in WooCommerce.
+* Set channel or group access to any Simple or Variable product in WooCommerce.
+* Variable product support: configure Telegram channel access per variation.
 * Choose between two different post-checkout flows (Activation via bot, or direct invite link generation).
-* Allow or block external or manual Telgram invites.
+* Allow or block external or manual Telegram invites.
 * Secure webhook validation.
 * Works with WooCommerce HPOS.
 
@@ -35,14 +36,13 @@ Note, in the Lite version members are not automatically removed from channels or
 
 == Pro version ==
 
-* NEW: Now supports "Flexible Subscriptions"!
 * Control access to **unlimited** Telegram private channels or groups.
-* Control access to multiple channels or groups per product. 
-* Use with both **Simple** and **Simple Subscription** products in WooCommerce.
+* Control access to multiple channels or groups per product.
+* Use with **Simple**, **Variable**, **Simple Subscription**, and **Variable Subscription** products in WooCommerce.
 * Connect to automation services such as Make.com, n8n, Paddly Connect, etc. to trigger external automations or notifications.
 * Automatically removes members when their subscriptions expire.
 * Members won't be removed if they have multiple subscriptions and at least one is still active.
-* Works best with [WooCommerce Subscriptions](https://woocommerce.com/products/woocommerce-subscriptions/), also supports [Flexible Subscriptions](https://wordpress.org/plugins/flexible-subscriptions/). Other subscription plugins support coming soon.
+* Works with WooCommerce Subscriptions and Flexible Subscriptions by WP Desk.
 * Set access expiry for Simple products (automatically removes members on expiration).
 * Set order cancellation access cut-off to match a refund policy (members can be optionally instantly removed if they cancel their subscription within the cut-off period).
 
@@ -52,7 +52,7 @@ Note, in the Lite version members are not automatically removed from channels or
 Use the standard WordPress plugins installation page and install or upload the plugin.
 
 After plugin activation plugin settings are in **Settings > Telegram Subscriber Manager** in the wp-admin dashboard.
-Individual product settings are in the **Product data** settings in the **Telegram Channels** tab (available for **Simple** and **Simple Subscription** products only).
+Individual product settings are in the **Product data** settings in the **Telegram Access** tab (available for **Simple** and **Variable** products). For variable products, Telegram channel settings are configured on each individual variation.
 
 
 == External services ==
@@ -72,6 +72,11 @@ It also sets a webhook to handle communication between your WooCommerce store an
 
 
 == Changelog ==
+
+= 1.7.0 =
+* New: Add support for Variable products with per-variation Telegram channel settings.
+* New: (Pro version) Add support for Variable and Variable Subscription products.
+* Update: (Pro version) Optimize user removal with a single API call instead of two.
 
 = 1.6.0 =
 * New: (Pro version) Add support for Flexible Subscriptions by WP Desk as a subscription backend.
