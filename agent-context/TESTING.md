@@ -4,119 +4,64 @@
 
 ## Current Status
 
-**No test suite exists for the lite plugin.** There is no `phpunit.xml`, no `tests/` directory, and no dev dependencies in `composer.json`.
+The lite plugin has a comprehensive test suite with both unit and integration tests.
 
-The pro version (`wctlgm-subscriber-manager`) has a comprehensive test suite with PHPUnit, Brain\Monkey, and Mockery that serves as a reference for establishing testing infrastructure here.
+- **Unit tests:** PHPUnit with Brain\Monkey and Mockery for WordPress/WooCommerce mocking
+- **Integration tests:** wp-env with wp-phpunit for full WordPress environment testing
 
-## Proposed Test Stack
+## Test Stack
 
 | Tool | Version | Purpose |
 |------|---------|---------|
 | PHPUnit | ^9.6 | Test runner |
-| Brain\Monkey | ^2.6 | WordPress function mocking |
-| Mockery | ^1.6 | Object mocking |
+| Brain\Monkey | ^2.7 | WordPress function mocking (unit tests) |
+| Mockery | ^1.6 | Object mocking (unit tests) |
+| wp-phpunit | ^6.4 | WordPress test framework (integration tests) |
+| Yoast PHPUnit Polyfills | ^2.0 | PHPUnit compatibility layer |
 
-Integration tests (wp-env / Docker) are not planned for the initial phase. The lite plugin's simpler architecture makes unit tests with mocking sufficient for high-confidence coverage.
+## Running Tests
 
-## Setup Plan
+```bash
+# Unit tests
+composer test:unit
 
-### Step 1: Add dev dependencies to composer.json
-
-```json
-{
-    "require-dev": {
-        "phpunit/phpunit": "^9.6",
-        "brain/monkey": "^2.6",
-        "mockery/mockery": "^1.6",
-        "symfony/polyfill-php73": "^1.29"
-    },
-    "scripts": {
-        "test:unit": "vendor/bin/phpunit"
-    }
-}
+# Integration tests (requires wp-env running)
+composer test:integration
 ```
 
-### Step 2: Create phpunit.xml.dist
+## Test Infrastructure
 
-```xml
-<?xml version="1.0"?>
-<phpunit
-    bootstrap="tests/bootstrap.php"
-    colors="true"
-    verbose="true"
-    beStrictAboutTestsThatDoNotTestAnything="true"
->
-    <testsuites>
-        <testsuite name="unit">
-            <directory suffix="Test.php">tests</directory>
-            <exclude>tests/stubs</exclude>
-        </testsuite>
-    </testsuites>
-</phpunit>
-```
+### Configuration Files
 
-### Step 3: Create test bootstrap (`tests/bootstrap.php`)
+- `phpunit.xml.dist` — Unit test configuration (bootstrap: `tests/bootstrap.php`)
+- `phpunit-integration.xml.dist` — Integration test configuration (bootstrap: `tests/integration/bootstrap.php`)
+- `.wp-env.json` — WordPress environment for integration tests (WP 6.6, PHP 8.3, WooCommerce latest)
 
-The bootstrap should:
-1. Load Composer autoloader (`vendor/autoload.php`)
-2. Initialize Brain\Monkey (`Brain\Monkey\setUp()`)
-3. Define WordPress constants: `ABSPATH`, `WCTLGM_SML_PLUGIN_DIR`, `WCTLGM_SML_PLUGIN_BASE`, `HOUR_IN_SECONDS`
-4. Load WordPress function stubs (`tests/stubs/wordpress.php`)
-5. Load WooCommerce class stubs (`tests/stubs/woocommerce.php`)
-6. Require plugin class files in dependency order (matching the load order in CONVENTIONS.md)
+### Unit Test Bootstrap (`tests/bootstrap.php`)
 
-**Note:** Must handle namespaced classes — all plugin classes use `Subscriber_Manager_Lite_for_Telegram` namespace.
+1. Loads Composer autoloader (`vendor/autoload.php`)
+2. Initializes Brain\Monkey
+3. Defines WordPress constants: `ABSPATH`, `WCTLGM_SML_PLUGIN_DIR`, `WCTLGM_SML_PLUGIN_BASE`, `HOUR_IN_SECONDS`
+4. Loads WordPress function stubs (`tests/stubs/wordpress.php`)
+5. Loads WooCommerce class stubs (`tests/stubs/woocommerce.php`)
+6. Requires plugin class files in dependency order
 
-### Step 4: Create base TestCase (`tests/TestCase.php`)
+### Base TestCase (`tests/TestCase.php`)
 
-```php
-namespace Subscriber_Manager_Lite_for_Telegram\Tests;
+Sets up Brain\Monkey and Mockery per test, provides helper `create_mock_item()` for WooCommerce order items.
 
-use PHPUnit\Framework\TestCase as PHPUnitTestCase;
-use Brain\Monkey;
-use Mockery;
+### Stubs (`tests/stubs/`)
 
-class TestCase extends PHPUnitTestCase {
-    protected function setUp(): void {
-        parent::setUp();
-        Monkey\setUp();
-    }
+- **`wordpress.php`** — WordPress function stubs: `sanitize_text_field()`, `sanitize_url()`, `esc_url_raw()`, `esc_html()`, `wp_generate_password()`, `wp_json_encode()`, etc.
+- **`woocommerce.php`** — WooCommerce class stubs: `WC_Order`, `WC_Order_Item_Product`, `WC_Product`, `WC_Email`, `WC()` function
 
-    protected function tearDown(): void {
-        Monkey\tearDown();
-        Mockery::close();
-        parent::tearDown();
-    }
+### Integration Test Helpers (`tests/integration/helpers/`)
 
-    /**
-     * Create a mock WooCommerce order item.
-     */
-    protected function create_mock_item( $product_id, $variation_id = 0 ) {
-        $item = Mockery::mock( 'WC_Order_Item_Product' );
-        $item->shouldReceive( 'get_product_id' )->andReturn( $product_id );
-        $item->shouldReceive( 'get_variation_id' )->andReturn( $variation_id );
-        return $item;
-    }
-}
-```
+- `WC_Helper_Product` — WooCommerce product/order factory
+- `Telegram_Webhook_Helper` — Telegram webhook simulation
+- `API_Interceptor` — Telegram API call interception
 
-### Step 5: Create stubs
-
-**`tests/stubs/wordpress.php`** — Stub WordPress functions not handled by Brain\Monkey:
-- `sanitize_text_field()`, `sanitize_url()`, `esc_url_raw()`, `esc_html()`, `esc_url()`, `esc_attr()`
-- `wp_generate_password()`, `wp_json_encode()`
-- `get_bloginfo()`
-- `plugin_basename()`, `plugin_dir_path()`, `plugin_dir_url()`
-- `wp_kses_post()`
-
-**`tests/stubs/woocommerce.php`** — Stub WooCommerce classes:
-- `WC_Order` with methods: `get_id()`, `get_items()`, `get_status()`, `get_meta()`, `update_meta_data()`, `delete_meta_data()`, `add_meta_data()`, `save()`, `get_meta_data()`
-- `WC_Order_Item_Product` with: `get_product_id()`, `get_variation_id()`
-- `WC_Product` with: `is_type()`, `get_id()`
-- `WC_Email` base class
-- `WC()` function returning mailer with `get_emails()`
-
-## Proposed Test Coverage
+## Test Coverage
 
 ### Priority 1: Core Logic
 

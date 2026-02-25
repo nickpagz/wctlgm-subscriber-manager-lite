@@ -9,7 +9,7 @@ Detailed architecture docs, mermaid diagrams, testing guides, and coding convent
 - `agent-context/ARCHITECTURE.md` — Full project structure, class roles, options, meta keys, hooks
 - `agent-context/CONVENTIONS.md` — Naming conventions, code style, patterns
 - `agent-context/DATA-FLOW.md` — Mermaid diagrams for all major flows
-- `agent-context/TESTING.md` — Test status, proposed stack, writing patterns
+- `agent-context/TESTING.md` — Test stack, coverage, writing patterns
 - `agent-context/E2E-TESTING.md` — Semi-automated E2E testing playbook
 - `agent-context/ROADMAP.md` — Development roadmap and current phase
 
@@ -31,7 +31,15 @@ composer install
 composer install --no-dev --prefer-dist --optimize-autoloader
 ```
 
-There is no test suite, linter, or Node.js build step configured. The only JS file (`assets/js/wctlgm-subscriber-manager-lite.js`) is plain jQuery — no transpilation needed.
+Test suite uses PHPUnit 9.6 with Brain\Monkey for unit tests and wp-phpunit for integration tests. No linter or Node.js build step configured. The only JS file (`assets/js/wctlgm-subscriber-manager-lite.js`) is plain jQuery — no transpilation needed.
+
+```bash
+# Run unit tests
+composer test:unit
+
+# Run integration tests (requires wp-env)
+composer test:integration
+```
 
 ## Architecture
 

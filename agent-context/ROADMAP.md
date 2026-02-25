@@ -9,9 +9,9 @@ Items are marked complete manually by the project owner.
 ## Phase 1: Agent Context & Testing Foundation (current)
 
 - [x] Create agent-context documentation files
-- [ ] Update CLAUDE.md to reference agent-context files
-- [ ] Set up PHPUnit testing infrastructure (composer dev deps, bootstrap, stubs, base test case)
-- [ ] Write initial unit tests for core classes (Subscriptions_Handler, Order_Handler, Bot_Interaction_Handler)
+- [x] Update CLAUDE.md to reference agent-context files
+- [x] Set up PHPUnit testing infrastructure (composer dev deps, bootstrap, stubs, base test case)
+- [x] Write initial unit tests for core classes (Subscriptions_Handler, Order_Handler, Bot_Interaction_Handler)
 
 ## Phase 2: Sync with Pro
 
