@@ -7,6 +7,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - uses: actions/checkout@v3
@@ -23,10 +25,11 @@ jobs:
       - name: Zip Folder
         run: |
           zip -r ${{ github.event.repository.name }}.zip . \
-          -x ".*" ".*/**" ".git/**" ".github/**" "node_modules/**" \
-          ".gitignore" ".editorconfig" ".distignore" ".phpcs.xml" \
+          -x ".*" ".*/**" ".git/**" ".github/**" ".vscode/**" "node_modules/**" \
+          ".gitignore" ".editorconfig" ".distignore" ".phpcs.xml" ".wp-env.json" \
           "composer.json" "composer.lock" "package.json" "package-lock.json" \
-          "resources/**" \
+          "resources/**" "tests/**" "agent-context/**" "phpunit.xml.dist" \
+          "phpunit-integration.xml.dist" "CLAUDE.md"
           ls -la ${{ github.event.repository.name }}.zip
 
       - name: Release
