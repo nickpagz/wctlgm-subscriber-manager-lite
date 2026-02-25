@@ -64,7 +64,7 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 		wp_enqueue_script(
 			'subscriber-manager-lite-js',
 			plugin_dir_url( __FILE__ ) . '../assets/js/wctlgm-subscriber-manager-lite.js',
-			array( 'jquery' ),
+			array( 'jquery', 'wc-enhanced-select' ),
 			filemtime( plugin_dir_path( __FILE__ ) . '../assets/js/wctlgm-subscriber-manager-lite.js' ),
 			true
 		);
@@ -268,9 +268,12 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 		}
 
 		// Channel IDs.
-		$channel_ids = isset( $_POST['wctlgm_variation_channel_ids'][ $loop ] )
-			? array_map( 'sanitize_text_field', $_POST['wctlgm_variation_channel_ids'][ $loop ] )
-			: array();
+		$channel_ids_raw = array();
+		if ( isset( $_POST['wctlgm_variation_channel_ids'][ $loop ] ) ) {
+			$channel_ids_raw = wp_unslash( $_POST['wctlgm_variation_channel_ids'][ $loop ] );
+		}
+		$channel_ids_raw = (array) $channel_ids_raw;
+		$channel_ids     = array_map( 'sanitize_text_field', $channel_ids_raw );
 		update_post_meta( $variation_id, '_telegram_channel_ids', $channel_ids );
 	}
 

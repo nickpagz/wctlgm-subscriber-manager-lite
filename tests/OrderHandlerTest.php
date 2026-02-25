@@ -39,7 +39,7 @@ class OrderHandlerTest extends WCTLGM_Lite_TestCase {
 	/**
 	 * @test
 	 */
-	public function maybe_process_order_skips_non_simple_products() {
+	public function maybe_process_order_skips_unsupported_product_types() {
 		$order = $this->create_mock_order(
 			array(
 				'id'    => 100,
@@ -48,8 +48,8 @@ class OrderHandlerTest extends WCTLGM_Lite_TestCase {
 		);
 		Functions\when( 'wc_get_order' )->justReturn( $order );
 
-		// Variable product type — not supported in lite.
-		$product = $this->create_mock_product( array( 'type' => 'variable' ) );
+		// Subscription product type — not supported in lite.
+		$product = $this->create_mock_product( array( 'type' => 'subscription' ) );
 		Functions\when( 'wc_get_product' )->justReturn( $product );
 		Functions\when( 'get_post_meta' )->alias(
 			function ( $id, $key, $single = false ) {

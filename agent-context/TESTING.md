@@ -52,8 +52,10 @@ Sets up Brain\Monkey and Mockery per test, provides helper `create_mock_item()` 
 
 ### Stubs (`tests/stubs/`)
 
-- **`wordpress.php`** — WordPress function stubs: `sanitize_text_field()`, `sanitize_url()`, `esc_url_raw()`, `esc_html()`, `wp_generate_password()`, `wp_json_encode()`, etc.
-- **`woocommerce.php`** — WooCommerce class stubs: `WC_Order`, `WC_Order_Item_Product`, `WC_Product`, `WC_Email`, `WC()` function
+- **`wordpress.php`** — WordPress class stubs: `WP_Error`, `WP_REST_Request`, `WP_REST_Response`
+- **`woocommerce.php`** — WooCommerce class stubs: `WC_Logger`
+
+WordPress function stubs (`sanitize_text_field()`, `wp_generate_password()`, etc.) are defined in `tests/bootstrap.php`. WooCommerce object mocks (`WC_Order`, `WC_Product`, etc.) are created per-test via Mockery in `tests/TestCase.php`.
 
 ### Integration Test Helpers (`tests/integration/helpers/`)
 

@@ -53,7 +53,11 @@ jQuery(document).ready(function($) {
 	function initVariationSelects() {
 		$('.wctlgm-variation-channel-select').each(function() {
 			if (!$(this).hasClass('select2-hidden-accessible')) {
-				$(this).select2();
+				if ($.fn.selectWoo) {
+					$(this).selectWoo();
+				} else if ($.fn.select2) {
+					$(this).select2();
+				}
 			}
 		});
 		// Hide variation Telegram fields if product type is not variable.
