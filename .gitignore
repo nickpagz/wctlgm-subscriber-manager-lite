@@ -5,3 +5,8 @@
 composer.phar
 /vendor/
 /node_modules/
+
+.wp-env.override.json
+
+# Playwright MCP
+.playwright-mcp/
