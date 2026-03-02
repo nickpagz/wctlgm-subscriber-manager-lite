@@ -588,6 +588,94 @@ class Subscriber_Manager_Lite_WCTLGM_Database {
 	}
 
 	// ──────────────────────────────────────────────────────────
+	// Pending Invites (Orphaned Records)
+	// ──────────────────────────────────────────────────────────
+
+	/**
+	 * Get pending channel records that have no telegram_user_id.
+	 *
+	 * These are orders with invites issued but the user hasn't joined via Telegram yet.
+	 *
+	 * @param array $args {
+	 *     Query arguments.
+	 *     @type int    $per_page Items per page. Default 20.
+	 *     @type int    $page     Current page. Default 1.
+	 *     @type string $search   Search by order ID (numeric only).
+	 * }
+	 * @return array Array of pending record objects.
+	 */
+	public static function get_pending_records( $args = array() ) {
+		global $wpdb;
+
+		$defaults = array(
+			'per_page' => 20,
+			'page'     => 1,
+			'search'   => '',
+		);
+
+		$args = wp_parse_args( $args, $defaults );
+
+		$table  = $wpdb->prefix . 'wctlgm_user_channels';
+		$where  = array( 'telegram_user_id IS NULL', "status = 'pending'", 'order_id IS NOT NULL' );
+		$values = array();
+
+		if ( ! empty( $args['search'] ) && is_numeric( $args['search'] ) ) {
+			$where[]  = 'order_id = %d';
+			$values[] = (int) $args['search'];
+		}
+
+		$where_clause = 'WHERE ' . implode( ' AND ', $where );
+		$offset       = ( $args['page'] - 1 ) * $args['per_page'];
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name and validated WHERE clauses.
+		$sql = "SELECT *
+			FROM `{$table}`
+			{$where_clause}
+			ORDER BY created_at DESC
+			LIMIT %d OFFSET %d";
+
+		$values[] = $args['per_page'];
+		$values[] = $offset;
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		return $wpdb->get_results( $wpdb->prepare( $sql, $values ) );
+	}
+
+	/**
+	 * Count pending records without telegram_user_id.
+	 *
+	 * @return int Total count of orphaned pending invite records.
+	 */
+	public static function count_pending_records() {
+		global $wpdb;
+
+		$table = $wpdb->prefix . 'wctlgm_user_channels';
+
+		return (int) $wpdb->get_var(
+			"SELECT COUNT(*) FROM `{$table}` WHERE telegram_user_id IS NULL AND status = 'pending' AND order_id IS NOT NULL" // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		);
+	}
+
+	/**
+	 * Get a single user-channel record by its primary key.
+	 *
+	 * @param int $record_id The record ID.
+	 * @return object|null The record or null.
+	 */
+	public static function get_channel_record( $record_id ) {
+		global $wpdb;
+
+		$table = $wpdb->prefix . 'wctlgm_user_channels';
+
+		return $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT * FROM `{$table}` WHERE id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				$record_id
+			)
+		);
+	}
+
+	// ──────────────────────────────────────────────────────────
 	// Multi-Access Check
 	// ──────────────────────────────────────────────────────────
 

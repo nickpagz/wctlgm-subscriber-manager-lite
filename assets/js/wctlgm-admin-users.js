@@ -227,6 +227,55 @@ jQuery( document ).ready( function( $ ) {
 		executeAction( 'revoke', telegramId, channelId );
 	});
 
+	// ── Pending Invite Revoke ─────────────────────────────────
+
+	$( document ).on( 'click', '.wctlgm-pending-revoke', function() {
+		var $btn      = $( this );
+		var recordId  = $btn.data( 'record-id' );
+		var channelId = $btn.data( 'channel-id' );
+
+		if ( ! confirm( wctlgm_users_vars.i18n.confirm_revoke ) ) {
+			return;
+		}
+
+		$btn.prop( 'disabled', true ).text( wctlgm_users_vars.i18n.loading );
+
+		$.ajax({
+			url:    ajaxurl,
+			method: 'POST',
+			data:   {
+				action:     'wctlgm_subscriber_action',
+				nonce:      wctlgm_users_vars.nonce,
+				sub_action: 'revoke',
+				record_id:  recordId,
+				channel_id: channelId
+			},
+			success: function( response ) {
+				if ( response.success ) {
+					$btn.closest( 'tr' ).fadeOut( 300, function() {
+						$( this ).remove();
+						var $section   = $( '#wctlgm-pending-invites-section' );
+						var remaining  = $section.find( 'tbody tr' ).length;
+						if ( 0 === remaining ) {
+							$section.fadeOut( 300 );
+						} else {
+							$section.find( 'h3' ).text(
+								$section.find( 'h3' ).text().replace( /\(\d+\)/, '(' + remaining + ')' )
+							);
+						}
+					});
+				} else {
+					alert( response.data.message || wctlgm_users_vars.i18n.error );
+					$btn.prop( 'disabled', false ).text( wctlgm_users_vars.i18n.revoke_invite );
+				}
+			},
+			error: function() {
+				alert( wctlgm_users_vars.i18n.error );
+				$btn.prop( 'disabled', false ).text( wctlgm_users_vars.i18n.revoke_invite );
+			}
+		});
+	});
+
 	// ── Sync Status ──────────────────────────────────────────
 
 	$( document ).on( 'click', '.wctlgm-sync-user', function( e ) {

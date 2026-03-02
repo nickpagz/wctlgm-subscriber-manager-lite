@@ -654,6 +654,99 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 			</form>
 		</div>
 		<?php
+		$this->render_pending_invites_section();
+	}
+
+	/**
+	 * Render the pending invites section below the subscriber table.
+	 *
+	 * Shows user_channels records where telegram_user_id IS NULL (direct invite flow).
+	 * Only renders when orphaned pending records exist.
+	 */
+	private function render_pending_invites_section() {
+		$pending_count = Subscriber_Manager_Lite_WCTLGM_Database::count_pending_records();
+
+		if ( 0 === $pending_count ) {
+			return;
+		}
+
+		$pending_records = Subscriber_Manager_Lite_WCTLGM_Database::get_pending_records();
+		$channels_config = get_option( 'wctlgm_channels', array() );
+		?>
+		<div id="wctlgm-pending-invites-section">
+			<h3>
+				<?php
+				printf(
+					/* translators: %d: number of pending invite records */
+					esc_html__( 'Pending Invites (%d)', 'wctlgm-subscriber-manager-lite' ),
+					esc_html( $pending_count )
+				);
+				?>
+			</h3>
+			<p class="description">
+				<?php esc_html_e( 'Invite links sent to customers who have not yet joined via Telegram. You can revoke these invite links below.', 'wctlgm-subscriber-manager-lite' ); ?>
+			</p>
+			<table class="wp-list-table widefat fixed striped">
+				<thead>
+					<tr>
+						<th scope="col"><?php esc_html_e( 'Order', 'wctlgm-subscriber-manager-lite' ); ?></th>
+						<th scope="col"><?php esc_html_e( 'Customer', 'wctlgm-subscriber-manager-lite' ); ?></th>
+						<th scope="col"><?php esc_html_e( 'Channel / Group', 'wctlgm-subscriber-manager-lite' ); ?></th>
+						<th scope="col"><?php esc_html_e( 'Issued', 'wctlgm-subscriber-manager-lite' ); ?></th>
+						<th scope="col"><?php esc_html_e( 'Actions', 'wctlgm-subscriber-manager-lite' ); ?></th>
+					</tr>
+				</thead>
+				<tbody>
+					<?php foreach ( $pending_records as $record ) : ?>
+						<?php
+						$order         = wc_get_order( $record->order_id );
+						$customer_name = $order
+							? trim( $order->get_billing_first_name() . ' ' . $order->get_billing_last_name() )
+							: __( 'Unknown', 'wctlgm-subscriber-manager-lite' );
+
+						// Resolve channel name.
+						$channel_name = $record->channel_id;
+						foreach ( $channels_config as $ch ) {
+							if ( $ch['id'] === $record->channel_id ) {
+								$channel_name = $ch['name'];
+								break;
+							}
+						}
+
+						$issued_date = ! empty( $record->invite_issued_at )
+							? wp_date( get_option( 'date_format' ), strtotime( $record->invite_issued_at ) )
+							: '—';
+						?>
+						<tr>
+							<td>
+								<?php if ( $order ) : ?>
+									<a href="<?php echo esc_url( $order->get_edit_order_url() ); ?>">
+										#<?php echo esc_html( $record->order_id ); ?>
+									</a>
+								<?php else : ?>
+									#<?php echo esc_html( $record->order_id ); ?>
+									<em>(<?php esc_html_e( 'deleted', 'wctlgm-subscriber-manager-lite' ); ?>)</em>
+								<?php endif; ?>
+							</td>
+							<td><?php echo esc_html( $customer_name ); ?></td>
+							<td>
+								<span class="wctlgm-channel-badge"><?php echo esc_html( $channel_name ); ?></span>
+							</td>
+							<td><?php echo esc_html( $issued_date ); ?></td>
+							<td>
+								<button type="button"
+									class="button wctlgm-pending-revoke"
+									data-record-id="<?php echo esc_attr( $record->id ); ?>"
+									data-channel-id="<?php echo esc_attr( $record->channel_id ); ?>">
+									<?php esc_html_e( 'Revoke Invite', 'wctlgm-subscriber-manager-lite' ); ?>
+								</button>
+							</td>
+						</tr>
+					<?php endforeach; ?>
+				</tbody>
+			</table>
+		</div>
+		<?php
 	}
 
 	/**
@@ -788,6 +881,13 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 		$sub_action  = isset( $_POST['sub_action'] ) ? sanitize_text_field( wp_unslash( $_POST['sub_action'] ) ) : '';
 		$telegram_id = isset( $_POST['telegram_id'] ) ? sanitize_text_field( wp_unslash( $_POST['telegram_id'] ) ) : '';
 		$channel_id  = isset( $_POST['channel_id'] ) ? sanitize_text_field( wp_unslash( $_POST['channel_id'] ) ) : '';
+		$record_id   = isset( $_POST['record_id'] ) ? absint( wp_unslash( $_POST['record_id'] ) ) : 0;
+
+		// For revoke action, allow record_id as alternative to telegram_id (for pending invites without a Telegram user).
+		if ( 'revoke' === $sub_action && $record_id > 0 ) {
+			$this->handle_revoke_by_record_id( $record_id );
+			return;
+		}
 
 		if ( empty( $sub_action ) || empty( $telegram_id ) || empty( $channel_id ) ) {
 			wp_send_json_error( array( 'message' => __( 'Missing required parameters.', 'wctlgm-subscriber-manager-lite' ) ) );
@@ -896,6 +996,54 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 				__( 'Admin revoked invite for user %1$s in channel %2$s.', 'wctlgm-subscriber-manager-lite' ),
 				$telegram_id,
 				$channel_id
+			)
+		);
+
+		wp_send_json_success( array( 'message' => __( 'Invite link revoked.', 'wctlgm-subscriber-manager-lite' ) ) );
+	}
+
+	/**
+	 * Handle revoke action for orphaned records — looks up by record ID.
+	 *
+	 * Used for pending invites that have no telegram_user_id yet.
+	 *
+	 * @param int $record_id The user_channels record primary key.
+	 */
+	private function handle_revoke_by_record_id( $record_id ) {
+		$record = Subscriber_Manager_Lite_WCTLGM_Database::get_channel_record( $record_id );
+
+		if ( ! $record || empty( $record->invite_link ) ) {
+			wp_send_json_error( array( 'message' => __( 'No invite link found to revoke.', 'wctlgm-subscriber-manager-lite' ) ) );
+		}
+
+		if ( 'pending' !== $record->status ) {
+			wp_send_json_error( array( 'message' => __( 'This record is not in pending status.', 'wctlgm-subscriber-manager-lite' ) ) );
+		}
+
+		$bot_token = get_option( 'wctlgm_bot_token' );
+		if ( ! empty( $bot_token ) ) {
+			$result = $this->api_handler->revoke_invite_link( $record->channel_id, $record->invite_link );
+
+			if ( is_wp_error( $result ) ) {
+				wp_send_json_error( array( 'message' => $result->get_error_message() ) );
+			}
+		}
+
+		Subscriber_Manager_Lite_WCTLGM_Database::update_channel_record(
+			$record->id,
+			array(
+				'invite_revoked_at' => current_time( 'mysql' ),
+				'status'            => 'removed',
+			)
+		);
+
+		$this->logger->info(
+			sprintf(
+				/* translators: 1: Record ID, 2: Channel ID, 3: Order ID */
+				__( 'Admin revoked pending invite (record %1$s) for channel %2$s (order #%3$s).', 'wctlgm-subscriber-manager-lite' ),
+				$record_id,
+				$record->channel_id,
+				$record->order_id
 			)
 		);
 
