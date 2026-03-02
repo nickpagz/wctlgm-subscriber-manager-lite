@@ -200,6 +200,16 @@ class Subscriber_Manager_Lite_WCTLGM_Order_Handler {
 			foreach ( $response['channels'] as $invite ) {
 				// Store invite link with channel ID as meta key suffix
 				$order->add_meta_data( '_channel_invite_' . $invite['channel_id'], sanitize_url( $invite['invite_link'] ) );
+
+				// Create pending DB record for subscriber tracking.
+				Subscriber_Manager_Lite_WCTLGM_Database::add_user_channel(
+					array(
+						'order_id'         => $order_id,
+						'channel_id'       => $invite['channel_id'],
+						'invite_link'      => $invite['invite_link'],
+						'invite_issued_at' => current_time( 'mysql', true ),
+					)
+				);
 			}
 			$order->save();
 

@@ -1,6 +1,6 @@
 # Data Flow Diagrams
 
-> **Version:** 1.7.0 | **Last updated:** 2026-02-25
+> **Version:** 2.0.0 | **Last updated:** 2026-03-02
 
 ## Order Processing Flow
 
@@ -25,7 +25,8 @@ flowchart TD
     J -->|Yes| Z
     J -->|No| K[Subscriptions_Handler::get_channel_invites<br>resolves variation_id or product_id for meta]
     K --> L[Store _channel_invite_ meta per channel]
-    L --> M[Fire wc_wctlgm_invite_links_generated action]
+    L --> L2[Database::add_user_channel<br>pending record per channel]
+    L2 --> M[Fire wc_wctlgm_invite_links_generated action]
     M --> N[Schedule wctlgm_send_invite_links_email<br>5-second delay via Action Scheduler]
 ```
 
@@ -41,8 +42,20 @@ flowchart TD
 
     E -->|chat_join_request| F[process_join_request]
     F --> G[Subscriptions_Handler::is_join_request_valid]
-    G -->|Valid| H[approve_join_request + revoke_invite_link]
+    G -->|Valid| H[approve_join_request + revoke_invite_link<br>+ DB: get_or_create_user + update channel record]
     G -->|Invalid| I[deny_join_request]
+
+    E -->|chat_member| CM[process_chat_member_update]
+    CM --> CM1{new_status?}
+    CM1 -->|left| CM2{DB status = removed/banned?}
+    CM2 -->|Yes| N[Skip - preserve admin status]
+    CM2 -->|No| CM3[DB: update status → left]
+    CM1 -->|kicked| CM4{DB status = removed?}
+    CM4 -->|Yes| N
+    CM4 -->|No| CM5[DB: update status → banned]
+    CM1 -->|member/admin/creator| CM6{DB status = left?}
+    CM6 -->|Yes| CM7[DB: update status → active]
+    CM6 -->|No| N
 
     E -->|edited_channel_post<br>or edited_message| J{fetch initiated<br>from settings?}
     J -->|Yes| K[Save chat_id to transient<br>wctlgm_channel_id_temp_store]
@@ -89,6 +102,8 @@ sequenceDiagram
     Plugin->>TelegramAPI: createChatInviteLink (creates_join_request=true)
     TelegramAPI-->>Plugin: invite_link
     Plugin->>Plugin: Store _channel_invite_{channel_id}
+    Plugin->>Plugin: Database::add_user_channel (pending)
+    Plugin->>Plugin: Database::get_or_create_user + link_user_to_order_channels
 
     Plugin->>Bot: Send invite link(s) to user
     Plugin->>Plugin: Schedule wctlgm_send_activation_email
@@ -118,6 +133,7 @@ sequenceDiagram
     TelegramAPI-->>Plugin: invite_link
 
     Plugin->>Plugin: Store _channel_invite_{channel_id}
+    Plugin->>Plugin: Database::add_user_channel (pending)
     Plugin->>Plugin: Fire wc_wctlgm_invite_links_generated
     Plugin->>Plugin: Schedule email (5s delay)
 
@@ -129,6 +145,7 @@ sequenceDiagram
     Plugin->>Plugin: find_order_by_invite_link(invite_link, chat_id)
     Note over Plugin: Order found, status valid<br>No _telegram_user_id yet<br>→ Capture user ID, approve
 
+    Plugin->>Plugin: Database::get_or_create_user + update channel → active
     Plugin->>TelegramAPI: approveChatJoinRequest
     Plugin->>TelegramAPI: revokeChatInviteLink
 ```

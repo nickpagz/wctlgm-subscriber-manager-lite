@@ -3,7 +3,7 @@ Contributors:      rektification, npagazani
 Tags:              woocommerce, telegram, subscriptions
 Requires at least: 6.0
 Tested up to:      6.9.0
-Stable tag:        1.7.0
+Stable tag:        2.0.0
 License:           GPL-2.0-or-later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -31,8 +31,11 @@ The invite link is validated in the back-end, and the user is automatically gran
 * Allow or block external or manual Telegram invites.
 * Secure webhook validation.
 * Works with WooCommerce HPOS.
+* Subscriber table: view all Telegram subscribers, their channel memberships, and statuses directly in the admin dashboard.
+* Subscriber actions: remove, ban, unban users, or revoke pending invite links from the subscriber detail modal.
+* Sync live Telegram membership status for any subscriber with one click.
 
-Note, in the Lite version members are not automatically removed from channels or groups. They can be removed manually from within Telegram.
+Note, in the Lite version members are not automatically removed from channels or groups. They can be removed manually from the subscriber table or from within Telegram.
 
 == Pro version ==
 
@@ -72,6 +75,15 @@ It also sets a webhook to handle communication between your WooCommerce store an
 
 
 == Changelog ==
+
+= 2.0.0 =
+* New: Subscriber table — view and manage all Telegram subscribers from the admin dashboard.
+* New: Subscriber detail modal with live Telegram membership status, linked orders, and per-channel actions.
+* New: Admin actions — remove, ban, unban users, or revoke pending invite links directly from the subscriber table.
+* New: Sync Status — verify live Telegram membership for any subscriber with one click, and automatically populate user profile details (name, username).
+* New: Channel filter and search in the subscriber table.
+* New: Automatic tracking of subscriber lifecycle via Telegram webhook events (join, leave, kick).
+* New: Data migration — existing subscribers from order meta are automatically imported on upgrade.
 
 = 1.7.0 =
 * New: Add support for Variable products with per-variation Telegram channel settings.

@@ -32,6 +32,10 @@ class Subscriber_Manager_Lite_WCTLGM_Bot_Interaction_Handler {
 			return $this->process_join_request( $data );
 		}
 
+		if ( isset( $data['chat_member'] ) ) {
+			return $this->process_chat_member_update( $data );
+		}
+
 		if ( ( isset( $data['edited_channel_post'] ) ) || ( isset( $data['edited_message'] ) ) ) {
 			$this->logger->info( __( 'Edited message/channel post detected', 'wctlgm-subscriber-manager-lite' ) );
 			$chat_id = null;
@@ -112,6 +116,36 @@ class Subscriber_Manager_Lite_WCTLGM_Bot_Interaction_Handler {
 			$response_approval = $this->api_handler->approve_join_request( $chat_id, $user_id );
 			$response_revoke   = $this->api_handler->revoke_invite_link( $chat_id, $invite_link );
 			$this->logger->info( __( 'Join request approved and invite link revoked: ', 'wctlgm-subscriber-manager-lite' ) . wp_json_encode( $response_approval ) . wp_json_encode( $response_revoke ) . ' - ' . $user_id . ' - ' . $chat_id );
+
+			// Track in custom database.
+			$user_data = $this->extract_user_data( $data['chat_join_request']['from'] );
+			Subscriber_Manager_Lite_WCTLGM_Database::get_or_create_user( $user_id, $user_data );
+
+			// Find existing record by invite link and update, or create for external invites.
+			$existing = Subscriber_Manager_Lite_WCTLGM_Database::find_by_invite_link( $invite_link, $chat_id );
+			if ( $existing ) {
+				Subscriber_Manager_Lite_WCTLGM_Database::update_channel_record(
+					$existing->id,
+					array(
+						'telegram_user_id'  => $user_id,
+						'status'            => 'active',
+						'joined_at'         => current_time( 'mysql' ),
+						'invite_revoked_at' => current_time( 'mysql' ),
+					)
+				);
+			} else {
+				// External invite — no existing record.
+				Subscriber_Manager_Lite_WCTLGM_Database::add_user_channel(
+					array(
+						'telegram_user_id'  => $user_id,
+						'channel_id'        => $chat_id,
+						'invite_link'       => $invite_link,
+						'invite_revoked_at' => current_time( 'mysql' ),
+						'status'            => 'active',
+						'joined_at'         => current_time( 'mysql' ),
+					)
+				);
+			}
 		} else {
 			$response_deny = $this->api_handler->deny_join_request( $chat_id, $user_id );
 			$this->logger->info( __( 'Join request denied: ', 'wctlgm-subscriber-manager-lite' ) . wp_json_encode( $response_deny ) . ' - ' . $user_id . ' - ' . $chat_id );
@@ -209,6 +243,10 @@ class Subscriber_Manager_Lite_WCTLGM_Bot_Interaction_Handler {
 		$order_id = $results[1];
 
 		if ( $result['success'] ) {
+			// Track user in custom database.
+			Subscriber_Manager_Lite_WCTLGM_Database::get_or_create_user( $this->user_id );
+			Subscriber_Manager_Lite_WCTLGM_Database::link_user_to_order_channels( $order_id, $this->user_id );
+
 			$message = __( 'Activation successful!', 'wctlgm-subscriber-manager-lite' );
 			if ( ! empty( $result['channels'] ) ) {
 				$message .= "\n" . __( 'Use the following link to access the private channel or group:', 'wctlgm-subscriber-manager-lite' );
@@ -226,6 +264,78 @@ class Subscriber_Manager_Lite_WCTLGM_Bot_Interaction_Handler {
 			$message = __( 'Activation failed. Please check your code and try again.', 'wctlgm-subscriber-manager-lite' );
 		}
 		return $this->build_response( $message );
+	}
+
+	/**
+	 * Extract user data from Telegram webhook 'from' field.
+	 *
+	 * @param array $from The 'from' data from Telegram.
+	 * @return array Extracted user data.
+	 */
+	protected function extract_user_data( $from ) {
+		$data = array();
+
+		if ( isset( $from['username'] ) ) {
+			$data['telegram_username'] = sanitize_text_field( $from['username'] );
+		}
+		if ( isset( $from['first_name'] ) ) {
+			$data['first_name'] = sanitize_text_field( $from['first_name'] );
+		}
+		if ( isset( $from['last_name'] ) ) {
+			$data['last_name'] = sanitize_text_field( $from['last_name'] );
+		}
+
+		return $data;
+	}
+
+	/**
+	 * Process chat_member updates (user left, kicked, rejoined, etc.).
+	 *
+	 * @param array $data The Telegram webhook data.
+	 * @return array Response array.
+	 */
+	protected function process_chat_member_update( $data ) {
+		$chat_id    = sanitize_text_field( $data['chat_member']['chat']['id'] );
+		$user_id    = sanitize_text_field( $data['chat_member']['new_chat_member']['user']['id'] );
+		$new_status = sanitize_text_field( $data['chat_member']['new_chat_member']['status'] );
+		$user_data  = $this->extract_user_data( $data['chat_member']['new_chat_member']['user'] );
+
+		// Update user data if we know this user.
+		$existing_user = Subscriber_Manager_Lite_WCTLGM_Database::get_user( $user_id );
+		if ( $existing_user ) {
+			Subscriber_Manager_Lite_WCTLGM_Database::update_user( $user_id, $user_data );
+		}
+
+		// Map Telegram status to our DB status.
+		switch ( $new_status ) {
+			case 'left':
+				// GUARD: Don't overwrite admin-set statuses (removed/banned).
+				$channel = Subscriber_Manager_Lite_WCTLGM_Database::get_user_channel( $user_id, $chat_id );
+				if ( ! $channel || ! in_array( $channel->status, array( 'removed', 'banned' ), true ) ) {
+					Subscriber_Manager_Lite_WCTLGM_Database::update_user_channel_status( $user_id, $chat_id, 'left' );
+				}
+				break;
+
+			case 'kicked':
+				// GUARD: Don't overwrite 'removed' with 'banned'.
+				$channel = Subscriber_Manager_Lite_WCTLGM_Database::get_user_channel( $user_id, $chat_id );
+				if ( ! $channel || 'removed' !== $channel->status ) {
+					Subscriber_Manager_Lite_WCTLGM_Database::update_user_channel_status( $user_id, $chat_id, 'banned' );
+				}
+				break;
+
+			case 'member':
+			case 'administrator':
+			case 'creator':
+				// GUARD: Only re-activate from 'left' status.
+				$channel = Subscriber_Manager_Lite_WCTLGM_Database::get_user_channel( $user_id, $chat_id );
+				if ( $channel && 'left' === $channel->status ) {
+					Subscriber_Manager_Lite_WCTLGM_Database::update_user_channel_status( $user_id, $chat_id, 'active' );
+				}
+				break;
+		}
+
+		return array( 'action' => 'none' );
 	}
 
 	protected function build_response( $message ) {

@@ -86,6 +86,16 @@ function wp_json_encode( $data, $options = 0, $depth = 512 ) {
 	return json_encode( $data, $options, $depth );
 }
 
+// Array utilities.
+function wp_parse_args( $args, $defaults = array() ) {
+	if ( is_object( $args ) ) {
+		$args = get_object_vars( $args );
+	} elseif ( is_string( $args ) ) {
+		parse_str( $args, $args );
+	}
+	return array_merge( $defaults, $args );
+}
+
 // Error checking.
 function is_wp_error( $thing ) {
 	return $thing instanceof WP_Error;
@@ -108,6 +118,7 @@ require_once $plugin_dir . 'class-subscriber-manager-lite-wctlgm-logger.php';
 
 // Level 2: Depends on level 1.
 require_once $plugin_dir . 'class-subscriber-manager-lite-wctlgm-api-handler.php';
+require_once $plugin_dir . 'class-subscriber-manager-lite-wctlgm-database.php';
 require_once $plugin_dir . 'class-subscriber-manager-lite-wctlgm-subscriptions-handler.php';
 
 // Level 3: Depends on levels 1-2.

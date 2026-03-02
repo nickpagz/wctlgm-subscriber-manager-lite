@@ -75,6 +75,49 @@ class WP_REST_Request {
 	}
 }
 
+/**
+ * Minimal $wpdb stub for unit testing.
+ */
+class WPDB_Stub {
+	public $prefix = 'wp_';
+	public $insert_id = 1;
+	public $rows_affected = 0;
+
+	public function prepare( $query, ...$args ) {
+		return $query;
+	}
+
+	public function get_var( $query = null ) {
+		return null;
+	}
+
+	public function get_row( $query = null ) {
+		return null;
+	}
+
+	public function get_results( $query = null ) {
+		return array();
+	}
+
+	public function insert( $table, $data ) {
+		return 1;
+	}
+
+	public function update( $table, $data, $where ) {
+		return 1;
+	}
+
+	public function get_charset_collate() {
+		return 'DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci';
+	}
+
+	public function esc_like( $text ) {
+		return $text;
+	}
+}
+
+$GLOBALS['wpdb'] = new WPDB_Stub();
+
 class WP_REST_Response {
 	public $data;
 	public $status;
