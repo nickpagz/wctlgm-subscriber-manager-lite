@@ -507,7 +507,7 @@ class Subscriber_Manager_Lite_WCTLGM_Database {
 
 		// Map column to the right table alias.
 		if ( 'joined_at' === $orderby ) {
-			$orderby_col = 'uc.joined_at';
+			$orderby_col = 'earliest_joined';
 		} elseif ( 'created_at' === $orderby ) {
 			$orderby_col = 'u.created_at';
 		} else {

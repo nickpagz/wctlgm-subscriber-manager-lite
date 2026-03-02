@@ -396,6 +396,10 @@ class Subscriber_Manager_Lite_WCTLGM_API_Handler {
 	 * @return array|\WP_Error API response data or WP_Error on failure.
 	 */
 	public function remove_user_from_channel( $user_id, $channel_id ) {
+		if ( empty( $this->bot_token ) ) {
+			return new \WP_Error( 'missing_bot_token', __( 'Bot token is not configured.', 'wctlgm-subscriber-manager-lite' ) );
+		}
+
 		$url      = "https://api.telegram.org/bot{$this->bot_token}/banChatMember";
 		$response = wp_remote_post(
 			$url,
@@ -439,6 +443,10 @@ class Subscriber_Manager_Lite_WCTLGM_API_Handler {
 	 * @return array|\WP_Error API response data or WP_Error on failure.
 	 */
 	public function unban_user_from_channel( $user_id, $channel_id ) {
+		if ( empty( $this->bot_token ) ) {
+			return new \WP_Error( 'missing_bot_token', __( 'Bot token is not configured.', 'wctlgm-subscriber-manager-lite' ) );
+		}
+
 		$url      = "https://api.telegram.org/bot{$this->bot_token}/unbanChatMember";
 		$response = wp_remote_post(
 			$url,
