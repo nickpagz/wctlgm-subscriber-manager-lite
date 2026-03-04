@@ -91,7 +91,7 @@ function wctlgm_subscriber_manager_lite_activation() {
 	}
 
 	// Trigger database table creation and migration on next admin_init.
-	set_transient( 'wctlgm_needs_setup', true, 5 * MINUTE_IN_SECONDS );
+	set_transient( 'wctlgm_needs_setup', true, WEEK_IN_SECONDS );
 }
 
 register_activation_hook( __FILE__, 'wctlgm_subscriber_manager_lite_activation' );

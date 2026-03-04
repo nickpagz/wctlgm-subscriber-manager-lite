@@ -79,7 +79,7 @@ jQuery( document ).ready( function( $ ) {
 				if ( response.success ) {
 					renderModal( response.data );
 				} else {
-					$body.html( '<p>' + ( response.data.message || wctlgm_users_vars.i18n.error ) + '</p>' );
+					$body.html( '<p>' + escHtml( response.data.message || wctlgm_users_vars.i18n.error ) + '</p>' );
 				}
 			},
 			error: function() {

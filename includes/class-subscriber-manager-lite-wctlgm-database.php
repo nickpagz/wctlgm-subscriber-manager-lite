@@ -295,18 +295,28 @@ class Subscriber_Manager_Lite_WCTLGM_Database {
 
 		$update_data = array_merge( $update_data, $extra );
 
-		$result = $wpdb->update(
-			$table,
-			$update_data,
-			array(
-				'telegram_user_id' => $telegram_user_id,
-				'channel_id'       => $channel_id,
-				'status'           => 'active',
+		// Check if an active record exists for this user+channel.
+		$has_active = (bool) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT 1 FROM `{$table}` WHERE telegram_user_id = %s AND channel_id = %s AND status = 'active' LIMIT 1", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				$telegram_user_id,
+				$channel_id
 			)
 		);
 
-		// If no active record was found, try updating any record for this user+channel.
-		if ( 0 === $wpdb->rows_affected ) {
+		if ( $has_active ) {
+			// Update only the active record. A no-op update (0 rows affected) is still a success.
+			$result = $wpdb->update(
+				$table,
+				$update_data,
+				array(
+					'telegram_user_id' => $telegram_user_id,
+					'channel_id'       => $channel_id,
+					'status'           => 'active',
+				)
+			);
+		} else {
+			// No active record exists; fall back to updating any record for this user+channel.
 			$result = $wpdb->update(
 				$table,
 				$update_data,

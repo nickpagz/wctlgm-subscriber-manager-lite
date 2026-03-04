@@ -207,7 +207,7 @@ class Subscriber_Manager_Lite_WCTLGM_Order_Handler {
 						'order_id'         => $order_id,
 						'channel_id'       => $invite['channel_id'],
 						'invite_link'      => $invite['invite_link'],
-						'invite_issued_at' => current_time( 'mysql', true ),
+						'invite_issued_at' => current_time( 'mysql' ),
 					)
 				);
 			}

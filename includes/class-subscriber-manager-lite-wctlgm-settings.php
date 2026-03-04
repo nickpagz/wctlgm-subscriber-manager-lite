@@ -245,7 +245,7 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 					<p style="margin: 0; font-size: 13px;">
 						<strong><?php esc_html_e( 'Need Help?', 'wctlgm-subscriber-manager-lite' ); ?></strong>
 						<?php esc_html_e( 'Check our comprehensive setup guide and documentation.', 'wctlgm-subscriber-manager-lite' ); ?>
-						<a href="https://wctlgm.com/kb-category/getting-started/" target="_blank" style="margin-left: 8px;">
+						<a href="https://wctlgm.com/kb-category/getting-started/" target="_blank" rel="noopener noreferrer" style="margin-left: 8px;">
 							<?php esc_html_e( 'View Documentation', 'wctlgm-subscriber-manager-lite' ); ?> →
 						</a>
 					</p>
@@ -459,7 +459,7 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 					<p style="margin: 0;">
 						<strong><?php esc_html_e( 'Need Help?', 'wctlgm-subscriber-manager-lite' ); ?></strong>
 						<?php esc_html_e( 'Check out our comprehensive setup guide and documentation.', 'wctlgm-subscriber-manager-lite' ); ?>
-						<a href="https://wctlgm.com/kb-category/getting-started/" target="_blank" style="margin-left: 10px;">
+						<a href="https://wctlgm.com/kb-category/getting-started/" target="_blank" rel="noopener noreferrer" style="margin-left: 10px;">
 							<?php esc_html_e( 'View Support Documentation', 'wctlgm-subscriber-manager-lite' ); ?> &rarr;
 						</a>
 					</p>
@@ -1094,13 +1094,13 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 			if ( ! $user_updated && ! empty( $result['user'] ) ) {
 				$user_data = array();
 				if ( isset( $result['user']['username'] ) ) {
-					$user_data['telegram_username'] = $result['user']['username'];
+					$user_data['telegram_username'] = sanitize_text_field( $result['user']['username'] );
 				}
 				if ( isset( $result['user']['first_name'] ) ) {
-					$user_data['first_name'] = $result['user']['first_name'];
+					$user_data['first_name'] = sanitize_text_field( $result['user']['first_name'] );
 				}
 				if ( isset( $result['user']['last_name'] ) ) {
-					$user_data['last_name'] = $result['user']['last_name'];
+					$user_data['last_name'] = sanitize_text_field( $result['user']['last_name'] );
 				}
 				if ( ! empty( $user_data ) ) {
 					Subscriber_Manager_Lite_WCTLGM_Database::update_user( $telegram_id, $user_data );
