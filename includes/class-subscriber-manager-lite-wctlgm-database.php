@@ -626,7 +626,7 @@ class Subscriber_Manager_Lite_WCTLGM_Database {
 		$args = wp_parse_args( $args, $defaults );
 
 		$table  = $wpdb->prefix . 'wctlgm_user_channels';
-		$where  = array( 'telegram_user_id IS NULL', "status = 'pending'", 'order_id IS NOT NULL' );
+		$where  = array( "(telegram_user_id IS NULL OR telegram_user_id = '')", "status = 'pending'", 'order_id IS NOT NULL' );
 		$values = array();
 
 		if ( ! empty( $args['search'] ) && is_numeric( $args['search'] ) ) {
@@ -662,7 +662,7 @@ class Subscriber_Manager_Lite_WCTLGM_Database {
 		$table = $wpdb->prefix . 'wctlgm_user_channels';
 
 		return (int) $wpdb->get_var(
-			"SELECT COUNT(*) FROM `{$table}` WHERE telegram_user_id IS NULL AND status = 'pending' AND order_id IS NOT NULL" // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			"SELECT COUNT(*) FROM `{$table}` WHERE (telegram_user_id IS NULL OR telegram_user_id = '') AND status = 'pending' AND order_id IS NOT NULL" // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		);
 	}
 
