@@ -1,6 +1,6 @@
 # Architecture Overview
 
-> **Version:** 1.7.0 | **Last updated:** 2026-02-25
+> **Version:** 2.0.0 | **Last updated:** 2026-03-02
 
 ## Directory Structure
 
@@ -15,13 +15,15 @@ wctlgm-subscriber-manager-lite/
 ├── includes/
 │   ├── class-subscriber-manager-lite-wctlgm.php                       # Main orchestrator
 │   ├── class-subscriber-manager-lite-wctlgm-logger.php                # Logging utility
-│   ├── class-subscriber-manager-lite-wctlgm-settings.php              # Admin settings & product data
+│   ├── class-subscriber-manager-lite-wctlgm-settings.php              # Admin settings, product data, subscriber AJAX
 │   ├── class-subscriber-manager-lite-wctlgm-api-handler.php           # Telegram API client
 │   ├── class-subscriber-manager-lite-wctlgm-endpoint-handler.php      # REST endpoint
-│   ├── class-subscriber-manager-lite-wctlgm-bot-interaction-handler.php # Bot commands & join requests
+│   ├── class-subscriber-manager-lite-wctlgm-bot-interaction-handler.php # Bot commands, join requests, chat_member
 │   ├── class-subscriber-manager-lite-wctlgm-order-handler.php         # Order status processing
 │   ├── class-subscriber-manager-lite-wctlgm-subscriptions-handler.php # Core logic (activation, invites, validation)
 │   ├── class-subscriber-manager-lite-wctlgm-email-handler.php         # Email class registration
+│   ├── class-subscriber-manager-lite-wctlgm-database.php              # Custom DB tables & CRUD
+│   ├── class-subscriber-manager-lite-wctlgm-users-list-table.php      # WP_List_Table for subscriber admin UI
 │   └── emails/
 │       ├── class-subscriber-manager-lite-wctlgm-activation-email.php  # Post-activation email
 │       └── class-subscriber-manager-lite-wctlgm-invite-links-email.php # Direct invite email
@@ -31,8 +33,11 @@ wctlgm-subscriber-manager-lite/
 │   └── plain/
 │       ├── telegram-channel-activation.php      # Activation email plain text
 │       └── telegram-channel-invite-links.php    # Invite links email plain text
+├── assets/css/
+│   └── wctlgm-admin-users.css                   # Subscriber table & modal styles
 ├── assets/js/
-│   └── wctlgm-subscriber-manager-lite.js        # Admin JS (jQuery, no build step)
+│   ├── wctlgm-subscriber-manager-lite.js        # Admin JS (jQuery, no build step)
+│   └── wctlgm-admin-users.js                    # Subscriber table tab switching, modal, AJAX actions
 ├── .github/workflows/
 │   ├── build-release.yml                        # GitHub release → ZIP asset
 │   ├── push-deploy.yml                          # WordPress.org SVN deployment
@@ -67,10 +72,13 @@ Constructor calls three methods:
    - Bot_Interaction_Handler
    - Endpoint_Handler
    - Email_Handler
+   - Database
+   - Users_List_Table
 
 2. **`define_admin_settings()`** — hooks `init_settings()` to `init` action (creates Settings instance)
 
 3. **`initialize_handlers()`** — hooks handler initialization:
+   - `Database::init()` — registers `admin_init` hook for table creation/migration
    - `Endpoint_Handler` → new instance at `plugins_loaded` priority 10
    - `Bot_Interaction_Handler::init()` → at `init`
    - `Order_Handler::init()` → at `plugins_loaded`
@@ -86,19 +94,26 @@ Constructor calls three methods:
 ### Subscriber_Manager_Lite_WCTLGM_Settings
 
 **File:** `includes/class-subscriber-manager-lite-wctlgm-settings.php`
-**Role:** Admin settings page, product/variation data panels, AJAX handlers.
+**Role:** Admin settings page, product/variation data panels, subscriber table UI, AJAX handlers.
 
 Key responsibilities:
-- Settings page at **Settings > Telegram Subscriber Manager** (`add_options_page`)
+- Settings page at **Settings > Telegram Subscriber Manager** (`add_options_page`, slug `wctlgm-settings`)
+- **Two-tab layout:** Settings tab (form + support link) and Subscribers tab (list table)
 - Registered settings: `wctlgm_bot_token`, `wctlgm_bot_url`, `wctlgm_allow_external_invites`, `wctlgm_require_activation_flow`, `wctlgm_channels`
 - Product data tab "Telegram Access" with classes `show_if_simple`, `show_if_variable`, `hide_if_subscription`
 - **Variable product support:** Tab panel shows "configure on variations" message for variable products (toggled by JS). Per-variation channel select rendered via `wctlgm_variation_telegram_fields()`. Variation data saved via `wctlgm_save_variation_telegram_data()` with dual nonce validation (AJAX `save-variations` + main form `woocommerce_save_data`).
 - **Single channel enforcement:** `sanitize_channels()` only processes `$input[0]`, always returns single-entry array
 - Upsell notices for multi-channel and pro features via `wctlgm_fs()->get_upgrade_url()`
-- AJAX handlers: `wctlgm_set_webhook`, `check_and_set_channel_id`
+- **Subscriber table:** `users_page()` renders `Users_List_Table` with search and channel filter
+- **Subscriber detail modal:** HTML appended after `.wrap` div, populated via AJAX
+- AJAX handlers: `wctlgm_set_webhook`, `check_and_set_channel_id`, `wctlgm_get_user_details`, `wctlgm_subscriber_action`, `wctlgm_sync_user_status`
+- `ajax_get_user_details()` — fetches user info, orders, per-channel live Telegram status
+- `ajax_subscriber_action()` — dispatches to `handle_remove_action()`, `handle_ban_action()`, or `handle_revoke_action()`
+- `ajax_sync_user_status()` — calls `get_chat_member()` for each active/pending channel, updates DB status and user profile (name, username)
 - Webhook warning admin notice when `wctlgm_webhook_clicked` is false
 - Legacy migration from `wctlgm_force_activation_flow` to `wctlgm_require_activation_flow`
 - Activation flow change handler: resets `wctlgm_webhook_clicked` on toggle
+- **Enqueue hook:** `settings_page_wctlgm-settings` (derived from `add_options_page` slug)
 
 ### Subscriber_Manager_Lite_WCTLGM_API_Handler
 
@@ -114,9 +129,11 @@ Methods:
 - `approve_join_request($chat_id, $user_id)`
 - `revoke_invite_link($chat_id, $invite_link)`
 - `deny_join_request($chat_id, $user_id)`
-- `get_allowed_updates()` — conditionally includes `message` when activation flow is enabled
-
-**Not present (pro-only):** `remove_user_from_channel`, `unban_user_from_channel`, `get_chat_member`
+- `get_chat_member_status($user_id, $channel_id)` — returns status string with 5-min transient cache
+- `get_chat_member($user_id, $channel_id)` — returns full result (status + user object) without caching
+- `remove_user_from_channel($user_id, $channel_id)` — calls `banChatMember` (permanent ban)
+- `unban_user_from_channel($user_id, $channel_id)` — calls `unbanChatMember` (allows rejoin)
+- `get_allowed_updates()` — conditionally includes `message` when activation flow is enabled; always includes `chat_member`
 
 ### Subscriber_Manager_Lite_WCTLGM_Endpoint_Handler
 
@@ -131,17 +148,20 @@ Methods:
 ### Subscriber_Manager_Lite_WCTLGM_Bot_Interaction_Handler
 
 **File:** `includes/class-subscriber-manager-lite-wctlgm-bot-interaction-handler.php`
-**Role:** Processes bot commands and join requests.
+**Role:** Processes bot commands, join requests, and chat member updates. Tracks subscriber lifecycle in DB.
 
 - **Static `init()`:** Only registers `wctlgm_send_activation_email` Action Scheduler hook
 - **`process_telegram_request($data)`:** Routes incoming Telegram updates:
   - `chat_join_request` → `process_join_request()`
+  - `chat_member` → `process_chat_member_update()`
   - `edited_channel_post` / `edited_message` → channel ID capture for settings
   - `message` (private chat only) → command routing: `/start`, `/activate`, `/help`, default
 - **`handle_start_command($args)`:** Welcome message, or auto-activate if payload matches code pattern
-- **`handle_activation_command($code)`:** Creates `Subscriptions_Handler`, calls `process_activation_code()`, schedules activation email
+- **`handle_activation_command($code)`:** Creates `Subscriptions_Handler`, calls `process_activation_code()`, schedules activation email, creates/updates DB user record and links to order channels
 - **`handle_help_command()`:** Returns help text with example
-- **`process_join_request($data)`:** Creates `Subscriptions_Handler`, validates, approves+revokes or denies
+- **`process_join_request($data)`:** Creates `Subscriptions_Handler`, validates, approves+revokes or denies, creates/updates DB user and channel records
+- **`process_chat_member_update($data)`:** Handles `chat_member` webhook events (user left, kicked, rejoined). Includes guards to preserve admin-set statuses (`removed`, `banned`)
+- **`extract_user_data($from)`:** Extracts `telegram_username`, `first_name`, `last_name` from Telegram webhook `from` data
 - **`send_activation_email($args)` (static):** Triggers `wctlgm_activation` WooCommerce email
 
 ### Subscriber_Manager_Lite_WCTLGM_Order_Handler
@@ -153,7 +173,7 @@ Methods:
 - **`maybe_process_order($order_id, $old_status, $new_status)`:**
   - Guards: order exists, has telegram product, new status is processing/completed, skip processing→completed
   - Activation flow: generates 8-char activation code if not already present
-  - Direct flow: generates invite links via `Subscriptions_Handler::get_channel_invites()`, stores meta, fires `wc_wctlgm_invite_links_generated`, schedules email (5s delay)
+  - Direct flow: generates invite links via `Subscriptions_Handler::get_channel_invites()`, stores meta, creates pending DB records, fires `wc_wctlgm_invite_links_generated`, schedules email (5s delay)
 - **`get_telegram_meta_id($item)`:** Resolves the correct ID for Telegram meta lookups — returns variation ID if present, otherwise product ID
 - **`order_has_telegram_product($order)`:** Checks for simple or variable products with non-empty `_telegram_channel_ids` (using variation-level meta for variable products)
 - **Email injection:** Injects activation code into `customer_processing_order` and `customer_completed_order` emails
@@ -167,7 +187,7 @@ Methods:
 **Important:** This is a single class — no factory, no interface, no inheritance (unlike the pro version's factory + interface pattern).
 
 - **Instance-based:** Constructor creates its own `API_Handler` and `Logger` instances
-- **`process_activation_code($code, $telegram_user_id)`:** Finds order by `_activation_code`, validates status, stores `_telegram_user_id`, deletes activation code, generates invites, stores invite meta
+- **`process_activation_code($code, $telegram_user_id)`:** Finds order by `_activation_code`, validates status, stores `_telegram_user_id`, deletes activation code, generates invites, stores invite meta, creates pending DB records
 - **`is_join_request_valid($user_id, $invite_link, $chat_id, $allow_external_invites)`:**
   - Finds order by invite link + chat ID
   - Activation flow: checks `_telegram_user_id` matches requesting user
@@ -197,6 +217,32 @@ Methods:
 - Helper methods: `log_api_request()`, `log_api_response()`
 - **Note:** Logger has both static methods (called directly) and is also instantiated as instance property in handlers that call instance methods on it. Both work because the underlying `get_logger()` is static.
 
+### Subscriber_Manager_Lite_WCTLGM_Database
+
+**File:** `includes/class-subscriber-manager-lite-wctlgm-database.php`
+**Role:** Custom database tables for subscriber tracking. All static methods.
+
+- **`init()`:** Registers `admin_init` hook for `maybe_create_tables_and_migrate()`
+- **Tables:** `{prefix}wctlgm_telegram_users` (user records), `{prefix}wctlgm_user_channels` (user-channel relationships with status tracking). Table names are shared with pro plugin for upgrade compatibility.
+- **User CRUD:** `get_or_create_user()`, `update_user()`, `get_user()`
+- **Channel CRUD:** `add_user_channel()`, `find_user_channel_record()`, `update_user_channel_status()`, `link_user_to_order_channels()`, `get_user_channel()`, `get_user_channels()`, `get_channels_by_order()`, `find_by_invite_link()`, `update_channel_record()`
+- **List table queries:** `get_subscribers_for_table()`, `count_subscribers()` — aggregated per-user with channel status pairs, support search/filter/sort/pagination
+- **Multi-access:** `get_other_active_channel_access()` — checks for other active records before removal
+- **Migration:** `migrate_existing_data()` — scans orders with `_telegram_user_id` or `_channel_invite_*` meta, creates user + channel records. Runs once on first install.
+- **Status values:** `pending`, `active`, `left`, `removed`, `banned`, `expired`
+- **Schema version:** Tracked via `wctlgm_db_version` option; `wctlgm_needs_setup` transient triggers creation on activation
+
+### Subscriber_Manager_Lite_WCTLGM_Users_List_Table
+
+**File:** `includes/class-subscriber-manager-lite-wctlgm-users-list-table.php`
+**Role:** WP_List_Table subclass for displaying subscribers in admin.
+
+- 4 columns: Username (with View Details / Sync Status row actions), Name, Channels (status badges with priority-based dedup), Joined
+- Channel filter dropdown via `extra_tablenav()`
+- Search by username, name, Telegram user ID, or order ID
+- Sortable by joined date
+- Nonce-protected search/filter form (`wctlgm_subscriber_table`)
+
 ### Email Classes (`includes/emails/`)
 
 - **`Activation_Email`** — Sent after `/activate` processing with invite links. Triggered via Action Scheduler (`wctlgm_send_activation_email`).
@@ -211,7 +257,8 @@ Templates: `templates/emails/` (HTML) and `templates/emails/plain/` (plain text)
 | Channels per product | 1 | Unlimited |
 | Product types | Simple, Variable | Simple, Variable, Subscription, Variable Subscription |
 | Subscription plugin support | None | WooCommerce Subscriptions, Flexible Subscriptions |
-| Automatic member removal | No (manual only) | Yes (on cancel/expire) |
+| Subscriber table / admin actions | Yes (view, remove, ban, unban, revoke, sync) | Yes |
+| Automatic member removal | No (manual via subscriber table) | Yes (on cancel/expire) |
 | Access expiry for simple products | No | Yes (scheduled via Action Scheduler) |
 | Cancel cut-off period | N/A | Yes (`_telegram_cut_off` meta) |
 | Remove on cancel setting | N/A | Yes (`_telegram_remove_on_cancel` meta) |
@@ -232,6 +279,7 @@ Templates: `templates/emails/` (HTML) and `templates/emails/plain/` (plain text)
 | `wctlgm_allow_external_invites` | bool | Allow non-order invite link validation |
 | `wctlgm_webhook_clicked` | bool | Whether "Set Webhook" button has been clicked |
 | `wctlgm_activation_flow_migrated` | bool | One-time migration flag for legacy `wctlgm_force_activation_flow` |
+| `wctlgm_db_version` | string | Database schema version (currently `1.0.0`) |
 
 ## Order/Product Meta Keys
 

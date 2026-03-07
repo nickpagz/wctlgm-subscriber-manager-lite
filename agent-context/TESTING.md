@@ -1,6 +1,6 @@
 # Testing Guide
 
-> **Version:** 1.7.0 | **Last updated:** 2026-02-25
+> **Version:** 2.0.0 | **Last updated:** 2026-03-02
 
 ## Current Status
 
@@ -42,9 +42,9 @@ composer test:integration
 1. Loads Composer autoloader (`vendor/autoload.php`)
 2. Initializes Brain\Monkey
 3. Defines WordPress constants: `ABSPATH`, `WCTLGM_SML_PLUGIN_DIR`, `WCTLGM_SML_PLUGIN_BASE`, `HOUR_IN_SECONDS`
-4. Loads WordPress function stubs (`tests/stubs/wordpress.php`)
+4. Loads WordPress function stubs (`tests/stubs/wordpress.php`) — includes `$wpdb` global setup
 5. Loads WooCommerce class stubs (`tests/stubs/woocommerce.php`)
-6. Requires plugin class files in dependency order
+6. Requires plugin class files in dependency order (including Database class)
 
 ### Base TestCase (`tests/TestCase.php`)
 
@@ -52,10 +52,10 @@ Sets up Brain\Monkey and Mockery per test, provides helper `create_mock_item()` 
 
 ### Stubs (`tests/stubs/`)
 
-- **`wordpress.php`** — WordPress class stubs: `WP_Error`, `WP_REST_Request`, `WP_REST_Response`
+- **`wordpress.php`** — WordPress class stubs: `WP_Error`, `WP_REST_Request`, `WP_REST_Response`, `WPDB_Stub` (minimal `$wpdb` mock with `prepare`, `get_var`, `get_row`, `get_results`, `insert`, `update`)
 - **`woocommerce.php`** — WooCommerce class stubs: `WC_Logger`
 
-WordPress function stubs (`sanitize_text_field()`, `wp_generate_password()`, etc.) are defined in `tests/bootstrap.php`. WooCommerce object mocks (`WC_Order`, `WC_Product`, etc.) are created per-test via Mockery in `tests/TestCase.php`.
+WordPress function stubs (`sanitize_text_field()`, `wp_generate_password()`, `wp_parse_args()`, etc.) are defined in `tests/bootstrap.php`. The `$wpdb` global is set up via `WPDB_Stub` in the stubs. WooCommerce object mocks (`WC_Order`, `WC_Product`, etc.) are created per-test via Mockery in `tests/TestCase.php`.
 
 ### Integration Test Helpers (`tests/integration/helpers/`)
 

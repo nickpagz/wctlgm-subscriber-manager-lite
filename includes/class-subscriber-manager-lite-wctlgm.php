@@ -31,6 +31,8 @@ class Subscriber_Manager_Lite_WCTLGM {
 		require_once WCTLGM_SML_PLUGIN_DIR . 'includes/class-subscriber-manager-lite-wctlgm-bot-interaction-handler.php';
 		require_once WCTLGM_SML_PLUGIN_DIR . 'includes/class-subscriber-manager-lite-wctlgm-endpoint-handler.php';
 		require_once WCTLGM_SML_PLUGIN_DIR . 'includes/class-subscriber-manager-lite-wctlgm-email-handler.php';
+		require_once WCTLGM_SML_PLUGIN_DIR . 'includes/class-subscriber-manager-lite-wctlgm-database.php';
+		require_once WCTLGM_SML_PLUGIN_DIR . 'includes/class-subscriber-manager-lite-wctlgm-users-list-table.php';
 	}
 
 	/**
@@ -51,6 +53,8 @@ class Subscriber_Manager_Lite_WCTLGM {
 	 * Initialize event handlers and other runtime components.
 	 */
 	private function initialize_handlers() {
+		Subscriber_Manager_Lite_WCTLGM_Database::init();
+
 		add_action(
 			'plugins_loaded',
 			function () {

@@ -29,6 +29,16 @@ class Subscriber_Manager_Lite_WCTLGM_Subscriptions_Handler {
 			$channel_invites = $response['channels'];
 			foreach ( $channel_invites as $invite ) {
 				$order->add_meta_data( '_channel_invite_' . $invite['channel_id'], sanitize_url( $invite['invite_link'] ) );
+
+				// Create pending DB record for subscriber tracking.
+				Subscriber_Manager_Lite_WCTLGM_Database::add_user_channel(
+					array(
+						'order_id'         => $order_id,
+						'channel_id'       => $invite['channel_id'],
+						'invite_link'      => $invite['invite_link'],
+						'invite_issued_at' => current_time( 'mysql' ),
+					)
+				);
 			}
 			$order->save();
 			return array( $response, $order_id );

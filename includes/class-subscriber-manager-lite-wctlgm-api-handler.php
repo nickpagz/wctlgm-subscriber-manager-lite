@@ -284,6 +284,203 @@ class Subscriber_Manager_Lite_WCTLGM_API_Handler {
 	}
 
 	/**
+	 * Get a chat member's status in a channel or group.
+	 *
+	 * Uses transient caching to avoid hitting Telegram API rate limits.
+	 *
+	 * @param string $user_id    The Telegram user ID.
+	 * @param string $channel_id The channel or group ID.
+	 * @return string Member status: creator, administrator, member, restricted, left, kicked, or error.
+	 */
+	public function get_chat_member_status( $user_id, $channel_id ) {
+		if ( empty( $this->bot_token ) ) {
+			return 'error';
+		}
+
+		$cache_key = 'wctlgm_member_' . md5( $user_id . '_' . $channel_id );
+		$cached    = get_transient( $cache_key );
+		if ( false !== $cached ) {
+			return $cached;
+		}
+
+		$url      = "https://api.telegram.org/bot{$this->bot_token}/getChatMember";
+		$response = wp_remote_post(
+			$url,
+			array(
+				'body'    => wp_json_encode(
+					array(
+						'chat_id' => $channel_id,
+						'user_id' => $user_id,
+					)
+				),
+				'headers' => array(
+					'Content-Type' => 'application/json',
+				),
+			)
+		);
+
+		if ( is_wp_error( $response ) ) {
+			$this->logger->error( __( 'Failed to get_chat_member_status. WordPress error: ', 'wctlgm-subscriber-manager-lite' ) . $response->get_error_message() );
+			return 'error';
+		}
+
+		$body = wp_remote_retrieve_body( $response );
+		$data = json_decode( $body, true );
+
+		if ( isset( $data['ok'] ) && $data['ok'] && isset( $data['result']['status'] ) ) {
+			$status = $data['result']['status'];
+			set_transient( $cache_key, $status, 5 * MINUTE_IN_SECONDS );
+			return $status;
+		}
+
+		$this->logger->error( __( 'Failed to get_chat_member_status. Telegram API error: ', 'wctlgm-subscriber-manager-lite' ) . $body );
+		return 'error';
+	}
+
+	/**
+	 * Get full chat member data from Telegram (status + user info).
+	 *
+	 * Unlike get_chat_member_status() which only returns the status string,
+	 * this returns the full ChatMember result including the user object
+	 * (first_name, last_name, username).
+	 *
+	 * @param string $user_id    The Telegram user ID.
+	 * @param string $channel_id The channel or group ID.
+	 * @return array|string Array with 'status' and 'user' keys on success, or 'error' string on failure.
+	 */
+	public function get_chat_member( $user_id, $channel_id ) {
+		if ( empty( $this->bot_token ) ) {
+			return 'error';
+		}
+
+		$url      = "https://api.telegram.org/bot{$this->bot_token}/getChatMember";
+		$response = wp_remote_post(
+			$url,
+			array(
+				'body'    => wp_json_encode(
+					array(
+						'chat_id' => $channel_id,
+						'user_id' => $user_id,
+					)
+				),
+				'headers' => array(
+					'Content-Type' => 'application/json',
+				),
+			)
+		);
+
+		if ( is_wp_error( $response ) ) {
+			return 'error';
+		}
+
+		$body = wp_remote_retrieve_body( $response );
+		$data = json_decode( $body, true );
+
+		if ( isset( $data['ok'] ) && $data['ok'] && isset( $data['result']['status'] ) ) {
+			return array(
+				'status' => $data['result']['status'],
+				'user'   => isset( $data['result']['user'] ) ? $data['result']['user'] : array(),
+			);
+		}
+
+		return 'error';
+	}
+
+	/**
+	 * Remove (ban) a user from a channel or group.
+	 *
+	 * Calls Telegram's banChatMember API — this is a permanent ban.
+	 *
+	 * @param string $user_id    The Telegram user ID.
+	 * @param string $channel_id The channel or group ID.
+	 * @return array|\WP_Error API response data or WP_Error on failure.
+	 */
+	public function remove_user_from_channel( $user_id, $channel_id ) {
+		if ( empty( $this->bot_token ) ) {
+			return new \WP_Error( 'missing_bot_token', __( 'Bot token is not configured.', 'wctlgm-subscriber-manager-lite' ) );
+		}
+
+		$url      = "https://api.telegram.org/bot{$this->bot_token}/banChatMember";
+		$response = wp_remote_post(
+			$url,
+			array(
+				'body'    => wp_json_encode(
+					array(
+						'chat_id' => $channel_id,
+						'user_id' => $user_id,
+					)
+				),
+				'headers' => array(
+					'Content-Type' => 'application/json',
+				),
+			)
+		);
+
+		if ( is_wp_error( $response ) ) {
+			$this->logger->error( __( 'Failed to remove_user_from_channel. WordPress error: ', 'wctlgm-subscriber-manager-lite' ) . $response->get_error_message() );
+			return $response;
+		}
+
+		$body = wp_remote_retrieve_body( $response );
+		$data = json_decode( $body, true );
+
+		if ( ! isset( $data['ok'] ) || ! $data['ok'] ) {
+			$error_message = isset( $data['description'] ) ? $data['description'] : 'Unknown error';
+			$this->logger->error( __( 'Failed to remove_user_from_channel. Telegram API error: ', 'wctlgm-subscriber-manager-lite' ) . $body );
+			return new \WP_Error( 'telegram_api_error', $error_message );
+		}
+
+		return $data;
+	}
+
+	/**
+	 * Unban a user from a channel or group.
+	 *
+	 * Calls Telegram's unbanChatMember API — removes without banning, allows rejoin.
+	 *
+	 * @param string $user_id    The Telegram user ID.
+	 * @param string $channel_id The channel or group ID.
+	 * @return array|\WP_Error API response data or WP_Error on failure.
+	 */
+	public function unban_user_from_channel( $user_id, $channel_id ) {
+		if ( empty( $this->bot_token ) ) {
+			return new \WP_Error( 'missing_bot_token', __( 'Bot token is not configured.', 'wctlgm-subscriber-manager-lite' ) );
+		}
+
+		$url      = "https://api.telegram.org/bot{$this->bot_token}/unbanChatMember";
+		$response = wp_remote_post(
+			$url,
+			array(
+				'body'    => wp_json_encode(
+					array(
+						'chat_id' => $channel_id,
+						'user_id' => $user_id,
+					)
+				),
+				'headers' => array(
+					'Content-Type' => 'application/json',
+				),
+			)
+		);
+
+		if ( is_wp_error( $response ) ) {
+			$this->logger->error( __( 'Failed to unban_user_from_channel. WordPress error: ', 'wctlgm-subscriber-manager-lite' ) . $response->get_error_message() );
+			return $response;
+		}
+
+		$body = wp_remote_retrieve_body( $response );
+		$data = json_decode( $body, true );
+
+		if ( ! isset( $data['ok'] ) || ! $data['ok'] ) {
+			$error_message = isset( $data['description'] ) ? $data['description'] : 'Unknown error';
+			$this->logger->error( __( 'Failed to unban_user_from_channel. Telegram API error: ', 'wctlgm-subscriber-manager-lite' ) . $body );
+			return new \WP_Error( 'telegram_api_error', $error_message );
+		}
+
+		return $data;
+	}
+
+	/**
 	 * Get allowed updates based on activation flow setting.
 	 *
 	 * @return array

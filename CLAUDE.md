@@ -31,7 +31,7 @@ composer install
 composer install --no-dev --prefer-dist --optimize-autoloader
 ```
 
-Test suite uses PHPUnit 9.6 with Brain\Monkey for unit tests and wp-phpunit for integration tests. No linter or Node.js build step configured. The only JS file (`assets/js/wctlgm-subscriber-manager-lite.js`) is plain jQuery — no transpilation needed.
+Test suite uses PHPUnit 9.6 with Brain\Monkey for unit tests and wp-phpunit for integration tests. No linter or Node.js build step configured. JS files (`assets/js/wctlgm-subscriber-manager-lite.js`, `assets/js/wctlgm-admin-users.js`) are plain jQuery — no transpilation needed.
 
 ```bash
 # Run unit tests
@@ -53,13 +53,15 @@ composer test:integration
 
 | Class | Role |
 |-------|------|
-| `Settings` | Admin settings page (Settings → Telegram Subscriber Manager), product/variation meta fields, AJAX handlers for webhook/channel setup |
-| `API_Handler` | Telegram Bot API wrapper (`setWebhook`, `setCommands`, `getChatMember`, `approveChatJoinRequest`, etc.) |
+| `Settings` | Admin settings page (Settings → Telegram Subscriber Manager), product/variation meta fields, subscriber table UI, AJAX handlers for webhook/channel/subscriber management |
+| `API_Handler` | Telegram Bot API wrapper (`setWebhook`, `setCommands`, `getChatMember`, `approveChatJoinRequest`, `banChatMember`, `unbanChatMember`, etc.) |
 | `Endpoint_Handler` | REST endpoint `POST /wp-json/wctlgm/v1/telegram-bot/` — validates webhook secret token, routes incoming Telegram updates |
-| `Bot_Interaction_Handler` | Processes Telegram bot commands (`/start`, `/activate`, `/help`) and chat join requests |
-| `Order_Handler` | Hooks into `woocommerce_order_status_changed` — generates activation codes or invite links depending on flow |
-| `Subscriptions_Handler` | Core subscription logic — processes activation codes, validates join requests, generates channel invite links |
+| `Bot_Interaction_Handler` | Processes Telegram bot commands (`/start`, `/activate`, `/help`), chat join requests, and `chat_member` updates with DB tracking |
+| `Order_Handler` | Hooks into `woocommerce_order_status_changed` — generates activation codes or invite links depending on flow, creates DB records |
+| `Subscriptions_Handler` | Core subscription logic — processes activation codes, validates join requests, generates channel invite links, creates DB records |
 | `Email_Handler` | Registers custom WooCommerce email classes |
+| `Database` | Custom DB tables (`wctlgm_telegram_users`, `wctlgm_user_channels`), CRUD operations, data migration |
+| `Users_List_Table` | WP_List_Table for subscriber admin UI with search, filter, and pagination |
 | `Logger` | Static logging utility wrapping `WC_Logger` |
 
 ### Email Classes (`includes/emails/`)

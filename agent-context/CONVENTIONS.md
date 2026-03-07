@@ -1,6 +1,6 @@
 # Coding Conventions & Patterns
 
-> **Version:** 1.7.0 | **Last updated:** 2026-02-25
+> **Version:** 2.0.0 | **Last updated:** 2026-03-02
 
 ## Naming Conventions
 
@@ -14,7 +14,9 @@
 | Meta key prefix | `_telegram_` or `_channel_invite_` | `_telegram_channel_ids`, `_channel_invite_-100123` |
 | Option prefix | `wctlgm_` | `wctlgm_bot_token` |
 | Constants prefix | `WCTLGM_SML_` | `WCTLGM_SML_PLUGIN_DIR` |
-| JS script handle | `subscriber-manager-lite-js` | `wp_enqueue_script('subscriber-manager-lite-js', ...)` |
+| JS script handle | `subscriber-manager-lite-js`, `wctlgm-admin-users-js` | `wp_enqueue_script('subscriber-manager-lite-js', ...)` |
+| CSS handle | `wctlgm-admin-users-css` | `wp_enqueue_style('wctlgm-admin-users-css', ...)` |
+| DB table prefix | `wctlgm_` | `{$wpdb->prefix}wctlgm_telegram_users` |
 | Test files | `{ClassName}Test.php` (proposed) | `SubscriptionsHandlerTest.php` |
 
 ## Code Style
@@ -48,8 +50,10 @@ Unlike the pro version, the lite plugin uses a **single `Subscriptions_Handler` 
 | `Email_Handler` | Static `init()` + static `add_email_classes()` |
 | `Bot_Interaction_Handler` | Static `init()` for hook registration; instance methods for request processing |
 | `Subscriptions_Handler` | Instance methods only (no static init) |
-| `Settings` | Instance methods only (created via `new` in orchestrator) |
+| `Settings` | Instance methods only (created via `new` in orchestrator). Holds `$api_handler` instance. |
 | `Logger` | Has static methods but is also instantiated as instance property in other classes |
+| `Database` | All static methods. Static `init()` registers `admin_init` hook. |
+| `Users_List_Table` | Instance methods. Extends `\WP_List_Table`. |
 
 ### Action Scheduler
 
@@ -80,6 +84,8 @@ The Settings class enforces a single channel:
    3e. Bot_Interaction_Handler
    3f. Endpoint_Handler
    3g. Email_Handler
+   3h. Database
+   3i. Users_List_Table
 4. Email classes (loaded lazily via woocommerce_email_classes filter):
    4a. Activation_Email
    4b. Invite_Links_Email
