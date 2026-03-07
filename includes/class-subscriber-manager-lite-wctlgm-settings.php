@@ -441,12 +441,12 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 		<div class="wrap fs-section">
 			<h1><?php esc_html_e( 'Telegram Subscriber Manager Settings', 'wctlgm-subscriber-manager-lite' ); ?></h1>
 			<h2 class="nav-tab-wrapper">
-				<a href="#settings" class="nav-tab fs-tab wctlgm-tab"><?php esc_html_e( 'Settings', 'wctlgm-subscriber-manager-lite' ); ?></a>
+				<a href="#settings" class="nav-tab fs-tab wctlgm-tab nav-tab-active"><?php esc_html_e( 'Settings', 'wctlgm-subscriber-manager-lite' ); ?></a>
 				<a href="#subscribers" class="nav-tab fs-tab wctlgm-tab"><?php esc_html_e( 'Subscribers', 'wctlgm-subscriber-manager-lite' ); ?></a>
 			</h2>
 
 			<!-- Settings Tab -->
-			<div id="settings-content" class="wctlgm-content-tab">
+			<div id="settings-content" class="wctlgm-content-tab wctlgm-tab-active">
 				<form method="post" action="options.php">
 					<?php
 					settings_fields( 'wctlgm_settings_group' );
@@ -1021,12 +1021,14 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 		}
 
 		$bot_token = get_option( 'wctlgm_bot_token' );
-		if ( ! empty( $bot_token ) ) {
-			$result = $this->api_handler->revoke_invite_link( $record->channel_id, $record->invite_link );
+		if ( empty( $bot_token ) ) {
+			wp_send_json_error( array( 'message' => __( 'Bot token is not configured. Cannot revoke invite link on Telegram.', 'wctlgm-subscriber-manager-lite' ) ) );
+		}
 
-			if ( is_wp_error( $result ) ) {
-				wp_send_json_error( array( 'message' => $result->get_error_message() ) );
-			}
+		$result = $this->api_handler->revoke_invite_link( $record->channel_id, $record->invite_link );
+
+		if ( is_wp_error( $result ) ) {
+			wp_send_json_error( array( 'message' => $result->get_error_message() ) );
 		}
 
 		Subscriber_Manager_Lite_WCTLGM_Database::update_channel_record(
