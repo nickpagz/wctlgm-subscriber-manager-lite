@@ -27,8 +27,12 @@ jQuery( document ).ready( function( $ ) {
 	}
 
 	$navTabs.on( 'click', function( e ) {
-		e.preventDefault();
-		switchTab( $( this ).attr( 'href' ) );
+		var href = $( this ).attr( 'href' );
+		if ( href && href.charAt( 0 ) === '#' ) {
+			e.preventDefault();
+			switchTab( href );
+		}
+		// Let Freemius tabs (full URLs) navigate normally.
 	});
 
 	// Initialize from URL hash or search/filter params.
