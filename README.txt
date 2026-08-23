@@ -3,7 +3,7 @@ Contributors:      rektification, npagazani
 Tags:              woocommerce, telegram, membership, invite link, sell access
 Requires at least: 6.0
 Tested up to:      6.9.0
-Stable tag:        2.0.0
+Stable tag:        2.1.0
 Requires PHP:      7.4
 License:           GPL-2.0-or-later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
@@ -163,6 +163,19 @@ It also sets a webhook to handle communication between your WooCommerce store an
 
 
 == Changelog ==
+
+= 2.1.0 =
+* New: (Pro version) Manual user management — set an expiry or associate an order for users who joined outside the normal flow (e.g. via a channel's primary link).
+* New: (Pro version) Surface invite-generation failures in the Pending Invites table with a Retry action, instead of failing silently.
+* New: (Pro version) Resend an existing invite link, or "Resend new" to revoke and regenerate a fresh link, directly from the subscriber tools.
+* New: (Pro version) Optionally remove customers from Telegram after a subscription has stayed on-hold for a configurable number of days (grace period for payment retries).
+* Update: (Pro version) getChatMember pre-flight prevents resending to users already in the channel and reconciles their status.
+* Security: Reject webhook requests when no secret token is configured, and compare tokens in constant time.
+* Security: Generate the webhook secret token with a cryptographically secure generator.
+* Security: Add capability and nonce checks to the Set Webhook and channel-ID admin AJAX actions.
+* Fix: Prevent a fatal error when an order references a product that was later deleted.
+* Fix: Preserve the activation code if invite generation fails, so customers can retry instead of being left with no access.
+* Fix: Internal robustness improvements to Telegram API error handling and subscriber-order linking.
 
 = 2.0.0 =
 * New: Subscriber table — view and manage all Telegram subscribers from the admin dashboard.

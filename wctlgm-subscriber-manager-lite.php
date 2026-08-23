@@ -2,11 +2,11 @@
 
 /**
  * @package Subscriber_Manager_Lite_for_Telegram
- * @version 2.0.0
+ * @version 2.1.0
  * Plugin Name: Subscriber Manager Lite for Telegram
  * Plugin URI: https://wctlgm.com
  * Description: Automatically manage access to private Telegram channels and groups through WooCommerce. Invite links, subscriber management, and more.
- * Version: 2.0.0
+ * Version: 2.1.0
  * Author: Rektification
  * Author URI: https://wctlgm.com
  * License: GPL-2.0-or-later
