@@ -97,6 +97,7 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 			'wctlgm_vars',
 			array(
 				'nonce'                  => wp_create_nonce( 'check_set_channel_id_nonce' ),
+				'webhook_nonce'          => wp_create_nonce( 'wctlgm_set_webhook_nonce' ),
 				'variable_product_types' => array( 'variable' ),
 			)
 		);
@@ -349,12 +350,13 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 		}
 
 		// Channel IDs.
-		$channel_ids_raw = array();
+		$channel_ids = array();
 		if ( isset( $_POST['wctlgm_variation_channel_ids'][ $loop ] ) ) {
-			$channel_ids_raw = wp_unslash( $_POST['wctlgm_variation_channel_ids'][ $loop ] );
+			$channel_ids = array_map(
+				'sanitize_text_field',
+				(array) wp_unslash( $_POST['wctlgm_variation_channel_ids'][ $loop ] )
+			);
 		}
-		$channel_ids_raw = (array) $channel_ids_raw;
-		$channel_ids     = array_map( 'sanitize_text_field', $channel_ids_raw );
 		update_post_meta( $variation_id, '_telegram_channel_ids', $channel_ids );
 	}
 
@@ -375,13 +377,20 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 	}
 
 	public function wctlgm_generate_secret_token() {
-		$allowed_chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-';
-		$token         = substr( str_shuffle( $allowed_chars ), 0, 32 );
+		// Cryptographically secure, 32-char alphanumeric token. Telegram only
+		// permits A-Z, a-z, 0-9, _ and - in the webhook secret, so keep it to the
+		// alphanumeric subset wp_generate_password() produces without special chars.
+		$token = wp_generate_password( 32, false );
 		update_option( 'wctlgm_secret_token', $token );
 		return $token;
 	}
 
 	public function handle_set_webhook() {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( array( 'message' => __( 'Insufficient permissions', 'wctlgm-subscriber-manager-lite' ) ) );
+		}
+		check_ajax_referer( 'wctlgm_set_webhook_nonce', 'nonce' );
+
 		$secret_token = $this->wctlgm_generate_secret_token();
 		$webhook_url  = rest_url( 'wctlgm/v1/telegram-bot/' );
 		$api_handler  = new \Subscriber_Manager_Lite_for_Telegram\Subscriber_Manager_Lite_WCTLGM_API_Handler();
@@ -404,6 +413,7 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 			wp_send_json_error( array( 'message' => 'Insufficient permissions' ) );
 			return;
 		}
+		check_ajax_referer( 'check_set_channel_id_nonce', 'nonce' );
 
 		$this->logger->info( __( 'Channel ID fetch initiated from settings', 'wctlgm-subscriber-manager-lite' ) );
 

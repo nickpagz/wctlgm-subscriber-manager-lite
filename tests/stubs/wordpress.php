@@ -107,6 +107,10 @@ class WPDB_Stub {
 		return 1;
 	}
 
+	public function query( $query = null ) {
+		return 1;
+	}
+
 	public function get_charset_collate() {
 		return 'DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci';
 	}

@@ -144,6 +144,17 @@ class Subscriber_Manager_Lite_WCTLGM_API_Handler {
 			$this->logger->error( __( 'Failed to send message. WordPress error: ', 'wctlgm-subscriber-manager-lite' ) . $response->get_error_message() );
 			return $response;
 		}
+
+		$body = wp_remote_retrieve_body( $response );
+		$data = json_decode( $body, true );
+
+		if ( ! isset( $data['ok'] ) || ! $data['ok'] ) {
+			$error_message = isset( $data['description'] ) ? $data['description'] : 'Unknown error';
+			$this->logger->error( __( 'Failed to send message. Telegram API error: ', 'wctlgm-subscriber-manager-lite' ) . $body );
+			return new \WP_Error( 'telegram_api_error', $error_message );
+		}
+
+		return $data;
 	}
 
 	public function generate_invite_link( $chat_id ) {

@@ -96,6 +96,7 @@ jQuery(document).ready(function($) {
 			method: 'POST',
 			data: {
 				action: 'wctlgm_set_webhook',
+				nonce: wctlgm_vars.webhook_nonce
 			},
 			success: function(response) {
 				if (response.success) {
