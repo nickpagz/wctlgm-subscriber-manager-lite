@@ -170,6 +170,7 @@ It also sets a webhook to handle communication between your WooCommerce store an
 * New: (Pro version) Resend an existing invite link, or "Resend new" to revoke and regenerate a fresh link, directly from the subscriber tools.
 * New: (Pro version) Optionally remove customers from Telegram after a subscription has stayed on-hold for a configurable number of days (grace period for payment retries).
 * Update: (Pro version) getChatMember pre-flight prevents resending to users already in the channel and reconciles their status.
+* Update: The activation-step toggle is now hidden for sites not already using it (feature being deprecated).
 * Security: Reject webhook requests when no secret token is configured, and compare tokens in constant time.
 * Security: Generate the webhook secret token with a cryptographically secure generator.
 * Security: Add capability and nonce checks to the Set Webhook and channel-ID admin AJAX actions.

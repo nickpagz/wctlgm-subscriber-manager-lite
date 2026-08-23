@@ -536,13 +536,18 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 			'wctlgm_settings_section'
 		);
 
-		add_settings_field(
-			'wctlgm_require_activation_flow',
-			__( 'Require Activation Step', 'wctlgm-subscriber-manager-lite' ),
-			array( $this, 'require_activation_field' ),
-			'wctlgm-settings',
-			'wctlgm_settings_section'
-		);
+		// Activation flow is being deprecated: only surface the toggle to sites that
+		// are already using it. Sites where the option is false/unset never see it,
+		// making the feature invisible to everyone not already relying on it.
+		if ( get_option( 'wctlgm_require_activation_flow', false ) ) {
+			add_settings_field(
+				'wctlgm_require_activation_flow',
+				__( 'Require Activation Step', 'wctlgm-subscriber-manager-lite' ),
+				array( $this, 'require_activation_field' ),
+				'wctlgm-settings',
+				'wctlgm_settings_section'
+			);
+		}
 
 		add_settings_field(
 			'wctlgm_channels',
