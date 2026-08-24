@@ -2,7 +2,7 @@
 Contributors:      rektification, npagazani
 Tags:              woocommerce, telegram, membership, invite link, sell access
 Requires at least: 6.0
-Tested up to:      6.9.0
+Tested up to:      7.1.0
 Stable tag:        2.1.0
 Requires PHP:      7.4
 License:           GPL-2.0-or-later
