@@ -52,6 +52,43 @@ class EndpointHandlerTest extends WCTLGM_Lite_TestCase {
 
 	/**
 	 * @test
+	 *
+	 * Regression: on a fresh install the secret token is unset/empty. An
+	 * unauthenticated request with no header must be rejected — previously
+	 * '' === '' passed and accepted forged Telegram updates.
+	 */
+	public function check_permission_with_empty_saved_token_and_no_header_returns_false() {
+		$this->mock_plugin_options( array( 'wctlgm_secret_token' => '' ) );
+
+		$handler = new Subscriber_Manager_Lite_WCTLGM_Endpoint_Handler();
+		$request = new WP_REST_Request();
+		// No token header set — mirrors an unauthenticated POST on a fresh install.
+
+		$result = $handler->check_telegram_token_permission( $request );
+
+		$this->assertFalse( $result );
+	}
+
+	/**
+	 * @test
+	 *
+	 * Regression: an explicitly empty header must not match an empty saved
+	 * secret either.
+	 */
+	public function check_permission_with_empty_saved_token_and_empty_header_returns_false() {
+		$this->mock_plugin_options( array( 'wctlgm_secret_token' => '' ) );
+
+		$handler = new Subscriber_Manager_Lite_WCTLGM_Endpoint_Handler();
+		$request = new WP_REST_Request();
+		$request->set_header( 'X-Telegram-Bot-Api-Secret-Token', '' );
+
+		$result = $handler->check_telegram_token_permission( $request );
+
+		$this->assertFalse( $result );
+	}
+
+	/**
+	 * @test
 	 */
 	public function handle_telegram_requests_returns_send_message_response() {
 		$handler = new Subscriber_Manager_Lite_WCTLGM_Endpoint_Handler();

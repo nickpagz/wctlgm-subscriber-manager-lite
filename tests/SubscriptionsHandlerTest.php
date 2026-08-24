@@ -45,6 +45,43 @@ class SubscriptionsHandlerTest extends WCTLGM_Lite_TestCase {
 
 	/**
 	 * @test
+	 *
+	 * Regression (M2): when invite generation fails, the one-time activation
+	 * code must be preserved — no delete_meta_data, no _telegram_user_id
+	 * update, and no save — so the customer can retry rather than being left
+	 * "activated" with no access and a burned code.
+	 */
+	public function process_activation_code_preserves_code_on_invite_failure() {
+		$order = $this->create_mock_order(
+			array(
+				'id'     => 100,
+				'status' => 'completed',
+				'meta'   => array( '_activation_code' => 'ValidCode' ),
+				'items'  => array( $this->create_mock_item( 456 ) ),
+			)
+		);
+
+		// The code must NOT be consumed and the order must NOT be mutated/saved.
+		$order->shouldNotReceive( 'delete_meta_data' );
+		$order->shouldNotReceive( 'update_meta_data' );
+		$order->shouldNotReceive( 'save' );
+
+		Functions\when( 'wc_get_orders' )->justReturn( array( $order ) );
+		// No channel IDs configured → get_channel_invites() returns success=false.
+		Functions\when( 'get_post_meta' )->justReturn( array() );
+
+		$handler = new Subscriber_Manager_Lite_WCTLGM_Subscriptions_Handler();
+		$result  = $handler->process_activation_code( 'ValidCode', '67890' );
+
+		// Returns the failure response + order ID so the caller can surface
+		// "Activation failed" while leaving the code intact for a retry.
+		$this->assertIsArray( $result );
+		$this->assertSame( 100, $result[1] );
+		$this->assertFalse( $result[0]['success'] );
+	}
+
+	/**
+	 * @test
 	 */
 	public function process_activation_code_with_invalid_code_returns_false() {
 		// No matching orders.

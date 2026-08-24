@@ -113,13 +113,22 @@ class Subscriber_Manager_Lite_WCTLGM_Subscriptions_Handler {
 		);
 
 		if ( count( $orders ) > 1 ) {
+			// Log the count, meta key, and matching order IDs only — never the
+			// meta value, which for this helper is an activation code or invite
+			// URL (a live access credential that must not land in logs).
+			$order_ids = array_map(
+				function ( $order ) {
+					return $order->get_id();
+				},
+				$orders
+			);
 			$this->logger->warning(
 				sprintf(
-					/* translators: 1: number of matching orders, 2: meta key, 3: meta value */
-					__( 'Ambiguous order lookup: %1$d orders matched %2$s = %3$s; refusing to guess.', 'wctlgm-subscriber-manager-lite' ),
+					/* translators: 1: number of matching orders, 2: meta key, 3: comma-separated order IDs */
+					__( 'Ambiguous order lookup: %1$d orders matched on %2$s (orders: %3$s); refusing to guess.', 'wctlgm-subscriber-manager-lite' ),
 					count( $orders ),
 					$meta_key,
-					$meta_value
+					implode( ', ', $order_ids )
 				)
 			);
 			return null;
