@@ -68,10 +68,15 @@ Note: in the Lite version, members are not automatically removed from channels o
 Ready to scale your Telegram membership business? The Pro version is designed for creators and businesses that need more control and automation.
 
 * **Unlimited channels and groups** — control access to as many private Telegram channels and groups as you need, and assign multiple channels per product.
+* **Subscription products** — sell access with Simple Subscription and Variable Subscription products, in addition to Simple and Variable products.
 * **Subscription support** — works with WooCommerce Subscriptions and Flexible Subscriptions by WP Desk. Members are automatically removed when subscriptions expire.
 * **Smart member removal** — members with multiple active subscriptions won't lose access until all subscriptions expire.
+* **On-hold grace period** — optionally remove members after a subscription has stayed on-hold for a configurable number of days, giving customers time to resolve failed payments.
 * **Simple product access expiry** — set an expiration period for Simple products and automatically remove members when it expires.
 * **Cancellation cut-off** — optionally set an order cancellation access cut-off period to match your refund policy and remove members instantly if they cancel within the cut-off window.
+* **Manual member management** — manage members who joined outside the normal purchase flow (for example via a channel's primary invite link) by setting an access expiry or associating them with an order.
+* **Resend invite links** — resend an existing invite link, or "Resend new" to revoke and regenerate a fresh one, directly from the subscriber tools.
+* **Retry failed invites** — surface failed invite-link generation in the Pending Invites table with a one-click Retry, instead of failing silently.
 * **Automation webhooks** — connect to automation services such as Make.com, n8n, Pabbly Connect, and others to trigger external workflows and notifications.
 
 [Learn more about the Pro version](https://wctlgm.com) | [Compare Lite and Pro](https://wctlgm.com)
