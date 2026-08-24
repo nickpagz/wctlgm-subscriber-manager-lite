@@ -41,8 +41,7 @@ Managing access to a private Telegram channel or group manually is tedious and d
 
 * **Connect Telegram to WooCommerce** — link a private channel or group to any WooCommerce product. Customers get access automatically after purchase — whether the channel is the product or a bonus.
 * **Simple and Variable product support** — assign Telegram channel access at the product level for Simple products or per-variation for Variable products.
-* **Automatic invite link generation** — secure, one-time invite links are generated and delivered to customers via email after checkout.
-* **Two checkout flows** — choose between an Activation Code flow (customer activates via the Telegram bot) or a Direct Invite Link flow (invite link delivered immediately after purchase).
+* **Automatic invite link generation** — secure, one-time invite links are generated and delivered to customers immediately after checkout, via the Thank You page, the My Account area, and order email.
 * **Access control** — invite links are validated on the backend. Only customers with a valid purchase can join. Optionally allow or block external or manually created Telegram invites.
 
 **Manage Your Subscribers (New in v2.0)**
@@ -56,7 +55,7 @@ Managing access to a private Telegram channel or group manually is tedious and d
 **Built for WordPress and WooCommerce**
 
 * **WooCommerce HPOS compatible** — fully supports High-Performance Order Storage.
-* **Customizable emails** — activation and invite link emails are integrated with WooCommerce and can be customized in WooCommerce email settings.
+* **Customizable emails** — invite link emails are integrated with WooCommerce and can be customized in WooCommerce email settings.
 * **Secure webhook validation** — all communication between your store and Telegram is validated via a secret token.
 * **Logging** — key events are logged via WooCommerce Logger for easy troubleshooting.
 * **Semi-automatic channel ID retrieval** — retrieve your channel or group ID directly from the plugin settings page.
@@ -94,12 +93,9 @@ Ready to scale your Telegram membership business? The Pro version is designed fo
 7. In the **Product data** section, open the **Telegram Access** tab, enable Telegram access, and select your channel. For Variable products, configure Telegram access on each individual variation.
 8. Publish the product and you're ready to sell access.
 
-**Post-Checkout Flows**
+**How Access Is Delivered**
 
-The plugin supports two checkout flows. You can choose which flow to use in the plugin settings:
-
-* **Direct Invite Link flow** — the invite link is generated immediately after checkout and delivered via the Thank You page and order email. No interaction with the Telegram bot is required. This is the simpler option if you don't need the additional verification step.
-* **Activation Code flow (Legacy)** — after checkout, the customer receives an activation code via the WooCommerce Thank You page and order email. The customer sends the code to your Telegram bot (using the `/activate` command), and the bot validates the code and delivers the invite link. This flow adds an extra verification step by linking the customer's Telegram account to their order.
+After a successful checkout, the plugin automatically generates a secure, one-time invite link and delivers it to the customer via the Thank You page, the My Account area, and the order email. No interaction with the Telegram bot is required — join requests are validated on the backend so only paying customers gain access.
 
 For detailed setup instructions, visit the [documentation](https://wctlgm.com/kb/).
 
@@ -116,12 +112,6 @@ Yes. The plugin requires a Telegram bot to generate invite links, validate join 
 = Does this plugin work with WooCommerce Variable products? =
 
 Yes. You can configure Telegram channel access per variation, so different product variations can grant access to different channels. The Telegram Access settings appear on each individual variation within the product editor.
-
-= What is the difference between the Activation Code flow and the Direct Invite Link flow? =
-
-The **Direct Invite Link flow** (recommended) generates and delivers the invite link immediately after checkout via email and the Thank You page. It's simpler and links the customer's Telegram account to their order upon joining the channel or group.
-
-The **Activation Code flow** sends a code to the customer after checkout. The customer then sends this code to your Telegram bot, which validates it and delivers the invite link. This links the customer's Telegram account to their WooCommerce order, however increases the number of steps for joining.
 
 = Can I see who has joined my Telegram channel? =
 
@@ -145,13 +135,13 @@ The Lite version works with Simple and Variable products only. It does not integ
 
 = What is the difference between the Lite and Pro versions? =
 
-The **Lite version** supports one Telegram channel or group, Simple and Variable products, manual subscriber management, and both checkout flows.
+The **Lite version** supports one Telegram channel or group, Simple and Variable products, automatic invite link delivery, and manual subscriber management.
 
 The **Pro version** adds unlimited channels and groups, multiple channels per product, WooCommerce Subscriptions support, automatic member removal on expiry, Simple product access expiry, order cancellation cut-off periods, and automation webhooks for connecting to services like Make.com and n8n. See the [full comparison](https://wctlgm.com).
 
 == External services ==
 
-This plugin connects to the Telegram API to manage access to private Telegram channels. It is used to grant or revoke access to these channels based on WooCommerce transactions. The plugin retrieves the user's Telegram ID and validates it during the activation process.
+This plugin connects to the Telegram API to manage access to private Telegram channels. It is used to grant or revoke access to these channels based on WooCommerce transactions. The plugin retrieves the user's Telegram ID and validates it when approving access to your channels.
 It also sets a webhook to handle communication between your WooCommerce store and Telegram. This service is provided by Telegram: [terms of use](https://telegram.org/tos), [privacy policy](https://telegram.org/privacy).
 
 
@@ -161,10 +151,8 @@ It also sets a webhook to handle communication between your WooCommerce store an
 2. Product settings — Telegram Access tab for Simple products
 3. Channel settings — Pro version with multiple channels
 4. Product settings — Pro version with subscription options
-5. Post-checkout Thank You page with activation code
-6. Telegram bot activation and invite link delivery
-7. Subscriber table — View all subscribers with search, filter, and status badges
-8. Subscriber detail modal — Live Telegram status, linked orders, and admin actions
+5. Subscriber table — View all subscribers with search, filter, and status badges
+6. Subscriber detail modal — Live Telegram status, linked orders, and admin actions
 
 
 == Changelog ==
