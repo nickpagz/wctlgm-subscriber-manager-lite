@@ -28,6 +28,15 @@ class Subscriber_Manager_Lite_WCTLGM_Subscriptions_Handler {
 			// generation fails (e.g. bot lacks rights, Telegram down), leave the
 			// activation code intact so the customer can retry rather than being
 			// left "activated" with no access and a burned code.
+			//
+			// Known limitation: the code is not claimed atomically before these
+			// remote calls, so two near-simultaneous /activate requests for the
+			// same code can both generate invites and the later save can overwrite
+			// _telegram_user_id. Accepted as low risk — the code is a private,
+			// single-customer value and the activation flow is deprecated (hidden
+			// for new sites). If this flow is ever revived, add an atomic per-code
+			// claim (e.g. add_option() mutex) released on failure / consumed on
+			// success before invite generation.
 			$response = $this->get_channel_invites( $order );
 			if ( empty( $response['success'] ) ) {
 				return array( $response, $order_id );
