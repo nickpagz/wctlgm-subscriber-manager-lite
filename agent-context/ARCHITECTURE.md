@@ -187,7 +187,7 @@ Methods:
 **Important:** This is a single class — no factory, no interface, no inheritance (unlike the pro version's factory + interface pattern).
 
 - **Instance-based:** Constructor creates its own `API_Handler` and `Logger` instances
-- **`process_activation_code($code, $telegram_user_id)`:** Finds order by `_activation_code`, validates status, stores `_telegram_user_id`, deletes activation code, generates invites, stores invite meta, creates pending DB records
+- **`process_activation_code($code, $telegram_user_id)`:** Finds order by `_activation_code`, validates status, then **generates invites first**. Only when invite generation succeeds does it store `_telegram_user_id`, delete the activation code, store invite meta, and create pending DB records. If invite generation fails, the one-time code is left intact (returns the failure response) so the customer can retry rather than being left "activated" with no access
 - **`is_join_request_valid($user_id, $invite_link, $chat_id, $allow_external_invites)`:**
   - Finds order by invite link + chat ID
   - Activation flow: checks `_telegram_user_id` matches requesting user
