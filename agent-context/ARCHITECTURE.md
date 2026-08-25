@@ -100,6 +100,7 @@ Key responsibilities:
 - Settings page at **Settings > Telegram Subscriber Manager** (`add_options_page`, slug `wctlgm-settings`)
 - **Two-tab layout:** Settings tab (form + support link) and Subscribers tab (list table)
 - Registered settings: `wctlgm_bot_token`, `wctlgm_bot_url`, `wctlgm_allow_external_invites`, `wctlgm_require_activation_flow`, `wctlgm_channels`
+- **Activation step is legacy/deprecated:** `wctlgm_require_activation_flow` stays a registered setting, but `register_settings()` only adds its settings *field* (`add_settings_field`) when the option is already enabled. New sites never see the "Require Activation Step" checkbox — it is hidden to discourage adoption of the flow being deprecated
 - Product data tab "Telegram Access" with classes `show_if_simple`, `show_if_variable`, `hide_if_subscription`
 - **Variable product support:** Tab panel shows "configure on variations" message for variable products (toggled by JS). Per-variation channel select rendered via `wctlgm_variation_telegram_fields()`. Variation data saved via `wctlgm_save_variation_telegram_data()` with dual nonce validation (AJAX `save-variations` + main form `woocommerce_save_data`).
 - **Single channel enforcement:** `sanitize_channels()` only processes `$input[0]`, always returns single-entry array

@@ -297,7 +297,7 @@ curl -s -X POST "${WEBHOOK_URL}" \
 | Telegram Bot Token | password input | `#wctlgm_bot_token` | Populated (non-empty) |
 | Telegram Bot URL | text input | `#wctlgm_bot_url` | Shows `http://t.me/wctlgmBot` |
 | Allow External Invites | checkbox | `#wctlgm_allow_external_invites` | Present |
-| Require Activation Step | checkbox | `#wctlgm_require_activation_flow` | Present |
+| Require Activation Step | checkbox | `#wctlgm_require_activation_flow` | **Hidden** unless the option is already enabled — legacy/deprecated field, only rendered on sites already using the activation flow |
 | Channel row | table row | `#wctlgm_channels_table` | Single row with "Testing 2" name and ID |
 | Set Webhook button | button | `#wctlgm_set_webhook_button` | Present, enabled (token exists) |
 | Upsell text | text | — | "Need to add multiple channels or groups?" |
