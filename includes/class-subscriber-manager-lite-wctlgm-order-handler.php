@@ -181,7 +181,7 @@ class Subscriber_Manager_Lite_WCTLGM_Order_Handler {
 			$product     = wc_get_product( $item->get_product_id() );
 			$channel_ids = get_post_meta( $meta_id, '_telegram_channel_ids', true );
 
-			if ( ! empty( $channel_ids ) && $product->is_type( array( 'simple', 'variable' ) ) ) {
+			if ( $product && ! empty( $channel_ids ) && $product->is_type( array( 'simple', 'variable' ) ) ) {
 				return true;
 			}
 		}

@@ -122,6 +122,38 @@ class OrderHandlerTest extends WCTLGM_Lite_TestCase {
 
 	/**
 	 * @test
+	 *
+	 * Regression (M1): an order line item whose product was later deleted
+	 * (wc_get_product() returns false) but whose _telegram_channel_ids meta
+	 * persists must not fatal on is_type() during order_has_telegram_product().
+	 */
+	public function maybe_process_order_handles_deleted_product() {
+		$order = $this->create_mock_order(
+			array(
+				'id'    => 100,
+				'items' => array( $this->create_mock_item( 456 ) ),
+			)
+		);
+		Functions\when( 'wc_get_order' )->justReturn( $order );
+
+		// Product was deleted — wc_get_product returns false.
+		Functions\when( 'wc_get_product' )->justReturn( false );
+		Functions\when( 'get_post_meta' )->alias(
+			function ( $id, $key, $single = false ) {
+				if ( '_telegram_channel_ids' === $key ) {
+					return array( '-1001234567890' );
+				}
+				return '';
+			}
+		);
+
+		// Should return without a fatal error (guard skips the deleted product).
+		Subscriber_Manager_Lite_WCTLGM_Order_Handler::maybe_process_order( 100, 'pending', 'processing' );
+		$this->assertTrue( true );
+	}
+
+	/**
+	 * @test
 	 */
 	public function maybe_process_order_generates_activation_code_when_required() {
 		$this->mock_plugin_options( array( 'wctlgm_require_activation_flow' => true ) );

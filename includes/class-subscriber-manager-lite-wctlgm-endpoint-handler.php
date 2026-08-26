@@ -32,9 +32,19 @@ class Subscriber_Manager_Lite_WCTLGM_Endpoint_Handler {
 	}
 
 	public function check_telegram_token_permission( WP_REST_Request $request ) {
+		$saved_token = (string) get_option( 'wctlgm_secret_token' );
+
+		// Never allow access when no secret has been configured yet — otherwise an
+		// empty saved token matches an empty/absent request header and any
+		// unauthenticated request would be accepted.
+		if ( '' === $saved_token ) {
+			return false;
+		}
+
 		$received_token = (string) $request->get_header( 'X-Telegram-Bot-Api-Secret-Token' );
-		$saved_token    = (string) get_option( 'wctlgm_secret_token' );
-		return $received_token === $saved_token;
+
+		// Constant-time comparison to avoid timing attacks against the secret.
+		return hash_equals( $saved_token, $received_token );
 	}
 
 	public function handle_telegram_requests( WP_REST_Request $request ) {

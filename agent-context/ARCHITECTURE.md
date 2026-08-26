@@ -100,6 +100,7 @@ Key responsibilities:
 - Settings page at **Settings > Telegram Subscriber Manager** (`add_options_page`, slug `wctlgm-settings`)
 - **Two-tab layout:** Settings tab (form + support link) and Subscribers tab (list table)
 - Registered settings: `wctlgm_bot_token`, `wctlgm_bot_url`, `wctlgm_allow_external_invites`, `wctlgm_require_activation_flow`, `wctlgm_channels`
+- **Activation step is legacy/deprecated:** `wctlgm_require_activation_flow` stays a registered setting, but `register_settings()` only adds its settings *field* (`add_settings_field`) when the option is already enabled. New sites never see the "Require Activation Step" checkbox — it is hidden to discourage adoption of the flow being deprecated
 - Product data tab "Telegram Access" with classes `show_if_simple`, `show_if_variable`, `hide_if_subscription`
 - **Variable product support:** Tab panel shows "configure on variations" message for variable products (toggled by JS). Per-variation channel select rendered via `wctlgm_variation_telegram_fields()`. Variation data saved via `wctlgm_save_variation_telegram_data()` with dual nonce validation (AJAX `save-variations` + main form `woocommerce_save_data`).
 - **Single channel enforcement:** `sanitize_channels()` only processes `$input[0]`, always returns single-entry array
@@ -187,7 +188,7 @@ Methods:
 **Important:** This is a single class — no factory, no interface, no inheritance (unlike the pro version's factory + interface pattern).
 
 - **Instance-based:** Constructor creates its own `API_Handler` and `Logger` instances
-- **`process_activation_code($code, $telegram_user_id)`:** Finds order by `_activation_code`, validates status, stores `_telegram_user_id`, deletes activation code, generates invites, stores invite meta, creates pending DB records
+- **`process_activation_code($code, $telegram_user_id)`:** Finds order by `_activation_code`, validates status, then **generates invites first**. Only when invite generation succeeds does it store `_telegram_user_id`, delete the activation code, store invite meta, and create pending DB records. If invite generation fails, the one-time code is left intact (returns the failure response) so the customer can retry rather than being left "activated" with no access
 - **`is_join_request_valid($user_id, $invite_link, $chat_id, $allow_external_invites)`:**
   - Finds order by invite link + chat ID
   - Activation flow: checks `_telegram_user_id` matches requesting user

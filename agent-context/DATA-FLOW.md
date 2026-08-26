@@ -97,10 +97,12 @@ sequenceDiagram
     Plugin->>Plugin: handle_start_command or handle_activation_command
 
     Plugin->>Plugin: Subscriptions_Handler::process_activation_code
-    Note over Plugin: Find order by _activation_code<br>Validate status (processing/completed)<br>Store _telegram_user_id<br>Delete _activation_code
+    Note over Plugin: Find order by _activation_code<br>Validate status (processing/completed)
 
     Plugin->>TelegramAPI: createChatInviteLink (creates_join_request=true)
     TelegramAPI-->>Plugin: invite_link
+    Note over Plugin: Generate invites BEFORE consuming the code.<br>On failure, leave _activation_code intact for retry.
+    Plugin->>Plugin: Store _telegram_user_id<br>Delete _activation_code
     Plugin->>Plugin: Store _channel_invite_{channel_id}
     Plugin->>Plugin: Database::add_user_channel (pending)
     Plugin->>Plugin: Database::get_or_create_user + link_user_to_order_channels

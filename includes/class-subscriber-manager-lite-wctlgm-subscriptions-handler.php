@@ -23,9 +23,27 @@ class Subscriber_Manager_Lite_WCTLGM_Subscriptions_Handler {
 		$order = $this->find_order_by( '_activation_code', sanitize_text_field( $code ) );
 		if ( $order && in_array( $order->get_status(), array( 'completed', 'processing' ), true ) ) {
 			$order_id = $order->get_id();
+
+			// Generate invites BEFORE consuming the one-time code. If invite
+			// generation fails (e.g. bot lacks rights, Telegram down), leave the
+			// activation code intact so the customer can retry rather than being
+			// left "activated" with no access and a burned code.
+			//
+			// Known limitation: the code is not claimed atomically before these
+			// remote calls, so two near-simultaneous /activate requests for the
+			// same code can both generate invites and the later save can overwrite
+			// _telegram_user_id. Accepted as low risk — the code is a private,
+			// single-customer value and the activation flow is deprecated (hidden
+			// for new sites). If this flow is ever revived, add an atomic per-code
+			// claim (e.g. add_option() mutex) released on failure / consumed on
+			// success before invite generation.
+			$response = $this->get_channel_invites( $order );
+			if ( empty( $response['success'] ) ) {
+				return array( $response, $order_id );
+			}
+
 			$order->update_meta_data( '_telegram_user_id', sanitize_text_field( $telegram_user_id ) );
 			$order->delete_meta_data( '_activation_code', sanitize_text_field( $code ) );
-			$response        = $this->get_channel_invites( $order );
 			$channel_invites = $response['channels'];
 			foreach ( $channel_invites as $invite ) {
 				$order->add_meta_data( '_channel_invite_' . $invite['channel_id'], sanitize_url( $invite['invite_link'] ) );
@@ -62,7 +80,7 @@ class Subscriber_Manager_Lite_WCTLGM_Subscriptions_Handler {
 			} else {
 				// Activation disabled - capture the user ID and approve
 				// Check if user ID already exists and log if overwriting
-				if ( ! empty( $telegram_user_id ) && $telegram_user_id !== $user_id ) {
+				if ( ! empty( $telegram_user_id ) && (string) $telegram_user_id !== (string) $user_id ) {
 					$this->logger->warning(
 						sprintf(
 							'Attempted User ID overwrite in order %1$d: %2$s -> %3$s',
@@ -104,6 +122,24 @@ class Subscriber_Manager_Lite_WCTLGM_Subscriptions_Handler {
 		);
 
 		if ( count( $orders ) > 1 ) {
+			// Log the count, meta key, and matching order IDs only — never the
+			// meta value, which for this helper is an activation code or invite
+			// URL (a live access credential that must not land in logs).
+			$order_ids = array_map(
+				function ( $order ) {
+					return $order->get_id();
+				},
+				$orders
+			);
+			$this->logger->warning(
+				sprintf(
+					/* translators: 1: number of matching orders, 2: meta key, 3: comma-separated order IDs */
+					__( 'Ambiguous order lookup: %1$d orders matched on %2$s (orders: %3$s); refusing to guess.', 'wctlgm-subscriber-manager-lite' ),
+					count( $orders ),
+					$meta_key,
+					implode( ', ', $order_ids )
+				)
+			);
 			return null;
 		}
 

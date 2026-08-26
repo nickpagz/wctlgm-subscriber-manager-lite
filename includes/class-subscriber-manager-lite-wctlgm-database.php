@@ -337,19 +337,28 @@ class Subscriber_Manager_Lite_WCTLGM_Database {
 	 *
 	 * @param int    $order_id The WooCommerce order ID.
 	 * @param string $telegram_user_id The Telegram user ID.
-	 * @return int Number of rows updated.
+	 * @return bool True on success, false on database error.
 	 */
 	public static function link_user_to_order_channels( $order_id, $telegram_user_id ) {
 		global $wpdb;
 
-		$table  = $wpdb->prefix . 'wctlgm_user_channels';
-		$result = $wpdb->update(
-			$table,
-			array( 'telegram_user_id' => $telegram_user_id ),
-			array( 'order_id' => $order_id )
+		$table = $wpdb->prefix . 'wctlgm_user_channels';
+
+		// Only link rows not already tied to a *different* Telegram user, so a
+		// re-run (or a code shared in error) can't clobber an existing
+		// association. $wpdb->update() can't express this WHERE, so query directly.
+		// $wpdb->query() returns rows affected (int) or false on error — return a
+		// reliable boolean rather than the stale $wpdb->rows_affected.
+		$result = $wpdb->query(
+			$wpdb->prepare(
+				"UPDATE `{$table}` SET telegram_user_id = %s WHERE order_id = %d AND ( telegram_user_id IS NULL OR telegram_user_id = '' OR telegram_user_id = %s )", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				$telegram_user_id,
+				$order_id,
+				$telegram_user_id
+			)
 		);
 
-		return $wpdb->rows_affected;
+		return false !== $result;
 	}
 
 	/**

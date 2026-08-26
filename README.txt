@@ -2,8 +2,8 @@
 Contributors:      rektification, npagazani
 Tags:              woocommerce, telegram, membership, invite link, sell access
 Requires at least: 6.0
-Tested up to:      6.9.0
-Stable tag:        2.0.0
+Tested up to:      7.1.0
+Stable tag:        2.1.0
 Requires PHP:      7.4
 License:           GPL-2.0-or-later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
@@ -41,8 +41,7 @@ Managing access to a private Telegram channel or group manually is tedious and d
 
 * **Connect Telegram to WooCommerce** — link a private channel or group to any WooCommerce product. Customers get access automatically after purchase — whether the channel is the product or a bonus.
 * **Simple and Variable product support** — assign Telegram channel access at the product level for Simple products or per-variation for Variable products.
-* **Automatic invite link generation** — secure, one-time invite links are generated and delivered to customers via email after checkout.
-* **Two checkout flows** — choose between an Activation Code flow (customer activates via the Telegram bot) or a Direct Invite Link flow (invite link delivered immediately after purchase).
+* **Automatic invite link generation** — secure, one-time invite links are generated and delivered to customers immediately after checkout, via the Thank You page, the My Account area, and order email.
 * **Access control** — invite links are validated on the backend. Only customers with a valid purchase can join. Optionally allow or block external or manually created Telegram invites.
 
 **Manage Your Subscribers (New in v2.0)**
@@ -56,7 +55,7 @@ Managing access to a private Telegram channel or group manually is tedious and d
 **Built for WordPress and WooCommerce**
 
 * **WooCommerce HPOS compatible** — fully supports High-Performance Order Storage.
-* **Customizable emails** — activation and invite link emails are integrated with WooCommerce and can be customized in WooCommerce email settings.
+* **Customizable emails** — invite link emails are integrated with WooCommerce and can be customized in WooCommerce email settings.
 * **Secure webhook validation** — all communication between your store and Telegram is validated via a secret token.
 * **Logging** — key events are logged via WooCommerce Logger for easy troubleshooting.
 * **Semi-automatic channel ID retrieval** — retrieve your channel or group ID directly from the plugin settings page.
@@ -68,10 +67,15 @@ Note: in the Lite version, members are not automatically removed from channels o
 Ready to scale your Telegram membership business? The Pro version is designed for creators and businesses that need more control and automation.
 
 * **Unlimited channels and groups** — control access to as many private Telegram channels and groups as you need, and assign multiple channels per product.
+* **Subscription products** — sell access with Simple Subscription and Variable Subscription products, in addition to Simple and Variable products.
 * **Subscription support** — works with WooCommerce Subscriptions and Flexible Subscriptions by WP Desk. Members are automatically removed when subscriptions expire.
 * **Smart member removal** — members with multiple active subscriptions won't lose access until all subscriptions expire.
+* **On-hold grace period** — optionally remove members after a subscription has stayed on-hold for a configurable number of days, giving customers time to resolve failed payments.
 * **Simple product access expiry** — set an expiration period for Simple products and automatically remove members when it expires.
 * **Cancellation cut-off** — optionally set an order cancellation access cut-off period to match your refund policy and remove members instantly if they cancel within the cut-off window.
+* **Manual member management** — manage members who joined outside the normal purchase flow (for example via a channel's primary invite link) by setting an access expiry or associating them with an order.
+* **Resend invite links** — resend an existing invite link, or "Resend new" to revoke and regenerate a fresh one, directly from the subscriber tools.
+* **Retry failed invites** — surface failed invite-link generation in the Pending Invites table with a one-click Retry, instead of failing silently.
 * **Automation webhooks** — connect to automation services such as Make.com, n8n, Pabbly Connect, and others to trigger external workflows and notifications.
 
 [Learn more about the Pro version](https://wctlgm.com) | [Compare Lite and Pro](https://wctlgm.com)
@@ -89,12 +93,9 @@ Ready to scale your Telegram membership business? The Pro version is designed fo
 7. In the **Product data** section, open the **Telegram Access** tab, enable Telegram access, and select your channel. For Variable products, configure Telegram access on each individual variation.
 8. Publish the product and you're ready to sell access.
 
-**Post-Checkout Flows**
+**How Access Is Delivered**
 
-The plugin supports two checkout flows. You can choose which flow to use in the plugin settings:
-
-* **Direct Invite Link flow** — the invite link is generated immediately after checkout and delivered via the Thank You page and order email. No interaction with the Telegram bot is required. This is the simpler option if you don't need the additional verification step.
-* **Activation Code flow (Legacy)** — after checkout, the customer receives an activation code via the WooCommerce Thank You page and order email. The customer sends the code to your Telegram bot (using the `/activate` command), and the bot validates the code and delivers the invite link. This flow adds an extra verification step by linking the customer's Telegram account to their order.
+After a successful checkout, the plugin automatically generates a secure, one-time invite link and delivers it to the customer via the Thank You page, the My Account area, and the order email. No interaction with the Telegram bot is required — join requests are validated on the backend so only paying customers gain access.
 
 For detailed setup instructions, visit the [documentation](https://wctlgm.com/kb/).
 
@@ -111,12 +112,6 @@ Yes. The plugin requires a Telegram bot to generate invite links, validate join 
 = Does this plugin work with WooCommerce Variable products? =
 
 Yes. You can configure Telegram channel access per variation, so different product variations can grant access to different channels. The Telegram Access settings appear on each individual variation within the product editor.
-
-= What is the difference between the Activation Code flow and the Direct Invite Link flow? =
-
-The **Direct Invite Link flow** (recommended) generates and delivers the invite link immediately after checkout via email and the Thank You page. It's simpler and links the customer's Telegram account to their order upon joining the channel or group.
-
-The **Activation Code flow** sends a code to the customer after checkout. The customer then sends this code to your Telegram bot, which validates it and delivers the invite link. This links the customer's Telegram account to their WooCommerce order, however increases the number of steps for joining.
 
 = Can I see who has joined my Telegram channel? =
 
@@ -140,13 +135,13 @@ The Lite version works with Simple and Variable products only. It does not integ
 
 = What is the difference between the Lite and Pro versions? =
 
-The **Lite version** supports one Telegram channel or group, Simple and Variable products, manual subscriber management, and both checkout flows.
+The **Lite version** supports one Telegram channel or group, Simple and Variable products, automatic invite link delivery, and manual subscriber management.
 
 The **Pro version** adds unlimited channels and groups, multiple channels per product, WooCommerce Subscriptions support, automatic member removal on expiry, Simple product access expiry, order cancellation cut-off periods, and automation webhooks for connecting to services like Make.com and n8n. See the [full comparison](https://wctlgm.com).
 
 == External services ==
 
-This plugin connects to the Telegram API to manage access to private Telegram channels. It is used to grant or revoke access to these channels based on WooCommerce transactions. The plugin retrieves the user's Telegram ID and validates it during the activation process.
+This plugin connects to the Telegram API to manage access to private Telegram channels. It is used to grant or revoke access to these channels based on WooCommerce transactions. The plugin retrieves the user's Telegram ID and validates it when approving access to your channels.
 It also sets a webhook to handle communication between your WooCommerce store and Telegram. This service is provided by Telegram: [terms of use](https://telegram.org/tos), [privacy policy](https://telegram.org/privacy).
 
 
@@ -156,13 +151,25 @@ It also sets a webhook to handle communication between your WooCommerce store an
 2. Product settings — Telegram Access tab for Simple products
 3. Channel settings — Pro version with multiple channels
 4. Product settings — Pro version with subscription options
-5. Post-checkout Thank You page with activation code
-6. Telegram bot activation and invite link delivery
-7. Subscriber table — View all subscribers with search, filter, and status badges
-8. Subscriber detail modal — Live Telegram status, linked orders, and admin actions
+5. Subscriber table — View all subscribers with search, filter, and status badges
+6. Subscriber detail modal — Live Telegram status, linked orders, and admin actions
 
 
 == Changelog ==
+
+= 2.1.0 =
+* New: (Pro version) Manual user management — set an expiry or associate an order for users who joined outside the normal flow (e.g. via a channel's primary link).
+* New: (Pro version) Surface invite-generation failures in the Pending Invites table with a Retry action, instead of failing silently.
+* New: (Pro version) Resend an existing invite link, or "Resend new" to revoke and regenerate a fresh link, directly from the subscriber tools.
+* New: (Pro version) Optionally remove customers from Telegram after a subscription has stayed on-hold for a configurable number of days (grace period for payment retries).
+* Update: (Pro version) getChatMember pre-flight prevents resending to users already in the channel and reconciles their status.
+* Update: The activation-step toggle is now hidden for sites not already using it (feature being deprecated).
+* Security: Reject webhook requests when no secret token is configured, and compare tokens in constant time.
+* Security: Generate the webhook secret token with a cryptographically secure generator.
+* Security: Add capability and nonce checks to the Set Webhook and channel-ID admin AJAX actions.
+* Fix: Prevent a fatal error when an order references a product that was later deleted.
+* Fix: Preserve the activation code if invite generation fails, so customers can retry instead of being left with no access.
+* Fix: Internal robustness improvements to Telegram API error handling and subscriber-order linking.
 
 = 2.0.0 =
 * New: Subscriber table — view and manage all Telegram subscribers from the admin dashboard.
