@@ -11,6 +11,15 @@ namespace Subscriber_Manager_Lite_for_Telegram;
  */
 class Subscriber_Manager_Lite_WCTLGM_Settings {
 
+	/**
+	 * Sites upgrading from below this version are prompted once to re-register
+	 * their Telegram webhook. The webhook secret became mandatory in 2.1.0, so a
+	 * webhook registered under an older release now carries a secret the endpoint
+	 * rejects — a silent failure that predates this one-time re-prompt (added in
+	 * 2.1.1), so the boundary is the fix version and catches 2.1.0 too.
+	 */
+	const WEBHOOK_REPROMPT_BELOW_VERSION = '2.1.1';
+
 	private $logger;
 	private $api_handler;
 
@@ -31,6 +40,7 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 		add_action( 'admin_init', array( $this, 'register_settings' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_subscriber_manager_scripts' ) );
 		add_action( 'init', array( $this, 'migrate_activation_flow_setting' ) );
+		add_action( 'admin_init', array( $this, 'maybe_reprompt_webhook_after_upgrade' ) );
 		add_action( 'admin_notices', array( $this, 'display_webhook_warning_notice' ) );
 		add_action( 'update_option_wctlgm_require_activation_flow', array( $this, 'handle_activation_flow_change' ), 10, 2 );
 		add_action( 'wp_ajax_wctlgm_get_user_details', array( $this, 'ajax_get_user_details' ) );
@@ -58,6 +68,46 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 		}
 
 		update_option( 'wctlgm_activation_flow_migrated', true );
+	}
+
+	/**
+	 * Re-surface the "Set Webhook" banner once after upgrading from a release
+	 * that predates the mandatory webhook secret.
+	 *
+	 * The webhook endpoint rejects any request whose secret-token header does not
+	 * match the saved secret (mandatory since 2.1.0). A site that registered its
+	 * webhook under an older version has a secret Telegram no longer matches, so
+	 * every incoming update is silently rejected with 401 — no logs, no
+	 * processing. Clearing wctlgm_webhook_clicked makes display_webhook_warning_notice()
+	 * prompt the admin to click "Set Webhook", which regenerates the secret and
+	 * re-registers it with Telegram in one step, restoring delivery.
+	 *
+	 * Runs once: after it records the current version, later upgrades no longer
+	 * trip it. Fresh installs (no bot token yet) are never prompted.
+	 */
+	public function maybe_reprompt_webhook_after_upgrade() {
+		$current = defined( 'WCTLGM_SML_VERSION' ) ? WCTLGM_SML_VERSION : '';
+		if ( '' === $current ) {
+			return;
+		}
+
+		$stored = (string) get_option( 'wctlgm_version', '' );
+		if ( $stored === $current ) {
+			return;
+		}
+
+		// Installs predating version tracking have no wctlgm_version; treat them
+		// as coming from before the mandatory-secret change.
+		$from = '' !== $stored ? $stored : '0';
+
+		// Only a site that already configured a bot has a webhook to fix; a fresh
+		// install has nothing to re-register and must not see the banner.
+		if ( version_compare( $from, self::WEBHOOK_REPROMPT_BELOW_VERSION, '<' )
+			&& '' !== (string) get_option( 'wctlgm_bot_token', '' ) ) {
+			delete_option( 'wctlgm_webhook_clicked' );
+		}
+
+		update_option( 'wctlgm_version', $current );
 	}
 
 	/**
