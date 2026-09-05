@@ -19,18 +19,61 @@ jobs:
       - name: Install Composer Dependencies
         run: composer install --no-dev --prefer-dist --optimize-autoloader
 
-      - name: List directory
-        run: ls -la
-
-      - name: Zip Folder
+      - name: Build plugin zip
         run: |
-          zip -r ${{ github.event.repository.name }}.zip . \
-          -x ".*" ".*/**" ".git/**" ".github/**" ".vscode/**" "node_modules/**" \
-          ".gitignore" ".editorconfig" ".distignore" ".phpcs.xml" ".wp-env.json" \
-          "composer.json" "composer.lock" "package.json" "package-lock.json" \
-          "resources/**" "tests/**" "agent-context/**" "phpunit.xml.dist" \
-          "phpunit-integration.xml.dist" "CLAUDE.md"
-          ls -la ${{ github.event.repository.name }}.zip
+          set -euo pipefail
+          SLUG="${{ github.event.repository.name }}"
+
+          # Stage the shippable files into a slug-named folder so the archive
+          # contains a single top-level directory (WordPress plugin convention),
+          # not files at the archive root. rsync excludes are anchored with a
+          # leading slash so they match only repo-root entries, leaving the
+          # production vendor/ tree (Freemius SDK) intact.
+          mkdir -p "build/$SLUG"
+          rsync -a ./ "build/$SLUG/" \
+            --exclude '/.git' \
+            --exclude '/.github' \
+            --exclude '/.vscode' \
+            --exclude '/.claude' \
+            --exclude '/.playwright-mcp' \
+            --exclude '/.wordpress-org' \
+            --exclude '/node_modules' \
+            --exclude '/tests' \
+            --exclude '/agent-context' \
+            --exclude '/resources' \
+            --exclude '/build' \
+            --exclude '/.gitignore' \
+            --exclude '/.editorconfig' \
+            --exclude '/.distignore' \
+            --exclude '/.phpcs.xml' \
+            --exclude '/.mcp.json' \
+            --exclude '/.wp-env.json' \
+            --exclude '/.phpunit.result.cache' \
+            --exclude '/composer.json' \
+            --exclude '/composer.lock' \
+            --exclude '/package.json' \
+            --exclude '/package-lock.json' \
+            --exclude '/phpunit.xml.dist' \
+            --exclude '/phpunit-integration.xml.dist' \
+            --exclude '/CLAUDE.md' \
+            --exclude '/SUBSCRIBER-TABLE-IMPLEMENTATION.md' \
+            --exclude '/AUDIT-FINDINGS.md' \
+            --exclude '.DS_Store' \
+            --exclude '*.zip'
+
+          # Guard: fail the build if any dev-only path slipped into the stage.
+          for forbidden in tests agent-context node_modules .github .wordpress-org CLAUDE.md composer.json phpunit.xml.dist phpunit-integration.xml.dist SUBSCRIBER-TABLE-IMPLEMENTATION.md; do
+            if [ -e "build/$SLUG/$forbidden" ]; then
+              echo "::error::Dev artifact '$forbidden' leaked into the release build"
+              exit 1
+            fi
+          done
+
+          ( cd build && zip -r "../$SLUG.zip" "$SLUG" )
+          echo "--- archive size ---"
+          ls -la "$SLUG.zip"
+          echo "--- archive top level (should be a single '$SLUG/' folder) ---"
+          unzip -l "$SLUG.zip" | awk '{print $4}' | grep -E "^$SLUG/[^/]*/?$" | sort -u | head -40
 
       - name: Release
         uses: softprops/action-gh-release@v1
