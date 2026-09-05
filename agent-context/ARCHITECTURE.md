@@ -113,6 +113,7 @@ Key responsibilities:
 - `ajax_sync_user_status()` — calls `get_chat_member()` for each active/pending channel, updates DB status and user profile (name, username)
 - Webhook warning admin notice when `wctlgm_webhook_clicked` is false
 - Legacy migration from `wctlgm_force_activation_flow` to `wctlgm_require_activation_flow`
+- Upgrade migration `maybe_reprompt_webhook_after_upgrade()` (hooked to `admin_init`): on the first admin request after an upgrade, compares the stored `wctlgm_version` option against the `WCTLGM_SML_VERSION` constant; when upgrading from below `WEBHOOK_REPROMPT_BELOW_VERSION` (the version that made the webhook secret mandatory) and a bot token is configured, deletes `wctlgm_webhook_clicked` so the webhook notice re-appears and the admin re-registers the webhook (resyncing the secret). Records `wctlgm_version` so it runs once; fresh installs (no bot token) are never prompted
 - Activation flow change handler: resets `wctlgm_webhook_clicked` on toggle
 - **Enqueue hook:** `settings_page_wctlgm-settings` (derived from `add_options_page` slug)
 
@@ -280,6 +281,7 @@ Templates: `templates/emails/` (HTML) and `templates/emails/plain/` (plain text)
 | `wctlgm_allow_external_invites` | bool | Allow non-order invite link validation |
 | `wctlgm_webhook_clicked` | bool | Whether "Set Webhook" button has been clicked |
 | `wctlgm_activation_flow_migrated` | bool | One-time migration flag for legacy `wctlgm_force_activation_flow` |
+| `wctlgm_version` | string | Last-seen plugin version; set by `maybe_reprompt_webhook_after_upgrade()` to run the post-upgrade webhook re-prompt once |
 | `wctlgm_db_version` | string | Database schema version (currently `1.0.0`) |
 
 ## Order/Product Meta Keys
