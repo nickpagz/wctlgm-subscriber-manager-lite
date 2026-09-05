@@ -3,7 +3,7 @@ Contributors:      rektification, npagazani
 Tags:              woocommerce, telegram, membership, invite link, sell access
 Requires at least: 6.0
 Tested up to:      7.1.0
-Stable tag:        2.1.0
+Stable tag:        2.1.1
 Requires PHP:      7.4
 License:           GPL-2.0-or-later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
@@ -156,6 +156,9 @@ It also sets a webhook to handle communication between your WooCommerce store an
 
 
 == Changelog ==
+
+= 2.1.1 =
+* Fix: After upgrading from a version that predates the mandatory webhook secret (2.1.0), sites whose Telegram webhook was registered under the older version had their incoming updates silently rejected — the plugin stopped receiving joins and other events with no error shown. On upgrade, the "Set Webhook" reminder now reappears so you can re-register the webhook and restore delivery in one click.
 
 = 2.1.0 =
 * New: (Pro version) Manual user management — set an expiry or associate an order for users who joined outside the normal flow (e.g. via a channel's primary link).
