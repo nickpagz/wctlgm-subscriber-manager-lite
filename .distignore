@@ -18,5 +18,6 @@ package-lock.json
 package.json
 README.md
 CLAUDE.md
+SUBSCRIBER-TABLE-IMPLEMENTATION.md
 phpunit.xml.dist
 phpunit-integration.xml.dist
