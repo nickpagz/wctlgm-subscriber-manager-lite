@@ -35,6 +35,8 @@ Managing access to a private Telegram channel or group manually is tedious and d
 
 [Website](https://rektification.com/products/subscriber-manager-for-telegram/) | [Documentation](https://rektification.com/docs/subscriber-manager-for-telegram/)
 
+**Looking for a Discord version of this?** [Role Manager for Discord](https://rektification.com/products/#product-role-manager) gives Discord roles with WooCommerce products.
+
 == Features ==
 
 **Automate Telegram Channel and Group Access**

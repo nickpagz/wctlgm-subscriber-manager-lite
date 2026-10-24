@@ -524,6 +524,13 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 						</a>
 					</p>
 				</div>
+
+				<p class="wctlgm-discord-link" style="margin: 0 0 20px;">
+					<?php esc_html_e( 'Looking for a Discord version of this?', 'wctlgm-subscriber-manager-lite' ); ?>
+					<a href="https://rektification.com/products/#product-role-manager" target="_blank" rel="noopener noreferrer" style="margin-left: 4px;">
+						<?php esc_html_e( 'See Role Manager for Discord', 'wctlgm-subscriber-manager-lite' ); ?> &rarr;
+					</a>
+				</p>
 			</div>
 
 			<!-- Subscribers Tab -->
