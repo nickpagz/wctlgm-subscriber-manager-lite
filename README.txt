@@ -33,7 +33,7 @@ Managing access to a private Telegram channel or group manually is tedious and d
 4. A customer purchases the product and receives an invite link automatically.
 5. The customer clicks the link, and the plugin validates and grants access — no admin interaction needed.
 
-[Website](https://wctlgm.com) | [Documentation](https://wctlgm.com/kb/)
+[Website](https://rektification.com/products/subscriber-manager-for-telegram/) | [Documentation](https://rektification.com/docs/subscriber-manager-for-telegram/)
 
 == Features ==
 
@@ -60,7 +60,7 @@ Managing access to a private Telegram channel or group manually is tedious and d
 * **Logging** — key events are logged via WooCommerce Logger for easy troubleshooting.
 * **Semi-automatic channel ID retrieval** — retrieve your channel or group ID directly from the plugin settings page.
 
-Note: in the Lite version, members are not automatically removed from channels or groups when orders are cancelled or refunded. They can be removed manually from the subscriber table or from within Telegram. The [Pro version](https://wctlgm.com) adds automatic member removal, multiple channels, subscription support, and more.
+Note: in the Lite version, members are not automatically removed from channels or groups when orders are cancelled or refunded. They can be removed manually from the subscriber table or from within Telegram. The [Pro version](https://rektification.com/products/subscriber-manager-for-telegram/) adds automatic member removal, multiple channels, subscription support, and more.
 
 == Pro Version ==
 
@@ -78,7 +78,7 @@ Ready to scale your Telegram membership business? The Pro version is designed fo
 * **Retry failed invites** — surface failed invite-link generation in the Pending Invites table with a one-click Retry, instead of failing silently.
 * **Automation webhooks** — connect to automation services such as Make.com, n8n, Pabbly Connect, and others to trigger external workflows and notifications.
 
-[Learn more about the Pro version](https://wctlgm.com) | [Compare Lite and Pro](https://wctlgm.com)
+[Learn more about the Pro version](https://rektification.com/products/subscriber-manager-for-telegram/) | [Compare Lite and Pro](https://rektification.com/products/subscriber-manager-for-telegram/#compare-versions)
 
 == Installation ==
 
@@ -97,7 +97,7 @@ Ready to scale your Telegram membership business? The Pro version is designed fo
 
 After a successful checkout, the plugin automatically generates a secure, one-time invite link and delivers it to the customer via the Thank You page, the My Account area, and the order email. No interaction with the Telegram bot is required — join requests are validated on the backend so only paying customers gain access.
 
-For detailed setup instructions, visit the [documentation](https://wctlgm.com/kb/).
+For detailed setup instructions, visit the [documentation](https://rektification.com/docs/subscriber-manager-for-telegram/).
 
 == Frequently Asked Questions ==
 
@@ -127,17 +127,17 @@ Yes. Invite links are one-time use and are generated on demand via the Telegram 
 
 = What happens if a customer cancels their order or requests a refund? =
 
-In the Lite version, members are not automatically removed when an order is cancelled or refunded. You can manually remove them from the subscriber table in wp-admin or directly within Telegram. The [Pro version](https://wctlgm.com) adds automatic member removal on subscription expiry and configurable cancellation cut-off periods.
+In the Lite version, members are not automatically removed when an order is cancelled or refunded. You can manually remove them from the subscriber table in wp-admin or directly within Telegram. The [Pro version](https://rektification.com/products/subscriber-manager-for-telegram/) adds automatic member removal on subscription expiry and configurable cancellation cut-off periods.
 
 = Does this plugin work with WooCommerce Subscriptions? =
 
-The Lite version works with Simple and Variable products only. It does not integrate with WooCommerce Subscriptions or other subscription plugins. The [Pro version](https://wctlgm.com) supports WooCommerce Subscriptions and Flexible Subscriptions by WP Desk, including automatic member removal when subscriptions expire. Support for additional subscription plugins are on our roadmap.
+The Lite version works with Simple and Variable products only. It does not integrate with WooCommerce Subscriptions or other subscription plugins. The [Pro version](https://rektification.com/products/subscriber-manager-for-telegram/) supports WooCommerce Subscriptions and Flexible Subscriptions by WP Desk, including automatic member removal when subscriptions expire. Support for additional subscription plugins are on our roadmap.
 
 = What is the difference between the Lite and Pro versions? =
 
 The **Lite version** supports one Telegram channel or group, Simple and Variable products, automatic invite link delivery, and manual subscriber management.
 
-The **Pro version** adds unlimited channels and groups, multiple channels per product, WooCommerce Subscriptions support, automatic member removal on expiry, Simple product access expiry, order cancellation cut-off periods, and automation webhooks for connecting to services like Make.com and n8n. See the [full comparison](https://wctlgm.com).
+The **Pro version** adds unlimited channels and groups, multiple channels per product, WooCommerce Subscriptions support, automatic member removal on expiry, Simple product access expiry, order cancellation cut-off periods, and automation webhooks for connecting to services like Make.com and n8n. See the [full comparison](https://rektification.com/products/subscriber-manager-for-telegram/#compare-versions).
 
 == External services ==
 
