@@ -72,6 +72,7 @@ Ready to scale your Telegram membership business? The Pro version is designed fo
 * **Smart member removal** — members with multiple active subscriptions won't lose access until all subscriptions expire.
 * **On-hold grace period** — optionally remove members after a subscription has stayed on-hold for a configurable number of days, giving customers time to resolve failed payments.
 * **Simple product access expiry** — set an expiration period for Simple products and automatically remove members when it expires.
+* **Removal on refund or cancellation** — members are automatically removed when a one-off order is refunded or cancelled, unless another active purchase still grants the channel. A partial refund removes a member only when it covers the Telegram product's whole line item. Refunding a subscription's order doesn't remove the member: cancel the subscription as well, and they're removed when it ends.
 * **Cancellation cut-off** — optionally set an order cancellation access cut-off period to match your refund policy and remove members instantly if they cancel within the cut-off window.
 * **Manual member management** — manage members who joined outside the normal purchase flow (for example via a channel's primary invite link) by setting an access expiry or associating them with an order.
 * **Resend invite links** — resend an existing invite link, or "Resend new" to revoke and regenerate a fresh one, directly from the subscriber tools.
@@ -127,7 +128,7 @@ Yes. Invite links are one-time use and are generated on demand via the Telegram 
 
 = What happens if a customer cancels their order or requests a refund? =
 
-In the Lite version, members are not automatically removed when an order is cancelled or refunded. You can manually remove them from the subscriber table in wp-admin or directly within Telegram. The [Pro version](https://wctlgm.com) adds automatic member removal on subscription expiry and configurable cancellation cut-off periods.
+In the Lite version, members are not automatically removed when an order is cancelled or refunded. You can manually remove them from the subscriber table in wp-admin or directly within Telegram. The [Pro version](https://wctlgm.com) automatically removes members when a one-off order is refunded or cancelled, and when a subscription is cancelled or expires. It also adds configurable cancellation cut-off periods.
 
 = Does this plugin work with WooCommerce Subscriptions? =
 
