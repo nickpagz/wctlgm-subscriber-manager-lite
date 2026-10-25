@@ -296,7 +296,7 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 					<p style="margin: 0; font-size: 13px;">
 						<strong><?php esc_html_e( 'Need Help?', 'wctlgm-subscriber-manager-lite' ); ?></strong>
 						<?php esc_html_e( 'Check our comprehensive setup guide and documentation.', 'wctlgm-subscriber-manager-lite' ); ?>
-						<a href="https://wctlgm.com/kb-category/getting-started/" target="_blank" rel="noopener noreferrer" style="margin-left: 8px;">
+						<a href="https://rektification.com/docs/subscriber-manager-for-telegram/#getting-started" target="_blank" rel="noopener noreferrer" style="margin-left: 8px;">
 							<?php esc_html_e( 'View Documentation', 'wctlgm-subscriber-manager-lite' ); ?> →
 						</a>
 					</p>
@@ -519,7 +519,7 @@ class Subscriber_Manager_Lite_WCTLGM_Settings {
 					<p style="margin: 0;">
 						<strong><?php esc_html_e( 'Need Help?', 'wctlgm-subscriber-manager-lite' ); ?></strong>
 						<?php esc_html_e( 'Check out our comprehensive setup guide and documentation.', 'wctlgm-subscriber-manager-lite' ); ?>
-						<a href="https://wctlgm.com/kb-category/getting-started/" target="_blank" rel="noopener noreferrer" style="margin-left: 10px;">
+						<a href="https://rektification.com/docs/subscriber-manager-for-telegram/#getting-started" target="_blank" rel="noopener noreferrer" style="margin-left: 10px;">
 							<?php esc_html_e( 'View Support Documentation', 'wctlgm-subscriber-manager-lite' ); ?> &rarr;
 						</a>
 					</p>
