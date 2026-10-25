@@ -11,7 +11,7 @@ jobs:
       contents: write
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
 
       - name: Validate composer.json and composer.lock
         run: composer validate --strict
@@ -76,7 +76,7 @@ jobs:
           unzip -l "$SLUG.zip" | awk '{print $4}' | grep -E "^$SLUG/[^/]*/?$" | sort -u | head -40
 
       - name: Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v3
         with:
           files: ${{ github.event.repository.name }}.zip
         env:
