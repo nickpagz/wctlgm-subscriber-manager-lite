@@ -35,6 +35,8 @@ Managing access to a private Telegram channel or group manually is tedious and d
 
 [Website](https://rektification.com/products/subscriber-manager-for-telegram/) | [Documentation](https://rektification.com/docs/subscriber-manager-for-telegram/)
 
+**Looking for a Discord version of this?** [Role Manager for Discord](https://rektification.com/products/#product-role-manager) gives Discord roles with WooCommerce products.
+
 == Features ==
 
 **Automate Telegram Channel and Group Access**
@@ -160,6 +162,8 @@ It also sets a webhook to handle communication between your WooCommerce store an
 
 = 2.1.2 =
 * Updated Freemius SDK to the latest version.
+* Update: Plugin, readme and settings-page links now point to rektification.com.
+* New: The settings page links to Role Manager for Discord, for stores that sell access to Discord servers.
 
 = 2.1.1 =
 * Fix: After upgrading from a version that predates the mandatory webhook secret (2.1.0), sites whose Telegram webhook was registered under the older version had their incoming updates silently rejected — the plugin stopped receiving joins and other events with no error shown. On upgrade, the "Set Webhook" reminder now reappears so you can re-register the webhook and restore delivery in one click.
