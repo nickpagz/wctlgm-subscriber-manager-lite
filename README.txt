@@ -3,7 +3,7 @@ Contributors:      rektification, npagazani
 Tags:              woocommerce, telegram, membership, invite link, sell access
 Requires at least: 6.0
 Tested up to:      7.1.0
-Stable tag:        2.1.2
+Stable tag:        2.1.3
 Requires PHP:      7.4
 License:           GPL-2.0-or-later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
@@ -159,6 +159,9 @@ It also sets a webhook to handle communication between your WooCommerce store an
 
 
 == Changelog ==
+
+= 2.1.3 =
+* Fix: Revoking an invite link from the subscriber table no longer fails with "INVITE_HASH_EXPIRED" when Telegram had already revoked the link. The record is now marked revoked instead of staying pending.
 
 = 2.1.2 =
 * Updated Freemius SDK to the latest version.
