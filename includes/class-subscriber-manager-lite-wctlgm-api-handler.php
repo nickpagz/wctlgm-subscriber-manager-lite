@@ -253,6 +253,18 @@ class Subscriber_Manager_Lite_WCTLGM_API_Handler {
 
 		if ( ! isset( $data['ok'] ) || ! $data['ok'] ) {
 			$error_message = isset( $data['description'] ) ? $data['description'] : 'Unknown error';
+
+			// Telegram refuses to revoke a link that is already revoked or expired
+			// (e.g. the one-time link consumed and revoked at join). The link can no
+			// longer grant access, which is what the caller wanted, so report success.
+			if ( false !== strpos( $error_message, 'INVITE_HASH_EXPIRED' ) ) {
+				$this->logger->info( __( 'Invite link was already revoked or expired; nothing to revoke: ', 'wctlgm-subscriber-manager-lite' ) . $invite_link );
+				return array(
+					'ok'              => true,
+					'already_revoked' => true,
+				);
+			}
+
 			$this->logger->error( __( 'Failed to revoke invite link. Telegram API error: ', 'wctlgm-subscriber-manager-lite' ) . $body );
 			return new \WP_Error( 'telegram_api_error', $error_message );
 		}
