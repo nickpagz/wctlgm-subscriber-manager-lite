@@ -26,7 +26,7 @@ class ApiHandlerRevokeInviteLinkTest extends WCTLGM_Lite_TestCase {
 	}
 
 	/**
-	 * A link that was already revoked (e.g. consumed at join) must not block an
+	 * A link Telegram no longer recognises (INVITE_HASH_EXPIRED) must not block an
 	 * admin revoke — it can no longer grant access, which is the goal of a revoke.
 	 *
 	 * @test
